@@ -10,3 +10,7 @@ vocab.txt
 
 # Python scripts (for development only)
 scripts/
+
+# Claude Code
+CLAUDE.md
+.claude/

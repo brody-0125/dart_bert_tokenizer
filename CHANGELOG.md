@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.0.2
+
+### Added
+- Project configuration files (.gitignore)
+- Updated .pubignore for cleaner package distribution
+
+## 1.0.1
+
+### Added
+- Comprehensive dartdoc comments for all public APIs
+- .pubignore for cleaner package distribution
+
 ## 1.0.0
 
 - Initial release

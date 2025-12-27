@@ -1,0 +1,12 @@
+# Dart
+.dart_tool/
+.packages
+build/
+pubspec.lock
+
+# IDE and OS files
+.idea/
+.DS_Store
+
+# Claude Code (local settings)
+.claude/

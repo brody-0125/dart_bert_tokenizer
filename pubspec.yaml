@@ -1,6 +1,6 @@
 name: dart_bert_tokenizer
 description: A lightweight, pure Dart implementation of BERT WordPiece tokenizer. 100% compatible with HuggingFace tokenizers.
-version: 1.0.0
+version: 1.0.2
 repository: https://github.com/brody-0125/dart_bert_tokenizer
 topics:
   - nlp
