@@ -18,7 +18,7 @@ A lightweight, pure Dart implementation of BERT WordPiece tokenizer.
 
 ```yaml
 dependencies:
-  dart_bert_tokenizer: ^1.0.0
+  dart_bert_tokenizer: ^1.0.1
 ```
 
 ## Quick Start

@@ -1,17 +1,101 @@
 import 'dart:typed_data';
 
-enum TruncationStrategy { longestFirst, onlyFirst, onlySecond, doNotTruncate }
+/// Strategy for truncating text pairs when they exceed the maximum length.
+///
+/// Used with [WordPieceTokenizer.encodePair] and [TruncationConfig] to
+/// control how text pairs are truncated.
+enum TruncationStrategy {
+  /// Removes tokens from the longer sequence first, alternating if equal.
+  ///
+  /// This is the default strategy and typically produces the best results
+  /// for most use cases.
+  longestFirst,
 
+  /// Only truncates the first sequence.
+  ///
+  /// Useful when the second sequence (e.g., context) should be preserved.
+  onlyFirst,
+
+  /// Only truncates the second sequence.
+  ///
+  /// Useful when the first sequence (e.g., question) should be preserved.
+  onlySecond,
+
+  /// Does not truncate; returns the full sequences.
+  ///
+  /// Use with caution as this may produce sequences longer than the model
+  /// can handle.
+  doNotTruncate,
+}
+
+/// The result of tokenizing text with a [WordPieceTokenizer].
+///
+/// Contains all the information needed to feed text into a BERT model:
+/// token IDs, attention masks, type IDs (for distinguishing text pairs),
+/// and mappings between tokens and original text positions.
+///
+/// ## Properties
+///
+/// - [ids]: Token IDs for model input
+/// - [tokens]: Token strings for debugging
+/// - [attentionMask]: 1 for real tokens, 0 for padding
+/// - [typeIds]: Segment IDs (0 for first sequence, 1 for second)
+/// - [specialTokensMask]: 1 for special tokens, 0 for regular tokens
+///
+/// ## Token-Character Mapping
+///
+/// The encoding provides methods to map between tokens and characters:
+///
+/// ```dart
+/// // Find which token contains character at position 5
+/// final tokenIdx = encoding.charToToken(5);
+///
+/// // Find character span for token at index 2
+/// final (start, end) = encoding.tokenToChars(2)!;
+/// ```
 class Encoding {
+  /// The token strings in this encoding.
   final List<String> tokens;
+
+  /// The token IDs for model input.
+  ///
+  /// These are the integer indices into the vocabulary that the model uses.
   final Int32List ids;
+
+  /// Segment/type IDs distinguishing text pairs.
+  ///
+  /// For single text: all 0s.
+  /// For text pairs: 0 for first sequence, 1 for second sequence.
   final Uint8List typeIds;
+
+  /// Attention mask indicating which tokens are real vs padding.
+  ///
+  /// 1 for real tokens, 0 for padding tokens.
   final Uint8List attentionMask;
+
+  /// Mask indicating which tokens are special tokens.
+  ///
+  /// 1 for special tokens (`[CLS]`, `[SEP]`, `[PAD]`), 0 for regular tokens.
   final Uint8List specialTokensMask;
+
+  /// Character offsets for each token as `(start, end)` pairs.
+  ///
+  /// Maps each token back to its position in the original text.
+  /// Special tokens have offset `(0, 0)`.
   final List<(int, int)> offsets;
+
+  /// Word indices for each token.
+  ///
+  /// Multiple tokens from the same word share the same word ID.
+  /// Special tokens have `null` word ID.
   final List<int?> wordIds;
+
   final List<int?>? _sequenceIds;
 
+  /// Creates an encoding with the specified data.
+  ///
+  /// This constructor is typically not called directly; use
+  /// [WordPieceTokenizer.encode] or [EncodingBuilder] instead.
   Encoding({
     required this.tokens,
     required List<int> ids,
@@ -42,12 +126,19 @@ class Encoding {
     List<int?>? sequenceIds,
   }) : _sequenceIds = sequenceIds;
 
+  /// The number of tokens in this encoding.
   int get length => tokens.length;
 
+  /// Whether this encoding contains no tokens.
   bool get isEmpty => tokens.isEmpty;
 
+  /// Whether this encoding contains at least one token.
   bool get isNotEmpty => tokens.isNotEmpty;
 
+  /// Sequence IDs indicating which sequence each token belongs to.
+  ///
+  /// Returns 0 for first sequence tokens, 1 for second sequence tokens,
+  /// and `null` for special tokens.
   List<int?> get sequenceIds {
     if (_sequenceIds != null) return _sequenceIds;
 
@@ -57,6 +148,9 @@ class Encoding {
     });
   }
 
+  /// Returns the number of sequences in this encoding.
+  ///
+  /// Returns 0 if empty, 1 for single text, 2 for text pairs.
   int get nSequences {
     final seqIds = sequenceIds;
     if (seqIds.any((id) => id == 1)) return 2;
@@ -64,6 +158,12 @@ class Encoding {
     return 0;
   }
 
+  /// Finds the token index containing the given character position.
+  ///
+  /// - [charPos]: Character position in the original text.
+  /// - [sequenceIndex]: Which sequence to search (0 or 1 for pairs).
+  ///
+  /// Returns the token index, or `null` if no token contains this position.
   int? charToToken(int charPos, {int sequenceIndex = 0}) {
     final seqIds = sequenceIds;
     for (var i = 0; i < length; i++) {
@@ -76,12 +176,19 @@ class Encoding {
     return null;
   }
 
+  /// Finds the word index containing the given character position.
+  ///
+  /// - [charPos]: Character position in the original text.
+  /// - [sequenceIndex]: Which sequence to search (0 or 1 for pairs).
   int? charToWord(int charPos, {int sequenceIndex = 0}) {
     final tokenIdx = charToToken(charPos, sequenceIndex: sequenceIndex);
     if (tokenIdx == null) return null;
     return wordIds[tokenIdx];
   }
 
+  /// Returns the character span for a token at the given index.
+  ///
+  /// Returns `(start, end)` character positions, or `null` for special tokens.
   (int, int)? tokenToChars(int tokenIndex) {
     if (tokenIndex < 0 || tokenIndex >= length) return null;
     final offset = offsets[tokenIndex];
@@ -89,16 +196,22 @@ class Encoding {
     return offset;
   }
 
+  /// Returns the word index for a token at the given index.
   int? tokenToWord(int tokenIndex) {
     if (tokenIndex < 0 || tokenIndex >= length) return null;
     return wordIds[tokenIndex];
   }
 
+  /// Returns which sequence a token belongs to (0, 1, or null for special).
   int? tokenToSequence(int tokenIndex) {
     if (tokenIndex < 0 || tokenIndex >= length) return null;
     return sequenceIds[tokenIndex];
   }
 
+  /// Returns the character span for an entire word.
+  ///
+  /// - [wordIndex]: The word index to look up.
+  /// - [sequenceIndex]: Which sequence to search.
   (int, int)? wordToChars(int wordIndex, {int sequenceIndex = 0}) {
     final seqIds = sequenceIds;
     int? start;
@@ -117,6 +230,9 @@ class Encoding {
     return (start, end);
   }
 
+  /// Returns the token span for an entire word.
+  ///
+  /// Returns `(startTokenIdx, endTokenIdx)` where end is exclusive.
   (int, int)? wordToTokens(int wordIndex, {int sequenceIndex = 0}) {
     final seqIds = sequenceIds;
     int? start;
@@ -134,6 +250,7 @@ class Encoding {
     return (start, end);
   }
 
+  /// Creates an empty encoding with no tokens.
   factory Encoding.empty() => Encoding._typed(
     tokens: const [],
     ids: Int32List(0),
@@ -145,6 +262,10 @@ class Encoding {
     sequenceIds: const [],
   );
 
+  /// Merges multiple encodings into a single encoding.
+  ///
+  /// - [encodings]: List of encodings to merge.
+  /// - [growingOffsets]: If true, offsets accumulate across encodings.
   static Encoding merge(
     List<Encoding> encodings, {
     bool growingOffsets = true,
@@ -232,6 +353,14 @@ class Encoding {
     );
   }
 
+  /// Returns a new encoding padded to the target length.
+  ///
+  /// - [targetLength]: The desired total length.
+  /// - [padTokenId]: The token ID to use for padding.
+  /// - [padToken]: The token string for padding (default: `[PAD]`).
+  /// - [padOnRight]: Whether to pad on the right side (default: true).
+  ///
+  /// Returns `this` if already at or above target length.
   Encoding withPadding({
     required int targetLength,
     required int padTokenId,
@@ -291,6 +420,10 @@ class Encoding {
     );
   }
 
+  /// Returns a new encoding padded to a multiple of the given value.
+  ///
+  /// Useful for hardware optimization where tensor dimensions should be
+  /// multiples of certain values.
   Encoding withPaddingToMultipleOf({
     required int multiple,
     required int padTokenId,
@@ -311,6 +444,13 @@ class Encoding {
     );
   }
 
+  /// Returns a new encoding truncated to the maximum length.
+  ///
+  /// - [maxLength]: The maximum number of tokens.
+  /// - [truncateFromEnd]: If true, removes tokens from the end; otherwise
+  ///   removes from the beginning.
+  ///
+  /// Returns `this` if already at or below max length.
   Encoding withTruncation({
     required int maxLength,
     bool truncateFromEnd = true,
@@ -347,6 +487,9 @@ class Encoding {
     }
   }
 
+  /// Converts this encoding to a Map representation.
+  ///
+  /// Useful for serialization or debugging.
   Map<String, dynamic> toMap() => {
     'tokens': tokens,
     'ids': ids,
@@ -362,6 +505,15 @@ class Encoding {
   String toString() =>
       'Encoding(tokens: $tokens, ids: $ids, nSequences: $nSequences)';
 
+  /// Truncates a pair of encodings to fit within the maximum length.
+  ///
+  /// Returns a tuple of truncated encodings based on the specified strategy.
+  ///
+  /// - [encodingA]: The first encoding.
+  /// - [encodingB]: The second encoding.
+  /// - [maxLength]: Maximum combined length including special tokens.
+  /// - [strategy]: How to distribute truncation between sequences.
+  /// - [numSpecialTokens]: Number of special tokens that will be added.
   static (Encoding, Encoding) truncatePair({
     required Encoding encodingA,
     required Encoding encodingB,
@@ -431,6 +583,18 @@ class Encoding {
   }
 }
 
+/// A builder for constructing [Encoding] objects incrementally.
+///
+/// Useful for building encodings token by token during the tokenization
+/// process.
+///
+/// Example:
+/// ```dart
+/// final builder = EncodingBuilder();
+/// builder.addSpecialToken(token: '[CLS]', id: 101, typeId: 0);
+/// builder.addToken(token: 'hello', id: 7592, typeId: 0, offset: (0, 5));
+/// final encoding = builder.build();
+/// ```
 class EncodingBuilder {
   final List<String> _tokens = [];
   final List<int> _ids = [];
@@ -441,6 +605,14 @@ class EncodingBuilder {
   final List<int?> _wordIds = [];
   final List<int?> _sequenceIds = [];
 
+  /// Adds a regular token to the encoding.
+  ///
+  /// - [token]: The token string.
+  /// - [id]: The token's vocabulary ID.
+  /// - [typeId]: Segment ID (0 or 1).
+  /// - [offset]: Character span in original text as `(start, end)`.
+  /// - [wordId]: Optional word index.
+  /// - [sequenceId]: Optional sequence ID.
   void addToken({
     required String token,
     required int id,
@@ -459,6 +631,9 @@ class EncodingBuilder {
     _sequenceIds.add(sequenceId ?? typeId);
   }
 
+  /// Adds a special token (e.g., `[CLS]`, `[SEP]`, `[PAD]`) to the encoding.
+  ///
+  /// Special tokens have no character offset and null word/sequence IDs.
   void addSpecialToken({
     required String token,
     required int id,
@@ -474,6 +649,9 @@ class EncodingBuilder {
     _sequenceIds.add(null);
   }
 
+  /// Builds and returns the constructed [Encoding].
+  ///
+  /// The builder can be reused after calling [clear].
   Encoding build() => Encoding._typed(
     tokens: List.unmodifiable(_tokens),
     ids: Int32List.fromList(_ids),
@@ -485,6 +663,7 @@ class EncodingBuilder {
     sequenceIds: List.unmodifiable(_sequenceIds),
   );
 
+  /// Clears the builder for reuse.
   void clear() {
     _tokens.clear();
     _ids.clear();

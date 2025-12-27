@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.1
+
+- Add comprehensive dartdoc documentation to all public API elements
+- Document library, classes, methods, and properties following Effective Dart guidelines
+- Improve pub.dev documentation score (target: 20%+ API documentation)
+
 ## 1.0.0
 
 - Initial release
