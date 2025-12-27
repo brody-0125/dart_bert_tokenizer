@@ -1,25 +1,60 @@
+/// A pre-tokenized word with its position in the original text.
+///
+/// Pre-tokens are the result of splitting text on whitespace and punctuation
+/// before WordPiece tokenization.
 class PreToken {
+  /// The text content of this pre-token.
   final String text;
+
+  /// The starting character position in the original text.
   final int start;
+
+  /// The ending character position in the original text (exclusive).
   final int end;
 
+  /// Creates a pre-token with the given text and positions.
   const PreToken({required this.text, required this.start, required this.end});
 
   @override
   String toString() => 'PreToken("$text", [$start:$end])';
 }
 
+/// BERT-style pre-tokenizer for text normalization and splitting.
+///
+/// Performs the following operations:
+/// - Normalizes Unicode characters and removes control characters
+/// - Optionally converts text to lowercase
+/// - Optionally strips accents (e.g., `é` -> `e`)
+/// - Adds spaces around Chinese characters for character-level tokenization
+/// - Splits on whitespace and punctuation
+///
+/// Example:
+/// ```dart
+/// final preTokenizer = BertPreTokenizer();
+/// final tokens = preTokenizer.preTokenize('Hello, World!');
+/// // Returns: [PreToken("hello", 0, 5), PreToken(",", 5, 6), ...]
+/// ```
 class BertPreTokenizer {
+  /// Whether to convert text to lowercase.
   final bool lowercase;
+
+  /// Whether to strip accents from characters.
   final bool stripAccents;
+
+  /// Whether to add spaces around Chinese characters.
   final bool handleChineseChars;
 
+  /// Creates a BERT pre-tokenizer with the specified options.
   const BertPreTokenizer({
     this.lowercase = true,
     this.stripAccents = true,
     this.handleChineseChars = true,
   });
 
+  /// Pre-tokenizes text into a list of [PreToken]s.
+  ///
+  /// Normalizes the text and splits it on whitespace and punctuation,
+  /// preserving character positions for later mapping.
   List<PreToken> preTokenize(String text) {
     final normalized = _normalizeSinglePass(text);
     return _splitOnWhitespaceAndPunctuation(normalized);
