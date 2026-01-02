@@ -1,30 +1,37 @@
-# This file configures the static analysis results for your project (errors,
-# warnings, and lints).
-#
-# This enables the 'recommended' set of lints from `package:lints`.
-# This set helps identify many issues that may lead to problems when running
-# or consuming Dart code, and enforces writing Dart using a single, idiomatic
-# style and format.
-#
-# If you want a smaller set of lints you can change this to specify
-# 'package:lints/core.yaml'. These are just the most critical lints
-# (the recommended set includes the core lints).
-# The core lints are also what is used by pub.dev for scoring packages.
+# Analysis options for dart_bert_tokenizer
+# https://dart.dev/guides/language/analysis-options
 
 include: package:lints/recommended.yaml
 
-# Uncomment the following section to specify additional rules.
+analyzer:
+  exclude:
+    - "**/*.g.dart"
+    - "**/*.freezed.dart"
+    - "build/**"
+    - ".dart_tool/**"
+    - "benchmark/**"
 
-# linter:
-#   rules:
-#     - camel_case_types
+linter:
+  rules:
+    # Error prevention
+    - always_declare_return_types
+    - avoid_returning_null_for_future
+    - cancel_subscriptions
+    - close_sinks
+    - throw_in_finally
 
-# analyzer:
-#   exclude:
-#     - path/to/excluded/files/**
-
-# For more information about the core and recommended set of lints, see
-# https://dart.dev/go/core-lints
-
-# For additional information about configuring this file, see
-# https://dart.dev/guides/language/analysis-options
+    # Style
+    - avoid_bool_literals_in_conditional_expressions
+    - avoid_escaping_inner_quotes
+    - avoid_multiple_declarations_per_line
+    - avoid_unused_constructor_parameters
+    - eol_at_end_of_file
+    - prefer_const_constructors
+    - prefer_const_declarations
+    - prefer_final_locals
+    - prefer_single_quotes
+    - type_annotate_public_apis
+    - unawaited_futures
+    - unnecessary_await_in_return
+    - unnecessary_parenthesis
+    - use_is_even_rather_than_modulo
