@@ -120,6 +120,30 @@ class Vocabulary {
     return Vocabulary._fromLines(tokens, subwordPrefix: subwordPrefix);
   }
 
+  /// Creates a vocabulary from a token-to-ID mapping.
+  ///
+  /// This is useful when loading vocabularies from formats like
+  /// HuggingFace `tokenizer.json`, where the vocabulary is stored as
+  /// a `Map<String, int>` rather than a line-based list.
+  ///
+  /// ```dart
+  /// final vocab = Vocabulary.fromMap({
+  ///   '[PAD]': 0, '[UNK]': 100, '[CLS]': 101, 'hello': 7592,
+  /// });
+  /// ```
+  static Vocabulary fromMap(
+    Map<String, int> tokenToId, {
+    String subwordPrefix = '##',
+  }) {
+    final vocab = Vocabulary(subwordPrefix: subwordPrefix);
+    for (final entry in tokenToId.entries) {
+      final token = entry.key.trim();
+      if (token.isEmpty) continue;
+      vocab._addToken(token, entry.value);
+    }
+    return vocab;
+  }
+
   static Vocabulary _fromLines(
     List<String> lines, {
     String subwordPrefix = '##',

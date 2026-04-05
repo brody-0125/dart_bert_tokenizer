@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.1.0
+
+- Add `tokenizer.json` loading support for HuggingFace tokenizer files
+  - `WordPieceTokenizer.fromTokenizerJson()` - async file loading
+  - `WordPieceTokenizer.fromTokenizerJsonSync()` - sync file loading
+  - `WordPieceTokenizer.fromTokenizerJsonString()` - load from JSON string
+- Add `Vocabulary.fromMap()` factory for token-to-ID map construction
+- Automatically extract normalizer, post-processor, and added tokens from JSON
+- Support optional `configOverride` parameter for advanced configuration
+- 25 new tests including vocab.txt vs tokenizer.json equivalence verification
+
 ## 1.0.1
 
 - Add comprehensive dartdoc documentation to all public API elements
