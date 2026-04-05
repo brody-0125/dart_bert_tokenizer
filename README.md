@@ -12,13 +12,14 @@ A lightweight, pure Dart implementation of BERT WordPiece tokenizer.
 - **Memory Efficient** - Typed arrays (`Int32List`, `Uint8List`) for 50-70% memory reduction
 - **Full API** - Encoding, decoding, padding, truncation, offset mapping
 - **Batch Processing** - Sequential and parallel (Isolate-based) batch encoding
-- **Well Tested** - 298 tests with 100% pass rate
+- **HuggingFace tokenizer.json** - Load directly from HuggingFace tokenizer files
+- **Well Tested** - 328 tests with 100% pass rate
 
 ## Installation
 
 ```yaml
 dependencies:
-  dart_bert_tokenizer: ^1.0.1
+  dart_bert_tokenizer: ^1.1.0
 ```
 
 ## Quick Start
@@ -39,6 +40,27 @@ void main() {
   final text = tokenizer.decode(encoding.ids, skipSpecialTokens: true);
   print(text); // hello , world !
 }
+```
+
+### Loading from tokenizer.json
+
+Load directly from HuggingFace `tokenizer.json` files — normalizer, post-processor, and model settings are automatically extracted:
+
+```dart
+// From file (async)
+final tokenizer = await WordPieceTokenizer.fromTokenizerJson('tokenizer.json');
+
+// From file (sync)
+final tokenizer = WordPieceTokenizer.fromTokenizerJsonSync('tokenizer.json');
+
+// From JSON string (e.g., embedded asset)
+final tokenizer = WordPieceTokenizer.fromTokenizerJsonString(jsonString);
+
+// Override extracted config if needed
+final tokenizer = WordPieceTokenizer.fromTokenizerJsonSync(
+  'tokenizer.json',
+  configOverride: WordPieceConfig(lowercase: false),
+);
 ```
 
 ## Usage
@@ -235,6 +257,9 @@ final tokenizer = WordPieceTokenizer(
 |--------|-------------|
 | `fromVocabFile(path)` | Load from vocab file (async) |
 | `fromVocabFileSync(path)` | Load from vocab file (sync) |
+| `fromTokenizerJson(path)` | Load from tokenizer.json (async) |
+| `fromTokenizerJsonSync(path)` | Load from tokenizer.json (sync) |
+| `fromTokenizerJsonString(json)` | Load from JSON string |
 | `encode(text)` | Encode single text |
 | `encodePair(textA, textB)` | Encode text pair |
 | `encodeBatch(texts)` | Encode multiple texts |
@@ -271,18 +296,23 @@ final tokenizer = WordPieceTokenizer(
 | Lookup complexity | O(m) per token |
 | HuggingFace compatibility | 100% (34 test cases) |
 
-## Vocabulary File
+## Vocabulary Files
 
-Download BERT vocabulary from HuggingFace:
-- [bert-base-uncased](https://huggingface.co/bert-base-uncased/raw/main/vocab.txt)
-- [bert-base-cased](https://huggingface.co/bert-base-cased/raw/main/vocab.txt)
+You can load from either `vocab.txt` or `tokenizer.json`:
 
-Format: One token per line, line number (0-indexed) = token ID.
+| Format | Method | Description |
+|--------|--------|-------------|
+| `vocab.txt` | `fromVocabFile()` / `fromVocabFileSync()` | One token per line, line number = ID |
+| `tokenizer.json` | `fromTokenizerJson()` / `fromTokenizerJsonSync()` | Full HuggingFace pipeline config |
+
+Download from HuggingFace:
+- [bert-base-uncased vocab.txt](https://huggingface.co/bert-base-uncased/raw/main/vocab.txt)
+- [bert-base-uncased tokenizer.json](https://huggingface.co/bert-base-uncased/raw/main/tokenizer.json)
 
 ## Testing
 
 ```bash
-# Run all tests (298 tests)
+# Run all tests (328 tests)
 dart test
 
 # Run specific test file
