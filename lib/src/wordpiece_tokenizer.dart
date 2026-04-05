@@ -1,8 +1,11 @@
 import 'dart:async';
+import 'dart:convert';
+import 'dart:io';
 import 'dart:isolate';
 
 import 'encoding.dart';
 import 'pre_tokenizer.dart';
+import 'tokenizer_json_parser.dart';
 import 'vocabulary.dart';
 
 const _kMinBatchSizeForParallel = 8;
@@ -453,6 +456,88 @@ class WordPieceTokenizer {
       path,
       subwordPrefix: config.subwordPrefix,
     );
+    return WordPieceTokenizer(vocab: vocab, config: config);
+  }
+
+  /// Creates a tokenizer from a HuggingFace `tokenizer.json` file
+  /// asynchronously.
+  ///
+  /// The JSON file must contain a WordPiece model. Normalizer settings,
+  /// post-processor configuration, and added tokens are automatically
+  /// extracted from the JSON.
+  ///
+  /// - [path]: Path to the `tokenizer.json` file.
+  /// - [configOverride]: Optional configuration that overrides values
+  ///   extracted from the JSON.
+  ///
+  /// Example:
+  /// ```dart
+  /// final tokenizer = await WordPieceTokenizer.fromTokenizerJson(
+  ///   'assets/tokenizer.json',
+  /// );
+  /// ```
+  static Future<WordPieceTokenizer> fromTokenizerJson(
+    String path, {
+    WordPieceConfig? configOverride,
+  }) async {
+    final content = await File(path).readAsString();
+    return _fromParsedTokenizerJson(
+      jsonDecode(content) as Map<String, dynamic>,
+      configOverride: configOverride,
+    );
+  }
+
+  /// Creates a tokenizer from a HuggingFace `tokenizer.json` file
+  /// synchronously.
+  ///
+  /// See [fromTokenizerJson] for details.
+  static WordPieceTokenizer fromTokenizerJsonSync(
+    String path, {
+    WordPieceConfig? configOverride,
+  }) {
+    final content = File(path).readAsStringSync();
+    return _fromParsedTokenizerJson(
+      jsonDecode(content) as Map<String, dynamic>,
+      configOverride: configOverride,
+    );
+  }
+
+  /// Creates a tokenizer from a JSON string in the HuggingFace
+  /// `tokenizer.json` format.
+  ///
+  /// See [fromTokenizerJson] for details.
+  static WordPieceTokenizer fromTokenizerJsonString(
+    String jsonString, {
+    WordPieceConfig? configOverride,
+  }) {
+    return _fromParsedTokenizerJson(
+      jsonDecode(jsonString) as Map<String, dynamic>,
+      configOverride: configOverride,
+    );
+  }
+
+  static WordPieceTokenizer _fromParsedTokenizerJson(
+    Map<String, dynamic> json, {
+    WordPieceConfig? configOverride,
+  }) {
+    final parsed = parseTokenizerJson(json);
+
+    final config = configOverride ??
+        WordPieceConfig(
+          lowercase: parsed.lowercase,
+          stripAccents: parsed.stripAccents,
+          handleChineseChars: parsed.handleChineseChars,
+          subwordPrefix: parsed.subwordPrefix,
+          maxWordLength: parsed.maxWordLength,
+          addClsToken: parsed.addClsToken,
+          addSepToken: parsed.addSepToken,
+        );
+
+    final vocab = Vocabulary.fromMap(
+      parsed.vocab,
+      subwordPrefix: config.subwordPrefix,
+    );
+
     return WordPieceTokenizer(vocab: vocab, config: config);
   }
 
