@@ -191,6 +191,9 @@ class AddedVocabulary {
         if (start < consumed) start = consumed;
       }
       if (token.rstrip) end += _spaceStart.firstMatch(text.substring(end))!.end;
+      // A previous rstrip may consume a whitespace-only token's entire match.
+      // HF 0.23.2 can panic when lstrip then produces a reversed/empty slice.
+      if (start >= end) continue;
       if (consumed < start) yield (consumed, start, null);
       yield (start, end, id);
       consumed = end;

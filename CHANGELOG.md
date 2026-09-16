@@ -17,7 +17,7 @@
   documented edge cases intentionally differ from HF 0.23.2.
 - Promote AraBERT v02 to a successful pinned network fixture. Add HF registration,
   flag-combination, pair/batch and Unicode-boundary regression fixtures.
-- Validate 1,300 offline tests and 788 network tests. No new runtime dependencies.
+- Validate 1,301 offline tests and 788 network tests. No new runtime dependencies.
 
 ## 1.1.0
 

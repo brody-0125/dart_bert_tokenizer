@@ -109,7 +109,7 @@ truncation lengths are chosen from actual token counts so only_first/only_second
 remain valid for language-specific vocabularies. Language cases include Arabic
 diacritics, Turkish I/İ/ı/i, Indic scripts, combining accents and control chars.
 
-The release suite currently has 1,300 offline tests and 788 opt-in network tests.
+The release suite currently has 1,301 offline tests and 788 opt-in network tests.
 Both paths register model cases through `test/hf_fixture_support.dart`, including
 the same error-message checks for unsupported pipelines and full-field
 comparisons for sequential and parallel batches.
@@ -137,3 +137,7 @@ join controls, combining marks and supplementary-plane characters. The same
 ranges generate `lib/src/unicode_word_data.dart` for runtime matching. This pins
 word boundaries across VM versions: Dart 3.13.3 Unicode properties matched HF
 over all scalars, but Dart 3.10.7 differed (first observed at U+0897).
+
+A separate regression covers `<X>` with rstrip=true followed by a whitespace-only
+AddedToken with lstrip=true: HF 0.23.2 panics with `AddedVocabulary bad split`
+for `<X>   hello`. Dart skips the already-consumed empty/reversed match.

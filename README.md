@@ -155,6 +155,8 @@ HF 0.23.2 edge-case policies:
   choice can vary with hash-map order.
 - Special-token filtering uses IDs, including normalized special tokens.
   Changing `normalized` refreshes decode spelling; HF can retain a stale cache.
+- Fully consumed whitespace-only matches are skipped rather than producing
+  the invalid slice that can crash HF 0.23.2 after combined stripping.
 - Sparse vocabularies allocate above the highest occupied ID, preventing
   collisions; new IDs must fit Int32. This replaces 1.1.0's HF-style count-based
   allocation for sparse JSON vocabularies.
@@ -419,7 +421,7 @@ every model of that language.
 Python `tokenizers==0.23.2` generates the checked-in expected values. Tests compare
 IDs, tokens, type IDs, attention/special masks, offsets, word/sequence IDs and
 both decoder modes, including sequential and parallel batches. The current suite
-has 1,300 offline tests and 788 opt-in network tests. CI checks Linux, Windows,
+has 1,301 offline tests and 788 opt-in network tests. CI checks Linux, Windows,
 Dart 3.10.7 and stable, plus analysis, formatting and publish dry-run.
 See [fixture provenance and regeneration](test/fixtures/huggingface/README.md).
 

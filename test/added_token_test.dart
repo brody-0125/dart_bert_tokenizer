@@ -116,6 +116,20 @@ void main() {
     expect(t.encode('cafe').ids[1], t.vocab.tokenToId('CAFÉ'));
   });
 
+  test(
+    'already absorbed whitespace cannot create a reversed or empty match',
+    () {
+      final t = tokenizer();
+      t.addTokens([
+        const AddedToken('<X>', rstrip: true, normalized: false),
+        const AddedToken(' ', lstrip: true, normalized: false),
+      ]);
+      final e = t.encode('<X>   hello');
+      expect(e.tokens, ['[CLS]', '<X>   ', 'hello', '[SEP]']);
+      expect(e.offsets, [(0, 0), (0, 6), (6, 11), (0, 0)]);
+    },
+  );
+
   test('registration does not change the model trie or shared vocabulary', () {
     final t = tokenizer();
     final before = t.vocab;
