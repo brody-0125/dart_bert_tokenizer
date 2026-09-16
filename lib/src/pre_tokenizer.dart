@@ -26,6 +26,16 @@ class PreToken {
       ? (start + from, start + to)
       : (_alignment[from].$1, _alignment[to - 1].$2);
 
+  /// An aligned slice whose indices are UTF-16 positions in [text].
+  PreToken slice(int from, int to) {
+    if (from == 0 && to == text.length) return this;
+    final value = text.substring(from, to);
+    if (_alignment != null) {
+      return PreToken._(value, _alignment.sublist(from, to));
+    }
+    return PreToken(text: value, start: start + from, end: start + to);
+  }
+
   @override
   String toString() => 'PreToken("$text", [$start:$end])';
 }
@@ -62,7 +72,10 @@ class BertPreTokenizer {
   static final _whitespace = RegExp(r'\p{White_Space}', unicode: true);
 
   /// Normalizes and splits [text], preserving original code-point offsets.
-  List<PreToken> preTokenize(String text) {
+  List<PreToken> preTokenize(String text) => splitNormalized(normalize(text));
+
+  /// Normalizes text while retaining original code-point alignment.
+  PreToken normalize(String text, {int offset = 0}) {
     final normalized = StringBuffer();
     final alignment = <(int, int)>[];
     void append(String value, int position) {
@@ -70,7 +83,7 @@ class BertPreTokenizer {
       alignment.addAll(List.filled(value.length, (position, position + 1)));
     }
 
-    var position = 0;
+    var position = offset;
     for (final rune in text.runes) {
       final char = String.fromCharCode(rune);
       final isSpace =
@@ -101,19 +114,22 @@ class BertPreTokenizer {
       position++;
     }
     final value = normalized.toString();
+    return value.isEmpty
+        ? PreToken(text: '', start: offset, end: offset)
+        : PreToken._(value, alignment);
+  }
+
+  /// Splits already normalized text without normalizing it a second time.
+  List<PreToken> splitNormalized(PreToken input) {
+    final value = input.text;
     if (value.isEmpty) return [];
-    if (!split) return [PreToken._(value, alignment)];
+    if (!split) return [input];
     final result = <PreToken>[];
     var start = 0;
     var index = 0;
     void emit(int end) {
       if (start < end) {
-        result.add(
-          PreToken._(
-            value.substring(start, end),
-            alignment.sublist(start, end),
-          ),
-        );
+        result.add(input.slice(start, end));
       }
     }
 
@@ -130,7 +146,7 @@ class BertPreTokenizer {
       if (whitespace || punctuation) {
         emit(index);
         if (punctuation && !whitespace) {
-          result.add(PreToken._(char, alignment.sublist(index, index + width)));
+          result.add(input.slice(index, index + width));
         }
         start = index + width;
       }

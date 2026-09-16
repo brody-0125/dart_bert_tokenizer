@@ -94,6 +94,13 @@ def cases(raw, language_cases=False):
                 result.append({'name': f'language-{i}-pair-{pair is not None}',
                                'input': text, 'pair': pair,
                                'expected': expected(t, t.encode(text, pair))})
+    if '[بريد]' in json.loads(raw)['model']['vocab']:
+        for i, text in enumerate(['هذا [بريد] جديد', 'هذا[بريد]جديد', '[مستخدم] [رابط]',
+                                 ' [بريد]\t[مستخدم] ', '[رابط]، نص', 'نصّ[بريد]',
+                                 '😀[رابط]😀']):
+            t = Tokenizer.from_str(raw)
+            result.append({'name': f'arabert-added-{i}', 'input': text,
+                           'expected': expected(t, t.encode(text))})
     return result
 
 

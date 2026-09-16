@@ -129,12 +129,18 @@ TokenizerJsonConfig _parseTokenizerJson(Map<String, dynamic> json) {
   // --- added_tokens (optional) ---
   final addedTokens = json['added_tokens'];
   if (addedTokens is List) {
-    var nextId = vocab.length;
+    var nextId = vocab.values.fold<int>(
+      0,
+      (next, id) => id >= next ? id + 1 : next,
+    );
     for (final tokenEntry in addedTokens) {
       if (tokenEntry is Map<String, dynamic>) {
         final content = tokenEntry['content'] as String?;
         if (content != null) {
           final id = vocab[content] ?? nextId;
+          if (id > 0x7fffffff) {
+            throw const FormatException('Added token ID exceeds Int32 range');
+          }
           vocab[content] = id;
           if (id >= nextId) nextId = id + 1;
         }
@@ -253,9 +259,15 @@ void _validateComponents(Map<String, dynamic> json) {
         (token['id'] as int) < 0) {
       throw const FormatException('Invalid added token');
     }
-    for (final flag in ['single_word', 'lstrip', 'rstrip', 'normalized']) {
-      if (token[flag] == true) {
-        throw FormatException('AddedToken.$flag is not supported');
+    for (final flag in [
+      'single_word',
+      'lstrip',
+      'rstrip',
+      'normalized',
+      'special',
+    ]) {
+      if (token.containsKey(flag) && token[flag] is! bool) {
+        throw FormatException('AddedToken.$flag must be a boolean');
       }
     }
   }

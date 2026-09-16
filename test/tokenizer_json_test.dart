@@ -380,8 +380,8 @@ void main() {
         jsonEncode(json),
       );
 
-      // HF assigns added-only tokens after the model vocabulary, ignoring a stale serialized ID.
-      expect(tokenizer.convertTokensToIds(['[CUSTOM]']), equals([14]));
+      // Sparse vocabularies allocate after the highest occupied ID, never in a hole.
+      expect(tokenizer.convertTokensToIds(['[CUSTOM]']), equals([7593]));
     });
 
     test('does not override vocab entries with added_tokens', () {

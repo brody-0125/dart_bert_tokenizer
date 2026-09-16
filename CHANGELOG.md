@@ -1,5 +1,23 @@
 # Changelog
 
+## 1.2.0
+
+- Add immutable `AddedToken` definitions, `addTokens()` and `addSpecialTokens()`
+  for both JSON and vocab.txt tokenizers. Preserve existing IDs and return new
+  or changed registration counts; ignore identical definitions and empty input.
+- Support Unicode single-word boundaries, left/right whitespace absorption,
+  and raw-then-normalized matching with original code-point alignment.
+- Keep added tokens separate from base WordPiece tries; refresh matching/decode
+  caches on definition updates. Filter special IDs independently of spelling.
+- Isolate registration state between tokenizer instances and snapshot settings
+  for in-flight parallel batches.
+- Use lowest ID for normalized-pattern ties; refresh stale decode spellings;
+  allocate sparse-vocabulary IDs above the maximum to avoid collisions. These
+  documented edge cases intentionally differ from HF 0.23.2.
+- Promote AraBERT v02 to a successful pinned network fixture. Add HF registration,
+  flag-combination, pair/batch and Unicode-boundary regression fixtures.
+- Validate 1,300 offline tests and 788 network tests. No new runtime dependencies.
+
 ## 1.1.0
 
 - Add `tokenizer.json` loading support for HuggingFace tokenizer files

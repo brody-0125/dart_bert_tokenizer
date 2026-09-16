@@ -52,8 +52,16 @@ void expectHfEncoding(
   );
 }
 
-Future<void> runHfCase(String raw, Map<String, dynamic> fixture) async {
-  final tokenizer = WordPieceTokenizer.fromTokenizerJsonString(raw);
+Future<void> runHfCase(String raw, Map<String, dynamic> fixture) =>
+    runHfTokenizerCase(
+      WordPieceTokenizer.fromTokenizerJsonString(raw),
+      fixture,
+    );
+
+Future<void> runHfTokenizerCase(
+  WordPieceTokenizer tokenizer,
+  Map<String, dynamic> fixture,
+) async {
   final padding = fixture['padding'] as Map<String, dynamic>?;
   if (padding != null) {
     tokenizer.enablePadding(

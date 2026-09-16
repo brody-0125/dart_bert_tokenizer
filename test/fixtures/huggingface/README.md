@@ -1,7 +1,7 @@
 # Hugging Face fixtures
 
-`manifest.json` pins thirteen executable model fixtures: eleven successful WordPiece
-pipelines and two explicitly unsupported pipelines. Repository revision and the
+`manifest.json` pins thirteen executable model fixtures: twelve successful WordPiece
+pipelines and one explicitly unsupported pipelines. Repository revision and the
 SHA-256 of the exact source bytes are recorded. `source_file` defaults to
 `tokenizer.json`; three models instead use `vocab.txt`.
 
@@ -21,6 +21,8 @@ from the repository root (or pass the script's absolute path):
 ```sh
 python -m pip install -r scripts/requirements-fixtures.txt
 python scripts/generate_hf_fixtures.py
+python scripts/generate_added_token_fixtures.py
+python scripts/generate_unicode_word_boundaries.py
 ```
 
 Models are downloaded to `.dart_tool/hf-fixtures/`; cache hits still verify the
@@ -90,11 +92,11 @@ compatibility transliteration of characters such as ø, ł or œ.
   validate that stated pipeline, not an unverified Transformers AutoTokenizer
   equivalence. Network tests insert the full downloaded vocabulary into that
   generated pipeline and check against the same offline oracle.
-- AraBERT v02 and IndicBERTv2: real unsupported AddedToken.single_word and
-  Whitespace configurations must produce specific FormatExceptions, both
-  offline and with the original downloaded files. Reduced negative fixtures
-  keep actual components and replace the vocabulary with a single unknown
-  token; no successful encoding compatibility is claimed.
+- AraBERT v02: official JSON now succeeds, including normalized/single-word
+  `[بريد]`, `[مستخدم]`, `[رابط]` and both decode modes. This does not include the
+  separately recommended ArabertPreprocessor.
+- IndicBERTv2: the actual Whitespace configuration must produce a specific
+  FormatException offline and with the original downloaded file.
 - Tohoku Japanese v3 and LINE Japanese DistilBERT remain outside executable
   coverage: their documented inference pipelines require MeCab/UniDic, with
   WordPiece and SentencePiece respectively. Loading just a vocabulary is not
@@ -107,7 +109,30 @@ truncation lengths are chosen from actual token counts so only_first/only_second
 remain valid for language-specific vocabularies. Language cases include Arabic
 diacritics, Turkish I/İ/ı/i, Indic scripts, combining accents and control chars.
 
-The release suite currently has 1,143 offline tests and 707 opt-in network tests.
+The release suite currently has 1,300 offline tests and 788 opt-in network tests.
 Both paths register model cases through `test/hf_fixture_support.dart`, including
 the same error-message checks for unsupported pipelines and full-field
 comparisons for sequential and parallel batches.
+
+## AddedToken oracle and deliberate differences (1.2.0)
+
+`added_tokens.golden.json` records dynamic registration return counts, all eight
+encoding fields, decode modes and independent JSON reload results. It includes
+all 32 flag combinations, Unicode inputs, mutation and pair/batch interactions.
+Direct HF output is retained as `hf_expected` when Dart intentionally filters a
+normalized special ID or refreshes a stale decode cache after an option change.
+The expected decoder strings are generated using HF's decoder applied to the
+current normalized definitions, with historical special IDs removed when needed.
+
+Different registered spellings can normalize to the same pattern. HF 0.23.2 can
+choose different IDs across runs. Dart chooses the lowest ID deterministically;
+this has a separate contract test rather than an arbitrary HF golden. Sparse
+model vocabularies also allocate after the maximum occupied ID rather than HF's
+count-based rule. Existing IDs must never be overwritten.
+
+`unicode_word_boundaries.json` contains ranges from probing every Unicode scalar
+with HF's actual single_word matcher (null normalizer/pre-tokenizer). Tests check
+both sides of each range boundary through the public encoding API, including
+join controls, combining marks and supplementary-plane characters. Python oracle
+version is fixed; on the development Dart 3.13.3 VM, the Unicode property regex
+was additionally checked against every scalar with zero differences.

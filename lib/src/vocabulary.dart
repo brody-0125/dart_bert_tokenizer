@@ -54,14 +54,46 @@ class Vocabulary {
   final Map<String, int> _tokenToId = {};
   final Map<int, String> _idToToken = {};
   int _size = 0;
-  final Trie _trie = Trie();
-  final Trie _subwordTrie = Trie();
+  final Trie _trie;
+  final Trie _subwordTrie;
 
   /// The prefix used for subword tokens (default: `##`).
   final String subwordPrefix;
 
   /// Creates an empty vocabulary with the given subword prefix.
-  Vocabulary({this.subwordPrefix = '##'});
+  Vocabulary({this.subwordPrefix = '##'})
+    : _trie = Trie(),
+      _subwordTrie = Trie();
+
+  Vocabulary._overlay(Vocabulary base)
+    : subwordPrefix = base.subwordPrefix,
+      _trie = base._trie,
+      _subwordTrie = base._subwordTrie {
+    _tokenToId.addAll(base._tokenToId);
+    _idToToken.addAll(base._idToToken);
+    _size = base._size;
+  }
+
+  /// Copies vocabulary lookups with extra tokens, without changing WordPiece
+  /// tries. The original vocabulary is unchanged. IDs must not collide.
+  Vocabulary withAddedTokens(Map<String, int> tokens) {
+    final result = Vocabulary._overlay(this);
+    for (final entry in tokens.entries) {
+      final id = entry.value;
+      if (id < 0 ||
+          id > 0x7fffffff ||
+          (result._idToToken.containsKey(id) &&
+              result._idToToken[id] != entry.key) ||
+          (result._tokenToId.containsKey(entry.key) &&
+              result._tokenToId[entry.key] != id)) {
+        throw ArgumentError('Invalid or conflicting added token ID: $id');
+      }
+      result._tokenToId[entry.key] = id;
+      result._idToToken[id] = entry.key;
+      if (id >= result._size) result._size = id + 1;
+    }
+    return result;
+  }
 
   /// The number of tokens in this vocabulary.
   int get size => _size;

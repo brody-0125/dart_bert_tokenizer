@@ -1,0 +1,1820 @@
+{
+  "oracle": "tokenizers==0.23.2",
+  "model": {
+    "name": "aubmindlab--bert-base-arabertv02",
+    "repository": "aubmindlab/bert-base-arabertv02",
+    "revision": "016fb9d6768f522a59c6e0d2d5d5d43a4e1bff60",
+    "sha256": "d9797bf02285035bba059782638b8c0aa130b7c2ca2d5dc2c30327586b3c773d",
+    "license": "Not specified in model metadata",
+    "language_cases": true
+  },
+  "cases": [
+    {
+      "name": "single-0-special-True",
+      "input": "Hello, world!",
+      "add_special_tokens": true,
+      "expected": {
+        "tokens": ["[CLS]", "He", "##ll", "##o", ",", "w", "##orld", "!", "[SEP]"],
+        "ids": [2, 47733, 41430, 219, 18, 92, 51459, 8, 3],
+        "type_ids": [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        "attention_mask": [1, 1, 1, 1, 1, 1, 1, 1, 1],
+        "special_tokens_mask": [1, 0, 0, 0, 0, 0, 0, 0, 1],
+        "offsets": [[0, 0], [0, 2], [2, 4], [4, 5], [5, 6], [7, 8], [8, 12], [12, 13], [0, 0]],
+        "word_ids": [null, 0, 0, 0, 1, 2, 2, 3, null],
+        "sequence_ids": [null, 0, 0, 0, 0, 0, 0, 0, null],
+        "decoded": "Hello, world!",
+        "decoded_with_special_tokens": "[CLS] Hello, world! [SEP]"
+      }
+    },
+    {
+      "name": "single-0-special-False",
+      "input": "Hello, world!",
+      "add_special_tokens": false,
+      "expected": {
+        "tokens": ["He", "##ll", "##o", ",", "w", "##orld", "!"],
+        "ids": [47733, 41430, 219, 18, 92, 51459, 8],
+        "type_ids": [0, 0, 0, 0, 0, 0, 0],
+        "attention_mask": [1, 1, 1, 1, 1, 1, 1],
+        "special_tokens_mask": [0, 0, 0, 0, 0, 0, 0],
+        "offsets": [[0, 2], [2, 4], [4, 5], [5, 6], [7, 8], [8, 12], [12, 13]],
+        "word_ids": [0, 0, 0, 1, 2, 2, 3],
+        "sequence_ids": [0, 0, 0, 0, 0, 0, 0],
+        "decoded": "Hello, world!",
+        "decoded_with_special_tokens": "Hello, world!"
+      }
+    },
+    {
+      "name": "single-1-special-True",
+      "input": "",
+      "add_special_tokens": true,
+      "expected": {
+        "tokens": ["[CLS]", "[SEP]"],
+        "ids": [2, 3],
+        "type_ids": [0, 0],
+        "attention_mask": [1, 1],
+        "special_tokens_mask": [1, 1],
+        "offsets": [[0, 0], [0, 0]],
+        "word_ids": [null, null],
+        "sequence_ids": [null, null],
+        "decoded": "",
+        "decoded_with_special_tokens": "[CLS] [SEP]"
+      }
+    },
+    {
+      "name": "single-1-special-False",
+      "input": "",
+      "add_special_tokens": false,
+      "expected": {
+        "tokens": [],
+        "ids": [],
+        "type_ids": [],
+        "attention_mask": [],
+        "special_tokens_mask": [],
+        "offsets": [],
+        "word_ids": [],
+        "sequence_ids": [],
+        "decoded": "",
+        "decoded_with_special_tokens": ""
+      }
+    },
+    {
+      "name": "single-2-special-True",
+      "input": " \t\n",
+      "add_special_tokens": true,
+      "expected": {
+        "tokens": ["[CLS]", "[SEP]"],
+        "ids": [2, 3],
+        "type_ids": [0, 0],
+        "attention_mask": [1, 1],
+        "special_tokens_mask": [1, 1],
+        "offsets": [[0, 0], [0, 0]],
+        "word_ids": [null, null],
+        "sequence_ids": [null, null],
+        "decoded": "",
+        "decoded_with_special_tokens": "[CLS] [SEP]"
+      }
+    },
+    {
+      "name": "single-2-special-False",
+      "input": " \t\n",
+      "add_special_tokens": false,
+      "expected": {
+        "tokens": [],
+        "ids": [],
+        "type_ids": [],
+        "attention_mask": [],
+        "special_tokens_mask": [],
+        "offsets": [],
+        "word_ids": [],
+        "sequence_ids": [],
+        "decoded": "",
+        "decoded_with_special_tokens": ""
+      }
+    },
+    {
+      "name": "single-3-special-True",
+      "input": "Hello   world",
+      "add_special_tokens": true,
+      "expected": {
+        "tokens": ["[CLS]", "He", "##ll", "##o", "w", "##orld", "[SEP]"],
+        "ids": [2, 47733, 41430, 219, 92, 51459, 3],
+        "type_ids": [0, 0, 0, 0, 0, 0, 0],
+        "attention_mask": [1, 1, 1, 1, 1, 1, 1],
+        "special_tokens_mask": [1, 0, 0, 0, 0, 0, 1],
+        "offsets": [[0, 0], [0, 2], [2, 4], [4, 5], [8, 9], [9, 13], [0, 0]],
+        "word_ids": [null, 0, 0, 0, 1, 1, null],
+        "sequence_ids": [null, 0, 0, 0, 0, 0, null],
+        "decoded": "Hello world",
+        "decoded_with_special_tokens": "[CLS] Hello world [SEP]"
+      }
+    },
+    {
+      "name": "single-3-special-False",
+      "input": "Hello   world",
+      "add_special_tokens": false,
+      "expected": {
+        "tokens": ["He", "##ll", "##o", "w", "##orld"],
+        "ids": [47733, 41430, 219, 92, 51459],
+        "type_ids": [0, 0, 0, 0, 0],
+        "attention_mask": [1, 1, 1, 1, 1],
+        "special_tokens_mask": [0, 0, 0, 0, 0],
+        "offsets": [[0, 2], [2, 4], [4, 5], [8, 9], [9, 13]],
+        "word_ids": [0, 0, 0, 1, 1],
+        "sequence_ids": [0, 0, 0, 0, 0],
+        "decoded": "Hello world",
+        "decoded_with_special_tokens": "Hello world"
+      }
+    },
+    {
+      "name": "single-4-special-True",
+      "input": "Hello\tworld\nagain",
+      "add_special_tokens": true,
+      "expected": {
+        "tokens": ["[CLS]", "He", "##ll", "##o", "w", "##orld", "a", "##g", "##ain", "[SEP]"],
+        "ids": [2, 47733, 41430, 219, 92, 51459, 70, 211, 37122, 3],
+        "type_ids": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        "attention_mask": [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        "special_tokens_mask": [1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+        "offsets": [[0, 0], [0, 2], [2, 4], [4, 5], [6, 7], [7, 11], [12, 13], [13, 14], [14, 17], [0, 0]],
+        "word_ids": [null, 0, 0, 0, 1, 1, 2, 2, 2, null],
+        "sequence_ids": [null, 0, 0, 0, 0, 0, 0, 0, 0, null],
+        "decoded": "Hello world again",
+        "decoded_with_special_tokens": "[CLS] Hello world again [SEP]"
+      }
+    },
+    {
+      "name": "single-4-special-False",
+      "input": "Hello\tworld\nagain",
+      "add_special_tokens": false,
+      "expected": {
+        "tokens": ["He", "##ll", "##o", "w", "##orld", "a", "##g", "##ain"],
+        "ids": [47733, 41430, 219, 92, 51459, 70, 211, 37122],
+        "type_ids": [0, 0, 0, 0, 0, 0, 0, 0],
+        "attention_mask": [1, 1, 1, 1, 1, 1, 1, 1],
+        "special_tokens_mask": [0, 0, 0, 0, 0, 0, 0, 0],
+        "offsets": [[0, 2], [2, 4], [4, 5], [6, 7], [7, 11], [12, 13], [13, 14], [14, 17]],
+        "word_ids": [0, 0, 0, 1, 1, 2, 2, 2],
+        "sequence_ids": [0, 0, 0, 0, 0, 0, 0, 0],
+        "decoded": "Hello world again",
+        "decoded_with_special_tokens": "Hello world again"
+      }
+    },
+    {
+      "name": "single-5-special-True",
+      "input": "café naïve résumé",
+      "add_special_tokens": true,
+      "expected": {
+        "tokens": ["[CLS]", "[UNK]", "[UNK]", "[UNK]", "[SEP]"],
+        "ids": [2, 1, 1, 1, 3],
+        "type_ids": [0, 0, 0, 0, 0],
+        "attention_mask": [1, 1, 1, 1, 1],
+        "special_tokens_mask": [1, 0, 0, 0, 1],
+        "offsets": [[0, 0], [0, 4], [5, 10], [11, 17], [0, 0]],
+        "word_ids": [null, 0, 1, 2, null],
+        "sequence_ids": [null, 0, 0, 0, null],
+        "decoded": "",
+        "decoded_with_special_tokens": "[CLS] [UNK] [UNK] [UNK] [SEP]"
+      }
+    },
+    {
+      "name": "single-5-special-False",
+      "input": "café naïve résumé",
+      "add_special_tokens": false,
+      "expected": {
+        "tokens": ["[UNK]", "[UNK]", "[UNK]"],
+        "ids": [1, 1, 1],
+        "type_ids": [0, 0, 0],
+        "attention_mask": [1, 1, 1],
+        "special_tokens_mask": [0, 0, 0],
+        "offsets": [[0, 4], [5, 10], [11, 17]],
+        "word_ids": [0, 1, 2],
+        "sequence_ids": [0, 0, 0],
+        "decoded": "",
+        "decoded_with_special_tokens": "[UNK] [UNK] [UNK]"
+      }
+    },
+    {
+      "name": "single-6-special-True",
+      "input": "café",
+      "add_special_tokens": true,
+      "expected": {
+        "tokens": ["[CLS]", "[UNK]", "[SEP]"],
+        "ids": [2, 1, 3],
+        "type_ids": [0, 0, 0],
+        "attention_mask": [1, 1, 1],
+        "special_tokens_mask": [1, 0, 1],
+        "offsets": [[0, 0], [0, 5], [0, 0]],
+        "word_ids": [null, 0, null],
+        "sequence_ids": [null, 0, null],
+        "decoded": "",
+        "decoded_with_special_tokens": "[CLS] [UNK] [SEP]"
+      }
+    },
+    {
+      "name": "single-6-special-False",
+      "input": "café",
+      "add_special_tokens": false,
+      "expected": {
+        "tokens": ["[UNK]"],
+        "ids": [1],
+        "type_ids": [0],
+        "attention_mask": [1],
+        "special_tokens_mask": [0],
+        "offsets": [[0, 5]],
+        "word_ids": [0],
+        "sequence_ids": [0],
+        "decoded": "",
+        "decoded_with_special_tokens": "[UNK]"
+      }
+    },
+    {
+      "name": "single-7-special-True",
+      "input": "ø ł œ Ð Þ",
+      "add_special_tokens": true,
+      "expected": {
+        "tokens": ["[CLS]", "[UNK]", "[UNK]", "[UNK]", "[UNK]", "[UNK]", "[SEP]"],
+        "ids": [2, 1, 1, 1, 1, 1, 3],
+        "type_ids": [0, 0, 0, 0, 0, 0, 0],
+        "attention_mask": [1, 1, 1, 1, 1, 1, 1],
+        "special_tokens_mask": [1, 0, 0, 0, 0, 0, 1],
+        "offsets": [[0, 0], [0, 1], [2, 3], [4, 5], [6, 7], [8, 9], [0, 0]],
+        "word_ids": [null, 0, 1, 2, 3, 4, null],
+        "sequence_ids": [null, 0, 0, 0, 0, 0, null],
+        "decoded": "",
+        "decoded_with_special_tokens": "[CLS] [UNK] [UNK] [UNK] [UNK] [UNK] [SEP]"
+      }
+    },
+    {
+      "name": "single-7-special-False",
+      "input": "ø ł œ Ð Þ",
+      "add_special_tokens": false,
+      "expected": {
+        "tokens": ["[UNK]", "[UNK]", "[UNK]", "[UNK]", "[UNK]"],
+        "ids": [1, 1, 1, 1, 1],
+        "type_ids": [0, 0, 0, 0, 0],
+        "attention_mask": [1, 1, 1, 1, 1],
+        "special_tokens_mask": [0, 0, 0, 0, 0],
+        "offsets": [[0, 1], [2, 3], [4, 5], [6, 7], [8, 9]],
+        "word_ids": [0, 1, 2, 3, 4],
+        "sequence_ids": [0, 0, 0, 0, 0],
+        "decoded": "",
+        "decoded_with_special_tokens": "[UNK] [UNK] [UNK] [UNK] [UNK]"
+      }
+    },
+    {
+      "name": "single-8-special-True",
+      "input": "你好世界 hello",
+      "add_special_tokens": true,
+      "expected": {
+        "tokens": ["[CLS]", "[UNK]", "[UNK]", "[UNK]", "[UNK]", "h", "##ell", "##o", "[SEP]"],
+        "ids": [2, 1, 1, 1, 1, 77, 33526, 219, 3],
+        "type_ids": [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        "attention_mask": [1, 1, 1, 1, 1, 1, 1, 1, 1],
+        "special_tokens_mask": [1, 0, 0, 0, 0, 0, 0, 0, 1],
+        "offsets": [[0, 0], [0, 1], [1, 2], [2, 3], [3, 4], [5, 6], [6, 9], [9, 10], [0, 0]],
+        "word_ids": [null, 0, 1, 2, 3, 4, 4, 4, null],
+        "sequence_ids": [null, 0, 0, 0, 0, 0, 0, 0, null],
+        "decoded": "hello",
+        "decoded_with_special_tokens": "[CLS] [UNK] [UNK] [UNK] [UNK] hello [SEP]"
+      }
+    },
+    {
+      "name": "single-8-special-False",
+      "input": "你好世界 hello",
+      "add_special_tokens": false,
+      "expected": {
+        "tokens": ["[UNK]", "[UNK]", "[UNK]", "[UNK]", "h", "##ell", "##o"],
+        "ids": [1, 1, 1, 1, 77, 33526, 219],
+        "type_ids": [0, 0, 0, 0, 0, 0, 0],
+        "attention_mask": [1, 1, 1, 1, 1, 1, 1],
+        "special_tokens_mask": [0, 0, 0, 0, 0, 0, 0],
+        "offsets": [[0, 1], [1, 2], [2, 3], [3, 4], [5, 6], [6, 9], [9, 10]],
+        "word_ids": [0, 1, 2, 3, 4, 4, 4],
+        "sequence_ids": [0, 0, 0, 0, 0, 0, 0],
+        "decoded": "hello",
+        "decoded_with_special_tokens": "[UNK] [UNK] [UNK] [UNK] hello"
+      }
+    },
+    {
+      "name": "single-9-special-True",
+      "input": "안녕하세요 세계",
+      "add_special_tokens": true,
+      "expected": {
+        "tokens": ["[CLS]", "[UNK]", "[UNK]", "[SEP]"],
+        "ids": [2, 1, 1, 3],
+        "type_ids": [0, 0, 0, 0],
+        "attention_mask": [1, 1, 1, 1],
+        "special_tokens_mask": [1, 0, 0, 1],
+        "offsets": [[0, 0], [0, 5], [6, 8], [0, 0]],
+        "word_ids": [null, 0, 1, null],
+        "sequence_ids": [null, 0, 0, null],
+        "decoded": "",
+        "decoded_with_special_tokens": "[CLS] [UNK] [UNK] [SEP]"
+      }
+    },
+    {
+      "name": "single-9-special-False",
+      "input": "안녕하세요 세계",
+      "add_special_tokens": false,
+      "expected": {
+        "tokens": ["[UNK]", "[UNK]"],
+        "ids": [1, 1],
+        "type_ids": [0, 0],
+        "attention_mask": [1, 1],
+        "special_tokens_mask": [0, 0],
+        "offsets": [[0, 5], [6, 8]],
+        "word_ids": [0, 1],
+        "sequence_ids": [0, 0],
+        "decoded": "",
+        "decoded_with_special_tokens": "[UNK] [UNK]"
+      }
+    },
+    {
+      "name": "single-10-special-True",
+      "input": "Hello 😊 world",
+      "add_special_tokens": true,
+      "expected": {
+        "tokens": ["[CLS]", "He", "##ll", "##o", "[UNK]", "w", "##orld", "[SEP]"],
+        "ids": [2, 47733, 41430, 219, 1, 92, 51459, 3],
+        "type_ids": [0, 0, 0, 0, 0, 0, 0, 0],
+        "attention_mask": [1, 1, 1, 1, 1, 1, 1, 1],
+        "special_tokens_mask": [1, 0, 0, 0, 0, 0, 0, 1],
+        "offsets": [[0, 0], [0, 2], [2, 4], [4, 5], [6, 7], [8, 9], [9, 13], [0, 0]],
+        "word_ids": [null, 0, 0, 0, 1, 2, 2, null],
+        "sequence_ids": [null, 0, 0, 0, 0, 0, 0, null],
+        "decoded": "Hello world",
+        "decoded_with_special_tokens": "[CLS] Hello [UNK] world [SEP]"
+      }
+    },
+    {
+      "name": "single-10-special-False",
+      "input": "Hello 😊 world",
+      "add_special_tokens": false,
+      "expected": {
+        "tokens": ["He", "##ll", "##o", "[UNK]", "w", "##orld"],
+        "ids": [47733, 41430, 219, 1, 92, 51459],
+        "type_ids": [0, 0, 0, 0, 0, 0],
+        "attention_mask": [1, 1, 1, 1, 1, 1],
+        "special_tokens_mask": [0, 0, 0, 0, 0, 0],
+        "offsets": [[0, 2], [2, 4], [4, 5], [6, 7], [8, 9], [9, 13]],
+        "word_ids": [0, 0, 0, 1, 2, 2],
+        "sequence_ids": [0, 0, 0, 0, 0, 0],
+        "decoded": "Hello world",
+        "decoded_with_special_tokens": "Hello [UNK] world"
+      }
+    },
+    {
+      "name": "single-11-special-True",
+      "input": "a\u0000b‍c",
+      "add_special_tokens": true,
+      "expected": {
+        "tokens": ["[CLS]", "a", "##bc", "[SEP]"],
+        "ids": [2, 70, 28914, 3],
+        "type_ids": [0, 0, 0, 0],
+        "attention_mask": [1, 1, 1, 1],
+        "special_tokens_mask": [1, 0, 0, 1],
+        "offsets": [[0, 0], [0, 1], [2, 5], [0, 0]],
+        "word_ids": [null, 0, 0, null],
+        "sequence_ids": [null, 0, 0, null],
+        "decoded": "abc",
+        "decoded_with_special_tokens": "[CLS] abc [SEP]"
+      }
+    },
+    {
+      "name": "single-11-special-False",
+      "input": "a\u0000b‍c",
+      "add_special_tokens": false,
+      "expected": {
+        "tokens": ["a", "##bc"],
+        "ids": [70, 28914],
+        "type_ids": [0, 0],
+        "attention_mask": [1, 1],
+        "special_tokens_mask": [0, 0],
+        "offsets": [[0, 1], [2, 5]],
+        "word_ids": [0, 0],
+        "sequence_ids": [0, 0],
+        "decoded": "abc",
+        "decoded_with_special_tokens": "abc"
+      }
+    },
+    {
+      "name": "single-12-special-True",
+      "input": "[MASK]Hello[SEP]",
+      "add_special_tokens": true,
+      "expected": {
+        "tokens": ["[CLS]", "[MASK]", "He", "##ll", "##o", "[SEP]", "[SEP]"],
+        "ids": [2, 4, 47733, 41430, 219, 3, 3],
+        "type_ids": [0, 0, 0, 0, 0, 0, 0],
+        "attention_mask": [1, 1, 1, 1, 1, 1, 1],
+        "special_tokens_mask": [1, 0, 0, 0, 0, 0, 1],
+        "offsets": [[0, 0], [0, 6], [6, 8], [8, 10], [10, 11], [11, 16], [0, 0]],
+        "word_ids": [null, 0, 1, 1, 1, 2, null],
+        "sequence_ids": [null, 0, 0, 0, 0, 0, null],
+        "decoded": "Hello",
+        "decoded_with_special_tokens": "[CLS] [MASK] Hello [SEP] [SEP]"
+      }
+    },
+    {
+      "name": "single-12-special-False",
+      "input": "[MASK]Hello[SEP]",
+      "add_special_tokens": false,
+      "expected": {
+        "tokens": ["[MASK]", "He", "##ll", "##o", "[SEP]"],
+        "ids": [4, 47733, 41430, 219, 3],
+        "type_ids": [0, 0, 0, 0, 0],
+        "attention_mask": [1, 1, 1, 1, 1],
+        "special_tokens_mask": [0, 0, 0, 0, 0],
+        "offsets": [[0, 6], [6, 8], [8, 10], [10, 11], [11, 16]],
+        "word_ids": [0, 1, 1, 1, 2],
+        "sequence_ids": [0, 0, 0, 0, 0],
+        "decoded": "Hello",
+        "decoded_with_special_tokens": "[MASK] Hello [SEP]"
+      }
+    },
+    {
+      "name": "single-13-special-True",
+      "input": "I'm happy. Don't worry!",
+      "add_special_tokens": true,
+      "expected": {
+        "tokens": ["[CLS]", "I", "'", "m", "h", "##ap", "##p", "##y", ".", "D", "##on", "'", "t", "w", "##or", "##ry", "!", "[SEP]"],
+        "ids": [2, 46, 13, 82, 77, 24740, 178, 254, 20, 41, 4854, 13, 89, 92, 5732, 35227, 8, 3],
+        "type_ids": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        "attention_mask": [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        "special_tokens_mask": [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+        "offsets": [[0, 0], [0, 1], [1, 2], [2, 3], [4, 5], [5, 7], [7, 8], [8, 9], [9, 10], [11, 12], [12, 14], [14, 15], [15, 16], [17, 18], [18, 20], [20, 22], [22, 23], [0, 0]],
+        "word_ids": [null, 0, 1, 2, 3, 3, 3, 3, 4, 5, 5, 6, 7, 8, 8, 8, 9, null],
+        "sequence_ids": [null, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, null],
+        "decoded": "I ' m happy. Don ' t worry!",
+        "decoded_with_special_tokens": "[CLS] I ' m happy. Don ' t worry! [SEP]"
+      }
+    },
+    {
+      "name": "single-13-special-False",
+      "input": "I'm happy. Don't worry!",
+      "add_special_tokens": false,
+      "expected": {
+        "tokens": ["I", "'", "m", "h", "##ap", "##p", "##y", ".", "D", "##on", "'", "t", "w", "##or", "##ry", "!"],
+        "ids": [46, 13, 82, 77, 24740, 178, 254, 20, 41, 4854, 13, 89, 92, 5732, 35227, 8],
+        "type_ids": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        "attention_mask": [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        "special_tokens_mask": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        "offsets": [[0, 1], [1, 2], [2, 3], [4, 5], [5, 7], [7, 8], [8, 9], [9, 10], [11, 12], [12, 14], [14, 15], [15, 16], [17, 18], [18, 20], [20, 22], [22, 23]],
+        "word_ids": [0, 1, 2, 3, 3, 3, 3, 4, 5, 5, 6, 7, 8, 8, 8, 9],
+        "sequence_ids": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        "decoded": "I ' m happy. Don ' t worry!",
+        "decoded_with_special_tokens": "I ' m happy. Don ' t worry!"
+      }
+    },
+    {
+      "name": "single-14-special-True",
+      "input": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "add_special_tokens": true,
+      "expected": {
+        "tokens": ["[CLS]", "[UNK]", "[SEP]"],
+        "ids": [2, 1, 3],
+        "type_ids": [0, 0, 0],
+        "attention_mask": [1, 1, 1],
+        "special_tokens_mask": [1, 0, 1],
+        "offsets": [[0, 0], [0, 101], [0, 0]],
+        "word_ids": [null, 0, null],
+        "sequence_ids": [null, 0, null],
+        "decoded": "",
+        "decoded_with_special_tokens": "[CLS] [UNK] [SEP]"
+      }
+    },
+    {
+      "name": "single-14-special-False",
+      "input": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "add_special_tokens": false,
+      "expected": {
+        "tokens": ["[UNK]"],
+        "ids": [1],
+        "type_ids": [0],
+        "attention_mask": [1],
+        "special_tokens_mask": [0],
+        "offsets": [[0, 101]],
+        "word_ids": [0],
+        "sequence_ids": [0],
+        "decoded": "",
+        "decoded_with_special_tokens": "[UNK]"
+      }
+    },
+    {
+      "name": "single-15-special-True",
+      "input": "İ 𐐀",
+      "add_special_tokens": true,
+      "expected": {
+        "tokens": ["[CLS]", "[UNK]", "[UNK]", "[SEP]"],
+        "ids": [2, 1, 1, 3],
+        "type_ids": [0, 0, 0, 0],
+        "attention_mask": [1, 1, 1, 1],
+        "special_tokens_mask": [1, 0, 0, 1],
+        "offsets": [[0, 0], [0, 1], [2, 3], [0, 0]],
+        "word_ids": [null, 0, 1, null],
+        "sequence_ids": [null, 0, 0, null],
+        "decoded": "",
+        "decoded_with_special_tokens": "[CLS] [UNK] [UNK] [SEP]"
+      }
+    },
+    {
+      "name": "single-15-special-False",
+      "input": "İ 𐐀",
+      "add_special_tokens": false,
+      "expected": {
+        "tokens": ["[UNK]", "[UNK]"],
+        "ids": [1, 1],
+        "type_ids": [0, 0],
+        "attention_mask": [1, 1],
+        "special_tokens_mask": [0, 0],
+        "offsets": [[0, 1], [2, 3]],
+        "word_ids": [0, 1],
+        "sequence_ids": [0, 0],
+        "decoded": "",
+        "decoded_with_special_tokens": "[UNK] [UNK]"
+      }
+    },
+    {
+      "name": "pair-right-longest_first",
+      "input": "Hello world again today",
+      "pair": "tokenization is interesting today",
+      "truncation": {
+        "max_length": 17,
+        "direction": "right",
+        "strategy": "longest_first"
+      },
+      "padding": {
+        "length": 19,
+        "direction": "right"
+      },
+      "expected": {
+        "tokens": ["[CLS]", "He", "##ll", "##o", "w", "##orld", "a", "##g", "[SEP]", "to", "##k", "##en", "##iz", "##ation", "is", "in", "[SEP]", "[PAD]", "[PAD]"],
+        "ids": [2, 47733, 41430, 219, 92, 51459, 70, 211, 3, 24832, 258, 5802, 40211, 15863, 44764, 17323, 3, 0, 0],
+        "type_ids": [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+        "attention_mask": [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+        "special_tokens_mask": [1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1],
+        "offsets": [[0, 0], [0, 2], [2, 4], [4, 5], [6, 7], [7, 11], [12, 13], [13, 14], [0, 0], [0, 2], [2, 3], [3, 5], [5, 7], [7, 12], [13, 15], [16, 18], [0, 0], [0, 0], [0, 0]],
+        "word_ids": [null, 0, 0, 0, 1, 1, 2, 2, null, 0, 0, 0, 0, 0, 1, 2, null, null, null],
+        "sequence_ids": [null, 0, 0, 0, 0, 0, 0, 0, null, 1, 1, 1, 1, 1, 1, 1, null, null, null],
+        "decoded": "Hello world ag tokenization is in",
+        "decoded_with_special_tokens": "[CLS] Hello world ag [SEP] tokenization is in [SEP] [PAD] [PAD]"
+      }
+    },
+    {
+      "name": "pair-right-only_first",
+      "input": "Hello world again today",
+      "pair": "tokenization is interesting today",
+      "truncation": {
+        "max_length": 17,
+        "direction": "right",
+        "strategy": "only_first"
+      },
+      "padding": {
+        "length": 19,
+        "direction": "right"
+      },
+      "expected": {
+        "tokens": ["[CLS]", "He", "[SEP]", "to", "##k", "##en", "##iz", "##ation", "is", "in", "##ter", "##est", "##ing", "to", "##d", "##ay", "[SEP]", "[PAD]", "[PAD]"],
+        "ids": [2, 47733, 3, 24832, 258, 5802, 40211, 15863, 44764, 17323, 17778, 27071, 11388, 24832, 180, 23228, 3, 0, 0],
+        "type_ids": [0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+        "attention_mask": [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+        "special_tokens_mask": [1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1],
+        "offsets": [[0, 0], [0, 2], [0, 0], [0, 2], [2, 3], [3, 5], [5, 7], [7, 12], [13, 15], [16, 18], [18, 21], [21, 24], [24, 27], [28, 30], [30, 31], [31, 33], [0, 0], [0, 0], [0, 0]],
+        "word_ids": [null, 0, null, 0, 0, 0, 0, 0, 1, 2, 2, 2, 2, 3, 3, 3, null, null, null],
+        "sequence_ids": [null, 0, null, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, null, null, null],
+        "decoded": "He tokenization is interesting today",
+        "decoded_with_special_tokens": "[CLS] He [SEP] tokenization is interesting today [SEP] [PAD] [PAD]"
+      }
+    },
+    {
+      "name": "pair-right-only_second",
+      "input": "Hello world again today",
+      "pair": "tokenization is interesting today",
+      "truncation": {
+        "max_length": 17,
+        "direction": "right",
+        "strategy": "only_second"
+      },
+      "padding": {
+        "length": 19,
+        "direction": "right"
+      },
+      "expected": {
+        "tokens": ["[CLS]", "He", "##ll", "##o", "w", "##orld", "a", "##g", "##ain", "to", "##d", "##ay", "[SEP]", "to", "##k", "##en", "[SEP]", "[PAD]", "[PAD]"],
+        "ids": [2, 47733, 41430, 219, 92, 51459, 70, 211, 37122, 24832, 180, 23228, 3, 24832, 258, 5802, 3, 0, 0],
+        "type_ids": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0],
+        "attention_mask": [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+        "special_tokens_mask": [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 1, 1],
+        "offsets": [[0, 0], [0, 2], [2, 4], [4, 5], [6, 7], [7, 11], [12, 13], [13, 14], [14, 17], [18, 20], [20, 21], [21, 23], [0, 0], [0, 2], [2, 3], [3, 5], [0, 0], [0, 0], [0, 0]],
+        "word_ids": [null, 0, 0, 0, 1, 1, 2, 2, 2, 3, 3, 3, null, 0, 0, 0, null, null, null],
+        "sequence_ids": [null, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, null, 1, 1, 1, null, null, null],
+        "decoded": "Hello world again today token",
+        "decoded_with_special_tokens": "[CLS] Hello world again today [SEP] token [SEP] [PAD] [PAD]"
+      }
+    },
+    {
+      "name": "pair-left-longest_first",
+      "input": "Hello world again today",
+      "pair": "tokenization is interesting today",
+      "truncation": {
+        "max_length": 17,
+        "direction": "left",
+        "strategy": "longest_first"
+      },
+      "padding": {
+        "length": 19,
+        "direction": "left"
+      },
+      "expected": {
+        "tokens": ["[PAD]", "[PAD]", "[CLS]", "##orld", "a", "##g", "##ain", "to", "##d", "##ay", "[SEP]", "in", "##ter", "##est", "##ing", "to", "##d", "##ay", "[SEP]"],
+        "ids": [0, 0, 2, 51459, 70, 211, 37122, 24832, 180, 23228, 3, 17323, 17778, 27071, 11388, 24832, 180, 23228, 3],
+        "type_ids": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1],
+        "attention_mask": [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        "special_tokens_mask": [1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1],
+        "offsets": [[0, 0], [0, 0], [0, 0], [7, 11], [12, 13], [13, 14], [14, 17], [18, 20], [20, 21], [21, 23], [0, 0], [16, 18], [18, 21], [21, 24], [24, 27], [28, 30], [30, 31], [31, 33], [0, 0]],
+        "word_ids": [null, null, null, 1, 2, 2, 2, 3, 3, 3, null, 2, 2, 2, 2, 3, 3, 3, null],
+        "sequence_ids": [null, null, null, 0, 0, 0, 0, 0, 0, 0, null, 1, 1, 1, 1, 1, 1, 1, null],
+        "decoded": "##orld again today interesting today",
+        "decoded_with_special_tokens": "[PAD] [PAD] [CLS]orld again today [SEP] interesting today [SEP]"
+      }
+    },
+    {
+      "name": "pair-left-only_first",
+      "input": "Hello world again today",
+      "pair": "tokenization is interesting today",
+      "truncation": {
+        "max_length": 17,
+        "direction": "left",
+        "strategy": "only_first"
+      },
+      "padding": {
+        "length": 19,
+        "direction": "left"
+      },
+      "expected": {
+        "tokens": ["[PAD]", "[PAD]", "[CLS]", "##ay", "[SEP]", "to", "##k", "##en", "##iz", "##ation", "is", "in", "##ter", "##est", "##ing", "to", "##d", "##ay", "[SEP]"],
+        "ids": [0, 0, 2, 23228, 3, 24832, 258, 5802, 40211, 15863, 44764, 17323, 17778, 27071, 11388, 24832, 180, 23228, 3],
+        "type_ids": [0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        "attention_mask": [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        "special_tokens_mask": [1, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+        "offsets": [[0, 0], [0, 0], [0, 0], [21, 23], [0, 0], [0, 2], [2, 3], [3, 5], [5, 7], [7, 12], [13, 15], [16, 18], [18, 21], [21, 24], [24, 27], [28, 30], [30, 31], [31, 33], [0, 0]],
+        "word_ids": [null, null, null, 3, null, 0, 0, 0, 0, 0, 1, 2, 2, 2, 2, 3, 3, 3, null],
+        "sequence_ids": [null, null, null, 0, null, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, null],
+        "decoded": "##ay tokenization is interesting today",
+        "decoded_with_special_tokens": "[PAD] [PAD] [CLS]ay [SEP] tokenization is interesting today [SEP]"
+      }
+    },
+    {
+      "name": "pair-left-only_second",
+      "input": "Hello world again today",
+      "pair": "tokenization is interesting today",
+      "truncation": {
+        "max_length": 17,
+        "direction": "left",
+        "strategy": "only_second"
+      },
+      "padding": {
+        "length": 19,
+        "direction": "left"
+      },
+      "expected": {
+        "tokens": ["[PAD]", "[PAD]", "[CLS]", "He", "##ll", "##o", "w", "##orld", "a", "##g", "##ain", "to", "##d", "##ay", "[SEP]", "to", "##d", "##ay", "[SEP]"],
+        "ids": [0, 0, 2, 47733, 41430, 219, 92, 51459, 70, 211, 37122, 24832, 180, 23228, 3, 24832, 180, 23228, 3],
+        "type_ids": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1],
+        "attention_mask": [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        "special_tokens_mask": [1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1],
+        "offsets": [[0, 0], [0, 0], [0, 0], [0, 2], [2, 4], [4, 5], [6, 7], [7, 11], [12, 13], [13, 14], [14, 17], [18, 20], [20, 21], [21, 23], [0, 0], [28, 30], [30, 31], [31, 33], [0, 0]],
+        "word_ids": [null, null, null, 0, 0, 0, 1, 1, 2, 2, 2, 3, 3, 3, null, 3, 3, 3, null],
+        "sequence_ids": [null, null, null, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, null, 1, 1, 1, null],
+        "decoded": "Hello world again today today",
+        "decoded_with_special_tokens": "[PAD] [PAD] [CLS] Hello world again today [SEP] today [SEP]"
+      }
+    },
+    {
+      "name": "pair-tokenization-Hello world",
+      "input": "tokenization",
+      "pair": "Hello world",
+      "expected": {
+        "tokens": ["[CLS]", "to", "##k", "##en", "##iz", "##ation", "[SEP]", "He", "##ll", "##o", "w", "##orld", "[SEP]"],
+        "ids": [2, 24832, 258, 5802, 40211, 15863, 3, 47733, 41430, 219, 92, 51459, 3],
+        "type_ids": [0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1],
+        "attention_mask": [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        "special_tokens_mask": [1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1],
+        "offsets": [[0, 0], [0, 2], [2, 3], [3, 5], [5, 7], [7, 12], [0, 0], [0, 2], [2, 4], [4, 5], [6, 7], [7, 11], [0, 0]],
+        "word_ids": [null, 0, 0, 0, 0, 0, null, 0, 0, 0, 1, 1, null],
+        "sequence_ids": [null, 0, 0, 0, 0, 0, null, 1, 1, 1, 1, 1, null],
+        "decoded": "tokenization Hello world",
+        "decoded_with_special_tokens": "[CLS] tokenization [SEP] Hello world [SEP]"
+      }
+    },
+    {
+      "name": "pair--",
+      "input": "",
+      "pair": "",
+      "expected": {
+        "tokens": ["[CLS]", "[SEP]", "[SEP]"],
+        "ids": [2, 3, 3],
+        "type_ids": [0, 0, 1],
+        "attention_mask": [1, 1, 1],
+        "special_tokens_mask": [1, 1, 1],
+        "offsets": [[0, 0], [0, 0], [0, 0]],
+        "word_ids": [null, null, null],
+        "sequence_ids": [null, null, null],
+        "decoded": "",
+        "decoded_with_special_tokens": "[CLS] [SEP] [SEP]"
+      }
+    },
+    {
+      "name": "pair-你好-😊 hi",
+      "input": "你好",
+      "pair": "😊 hi",
+      "expected": {
+        "tokens": ["[CLS]", "[UNK]", "[UNK]", "[SEP]", "[UNK]", "h", "##i", "[SEP]"],
+        "ids": [2, 1, 1, 3, 1, 77, 204, 3],
+        "type_ids": [0, 0, 0, 0, 1, 1, 1, 1],
+        "attention_mask": [1, 1, 1, 1, 1, 1, 1, 1],
+        "special_tokens_mask": [1, 0, 0, 1, 0, 0, 0, 1],
+        "offsets": [[0, 0], [0, 1], [1, 2], [0, 0], [0, 1], [2, 3], [3, 4], [0, 0]],
+        "word_ids": [null, 0, 1, null, 0, 1, 1, null],
+        "sequence_ids": [null, 0, 0, null, 1, 1, 1, null],
+        "decoded": "hi",
+        "decoded_with_special_tokens": "[CLS] [UNK] [UNK] [SEP] [UNK] hi [SEP]"
+      }
+    },
+    {
+      "name": "batch-left",
+      "batch": ["Hello", "tokenization", "", "你好", "😊 hi", "café", "hello world", "[MASK]"],
+      "padding": {
+        "direction": "left",
+        "pad_to_multiple_of": 8
+      },
+      "expected": [
+        {
+          "tokens": ["[PAD]", "[PAD]", "[PAD]", "[CLS]", "He", "##ll", "##o", "[SEP]"],
+          "ids": [0, 0, 0, 2, 47733, 41430, 219, 3],
+          "type_ids": [0, 0, 0, 0, 0, 0, 0, 0],
+          "attention_mask": [0, 0, 0, 1, 1, 1, 1, 1],
+          "special_tokens_mask": [1, 1, 1, 1, 0, 0, 0, 1],
+          "offsets": [[0, 0], [0, 0], [0, 0], [0, 0], [0, 2], [2, 4], [4, 5], [0, 0]],
+          "word_ids": [null, null, null, null, 0, 0, 0, null],
+          "sequence_ids": [null, null, null, null, 0, 0, 0, null],
+          "decoded": "Hello",
+          "decoded_with_special_tokens": "[PAD] [PAD] [PAD] [CLS] Hello [SEP]"
+        },
+        {
+          "tokens": ["[PAD]", "[CLS]", "to", "##k", "##en", "##iz", "##ation", "[SEP]"],
+          "ids": [0, 2, 24832, 258, 5802, 40211, 15863, 3],
+          "type_ids": [0, 0, 0, 0, 0, 0, 0, 0],
+          "attention_mask": [0, 1, 1, 1, 1, 1, 1, 1],
+          "special_tokens_mask": [1, 1, 0, 0, 0, 0, 0, 1],
+          "offsets": [[0, 0], [0, 0], [0, 2], [2, 3], [3, 5], [5, 7], [7, 12], [0, 0]],
+          "word_ids": [null, null, 0, 0, 0, 0, 0, null],
+          "sequence_ids": [null, null, 0, 0, 0, 0, 0, null],
+          "decoded": "tokenization",
+          "decoded_with_special_tokens": "[PAD] [CLS] tokenization [SEP]"
+        },
+        {
+          "tokens": ["[PAD]", "[PAD]", "[PAD]", "[PAD]", "[PAD]", "[PAD]", "[CLS]", "[SEP]"],
+          "ids": [0, 0, 0, 0, 0, 0, 2, 3],
+          "type_ids": [0, 0, 0, 0, 0, 0, 0, 0],
+          "attention_mask": [0, 0, 0, 0, 0, 0, 1, 1],
+          "special_tokens_mask": [1, 1, 1, 1, 1, 1, 1, 1],
+          "offsets": [[0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0]],
+          "word_ids": [null, null, null, null, null, null, null, null],
+          "sequence_ids": [null, null, null, null, null, null, null, null],
+          "decoded": "",
+          "decoded_with_special_tokens": "[PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [CLS] [SEP]"
+        },
+        {
+          "tokens": ["[PAD]", "[PAD]", "[PAD]", "[PAD]", "[CLS]", "[UNK]", "[UNK]", "[SEP]"],
+          "ids": [0, 0, 0, 0, 2, 1, 1, 3],
+          "type_ids": [0, 0, 0, 0, 0, 0, 0, 0],
+          "attention_mask": [0, 0, 0, 0, 1, 1, 1, 1],
+          "special_tokens_mask": [1, 1, 1, 1, 1, 0, 0, 1],
+          "offsets": [[0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 1], [1, 2], [0, 0]],
+          "word_ids": [null, null, null, null, null, 0, 1, null],
+          "sequence_ids": [null, null, null, null, null, 0, 0, null],
+          "decoded": "",
+          "decoded_with_special_tokens": "[PAD] [PAD] [PAD] [PAD] [CLS] [UNK] [UNK] [SEP]"
+        },
+        {
+          "tokens": ["[PAD]", "[PAD]", "[PAD]", "[CLS]", "[UNK]", "h", "##i", "[SEP]"],
+          "ids": [0, 0, 0, 2, 1, 77, 204, 3],
+          "type_ids": [0, 0, 0, 0, 0, 0, 0, 0],
+          "attention_mask": [0, 0, 0, 1, 1, 1, 1, 1],
+          "special_tokens_mask": [1, 1, 1, 1, 0, 0, 0, 1],
+          "offsets": [[0, 0], [0, 0], [0, 0], [0, 0], [0, 1], [2, 3], [3, 4], [0, 0]],
+          "word_ids": [null, null, null, null, 0, 1, 1, null],
+          "sequence_ids": [null, null, null, null, 0, 0, 0, null],
+          "decoded": "hi",
+          "decoded_with_special_tokens": "[PAD] [PAD] [PAD] [CLS] [UNK] hi [SEP]"
+        },
+        {
+          "tokens": ["[PAD]", "[PAD]", "[PAD]", "[PAD]", "[PAD]", "[CLS]", "[UNK]", "[SEP]"],
+          "ids": [0, 0, 0, 0, 0, 2, 1, 3],
+          "type_ids": [0, 0, 0, 0, 0, 0, 0, 0],
+          "attention_mask": [0, 0, 0, 0, 0, 1, 1, 1],
+          "special_tokens_mask": [1, 1, 1, 1, 1, 1, 0, 1],
+          "offsets": [[0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 4], [0, 0]],
+          "word_ids": [null, null, null, null, null, null, 0, null],
+          "sequence_ids": [null, null, null, null, null, null, 0, null],
+          "decoded": "",
+          "decoded_with_special_tokens": "[PAD] [PAD] [PAD] [PAD] [PAD] [CLS] [UNK] [SEP]"
+        },
+        {
+          "tokens": ["[PAD]", "[CLS]", "h", "##ell", "##o", "w", "##orld", "[SEP]"],
+          "ids": [0, 2, 77, 33526, 219, 92, 51459, 3],
+          "type_ids": [0, 0, 0, 0, 0, 0, 0, 0],
+          "attention_mask": [0, 1, 1, 1, 1, 1, 1, 1],
+          "special_tokens_mask": [1, 1, 0, 0, 0, 0, 0, 1],
+          "offsets": [[0, 0], [0, 0], [0, 1], [1, 4], [4, 5], [6, 7], [7, 11], [0, 0]],
+          "word_ids": [null, null, 0, 0, 0, 1, 1, null],
+          "sequence_ids": [null, null, 0, 0, 0, 0, 0, null],
+          "decoded": "hello world",
+          "decoded_with_special_tokens": "[PAD] [CLS] hello world [SEP]"
+        },
+        {
+          "tokens": ["[PAD]", "[PAD]", "[PAD]", "[PAD]", "[PAD]", "[CLS]", "[MASK]", "[SEP]"],
+          "ids": [0, 0, 0, 0, 0, 2, 4, 3],
+          "type_ids": [0, 0, 0, 0, 0, 0, 0, 0],
+          "attention_mask": [0, 0, 0, 0, 0, 1, 1, 1],
+          "special_tokens_mask": [1, 1, 1, 1, 1, 1, 0, 1],
+          "offsets": [[0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 6], [0, 0]],
+          "word_ids": [null, null, null, null, null, null, 0, null],
+          "sequence_ids": [null, null, null, null, null, null, 0, null],
+          "decoded": "",
+          "decoded_with_special_tokens": "[PAD] [PAD] [PAD] [PAD] [PAD] [CLS] [MASK] [SEP]"
+        }
+      ]
+    },
+    {
+      "name": "pair-batch-left",
+      "pair_batch": [["Hello", "hello world"], ["tokenization", "hello world"], ["", "hello world"], ["你好", "hello world"], ["😊 hi", "hello world"], ["café", "hello world"], ["hello world", "hello world"], ["[MASK]", "hello world"]],
+      "padding": {
+        "direction": "left",
+        "pad_to_multiple_of": 8
+      },
+      "truncation": {
+        "max_length": 8,
+        "direction": "left",
+        "strategy": "longest_first"
+      },
+      "expected": [
+        {
+          "tokens": ["[CLS]", "##ll", "##o", "[SEP]", "##o", "w", "##orld", "[SEP]"],
+          "ids": [2, 41430, 219, 3, 219, 92, 51459, 3],
+          "type_ids": [0, 0, 0, 0, 1, 1, 1, 1],
+          "attention_mask": [1, 1, 1, 1, 1, 1, 1, 1],
+          "special_tokens_mask": [1, 0, 0, 1, 0, 0, 0, 1],
+          "offsets": [[0, 0], [2, 4], [4, 5], [0, 0], [4, 5], [6, 7], [7, 11], [0, 0]],
+          "word_ids": [null, 0, 0, null, 0, 1, 1, null],
+          "sequence_ids": [null, 0, 0, null, 1, 1, 1, null],
+          "decoded": "##lloo world",
+          "decoded_with_special_tokens": "[CLS]llo [SEP]o world [SEP]"
+        },
+        {
+          "tokens": ["[CLS]", "##iz", "##ation", "[SEP]", "##o", "w", "##orld", "[SEP]"],
+          "ids": [2, 40211, 15863, 3, 219, 92, 51459, 3],
+          "type_ids": [0, 0, 0, 0, 1, 1, 1, 1],
+          "attention_mask": [1, 1, 1, 1, 1, 1, 1, 1],
+          "special_tokens_mask": [1, 0, 0, 1, 0, 0, 0, 1],
+          "offsets": [[0, 0], [5, 7], [7, 12], [0, 0], [4, 5], [6, 7], [7, 11], [0, 0]],
+          "word_ids": [null, 0, 0, null, 0, 1, 1, null],
+          "sequence_ids": [null, 0, 0, null, 1, 1, 1, null],
+          "decoded": "##izationo world",
+          "decoded_with_special_tokens": "[CLS]ization [SEP]o world [SEP]"
+        },
+        {
+          "tokens": ["[CLS]", "[SEP]", "h", "##ell", "##o", "w", "##orld", "[SEP]"],
+          "ids": [2, 3, 77, 33526, 219, 92, 51459, 3],
+          "type_ids": [0, 0, 1, 1, 1, 1, 1, 1],
+          "attention_mask": [1, 1, 1, 1, 1, 1, 1, 1],
+          "special_tokens_mask": [1, 1, 0, 0, 0, 0, 0, 1],
+          "offsets": [[0, 0], [0, 0], [0, 1], [1, 4], [4, 5], [6, 7], [7, 11], [0, 0]],
+          "word_ids": [null, null, 0, 0, 0, 1, 1, null],
+          "sequence_ids": [null, null, 1, 1, 1, 1, 1, null],
+          "decoded": "hello world",
+          "decoded_with_special_tokens": "[CLS] [SEP] hello world [SEP]"
+        },
+        {
+          "tokens": ["[CLS]", "[UNK]", "[UNK]", "[SEP]", "##o", "w", "##orld", "[SEP]"],
+          "ids": [2, 1, 1, 3, 219, 92, 51459, 3],
+          "type_ids": [0, 0, 0, 0, 1, 1, 1, 1],
+          "attention_mask": [1, 1, 1, 1, 1, 1, 1, 1],
+          "special_tokens_mask": [1, 0, 0, 1, 0, 0, 0, 1],
+          "offsets": [[0, 0], [0, 1], [1, 2], [0, 0], [4, 5], [6, 7], [7, 11], [0, 0]],
+          "word_ids": [null, 0, 1, null, 0, 1, 1, null],
+          "sequence_ids": [null, 0, 0, null, 1, 1, 1, null],
+          "decoded": "##o world",
+          "decoded_with_special_tokens": "[CLS] [UNK] [UNK] [SEP]o world [SEP]"
+        },
+        {
+          "tokens": ["[CLS]", "h", "##i", "[SEP]", "##o", "w", "##orld", "[SEP]"],
+          "ids": [2, 77, 204, 3, 219, 92, 51459, 3],
+          "type_ids": [0, 0, 0, 0, 1, 1, 1, 1],
+          "attention_mask": [1, 1, 1, 1, 1, 1, 1, 1],
+          "special_tokens_mask": [1, 0, 0, 1, 0, 0, 0, 1],
+          "offsets": [[0, 0], [2, 3], [3, 4], [0, 0], [4, 5], [6, 7], [7, 11], [0, 0]],
+          "word_ids": [null, 1, 1, null, 0, 1, 1, null],
+          "sequence_ids": [null, 0, 0, null, 1, 1, 1, null],
+          "decoded": "hio world",
+          "decoded_with_special_tokens": "[CLS] hi [SEP]o world [SEP]"
+        },
+        {
+          "tokens": ["[CLS]", "[UNK]", "[SEP]", "##ell", "##o", "w", "##orld", "[SEP]"],
+          "ids": [2, 1, 3, 33526, 219, 92, 51459, 3],
+          "type_ids": [0, 0, 0, 1, 1, 1, 1, 1],
+          "attention_mask": [1, 1, 1, 1, 1, 1, 1, 1],
+          "special_tokens_mask": [1, 0, 1, 0, 0, 0, 0, 1],
+          "offsets": [[0, 0], [0, 4], [0, 0], [1, 4], [4, 5], [6, 7], [7, 11], [0, 0]],
+          "word_ids": [null, 0, null, 0, 0, 1, 1, null],
+          "sequence_ids": [null, 0, null, 1, 1, 1, 1, null],
+          "decoded": "##ello world",
+          "decoded_with_special_tokens": "[CLS] [UNK] [SEP]ello world [SEP]"
+        },
+        {
+          "tokens": ["[CLS]", "w", "##orld", "[SEP]", "##o", "w", "##orld", "[SEP]"],
+          "ids": [2, 92, 51459, 3, 219, 92, 51459, 3],
+          "type_ids": [0, 0, 0, 0, 1, 1, 1, 1],
+          "attention_mask": [1, 1, 1, 1, 1, 1, 1, 1],
+          "special_tokens_mask": [1, 0, 0, 1, 0, 0, 0, 1],
+          "offsets": [[0, 0], [6, 7], [7, 11], [0, 0], [4, 5], [6, 7], [7, 11], [0, 0]],
+          "word_ids": [null, 1, 1, null, 0, 1, 1, null],
+          "sequence_ids": [null, 0, 0, null, 1, 1, 1, null],
+          "decoded": "worldo world",
+          "decoded_with_special_tokens": "[CLS] world [SEP]o world [SEP]"
+        },
+        {
+          "tokens": ["[CLS]", "[MASK]", "[SEP]", "##ell", "##o", "w", "##orld", "[SEP]"],
+          "ids": [2, 4, 3, 33526, 219, 92, 51459, 3],
+          "type_ids": [0, 0, 0, 1, 1, 1, 1, 1],
+          "attention_mask": [1, 1, 1, 1, 1, 1, 1, 1],
+          "special_tokens_mask": [1, 0, 1, 0, 0, 0, 0, 1],
+          "offsets": [[0, 0], [0, 6], [0, 0], [1, 4], [4, 5], [6, 7], [7, 11], [0, 0]],
+          "word_ids": [null, 0, null, 0, 0, 1, 1, null],
+          "sequence_ids": [null, 0, null, 1, 1, 1, 1, null],
+          "decoded": "##ello world",
+          "decoded_with_special_tokens": "[CLS] [MASK] [SEP]ello world [SEP]"
+        }
+      ]
+    },
+    {
+      "name": "batch-right",
+      "batch": ["Hello", "tokenization", "", "你好", "😊 hi", "café", "hello world", "[MASK]"],
+      "padding": {
+        "direction": "right",
+        "pad_to_multiple_of": 8
+      },
+      "expected": [
+        {
+          "tokens": ["[CLS]", "He", "##ll", "##o", "[SEP]", "[PAD]", "[PAD]", "[PAD]"],
+          "ids": [2, 47733, 41430, 219, 3, 0, 0, 0],
+          "type_ids": [0, 0, 0, 0, 0, 0, 0, 0],
+          "attention_mask": [1, 1, 1, 1, 1, 0, 0, 0],
+          "special_tokens_mask": [1, 0, 0, 0, 1, 1, 1, 1],
+          "offsets": [[0, 0], [0, 2], [2, 4], [4, 5], [0, 0], [0, 0], [0, 0], [0, 0]],
+          "word_ids": [null, 0, 0, 0, null, null, null, null],
+          "sequence_ids": [null, 0, 0, 0, null, null, null, null],
+          "decoded": "Hello",
+          "decoded_with_special_tokens": "[CLS] Hello [SEP] [PAD] [PAD] [PAD]"
+        },
+        {
+          "tokens": ["[CLS]", "to", "##k", "##en", "##iz", "##ation", "[SEP]", "[PAD]"],
+          "ids": [2, 24832, 258, 5802, 40211, 15863, 3, 0],
+          "type_ids": [0, 0, 0, 0, 0, 0, 0, 0],
+          "attention_mask": [1, 1, 1, 1, 1, 1, 1, 0],
+          "special_tokens_mask": [1, 0, 0, 0, 0, 0, 1, 1],
+          "offsets": [[0, 0], [0, 2], [2, 3], [3, 5], [5, 7], [7, 12], [0, 0], [0, 0]],
+          "word_ids": [null, 0, 0, 0, 0, 0, null, null],
+          "sequence_ids": [null, 0, 0, 0, 0, 0, null, null],
+          "decoded": "tokenization",
+          "decoded_with_special_tokens": "[CLS] tokenization [SEP] [PAD]"
+        },
+        {
+          "tokens": ["[CLS]", "[SEP]", "[PAD]", "[PAD]", "[PAD]", "[PAD]", "[PAD]", "[PAD]"],
+          "ids": [2, 3, 0, 0, 0, 0, 0, 0],
+          "type_ids": [0, 0, 0, 0, 0, 0, 0, 0],
+          "attention_mask": [1, 1, 0, 0, 0, 0, 0, 0],
+          "special_tokens_mask": [1, 1, 1, 1, 1, 1, 1, 1],
+          "offsets": [[0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0]],
+          "word_ids": [null, null, null, null, null, null, null, null],
+          "sequence_ids": [null, null, null, null, null, null, null, null],
+          "decoded": "",
+          "decoded_with_special_tokens": "[CLS] [SEP] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD]"
+        },
+        {
+          "tokens": ["[CLS]", "[UNK]", "[UNK]", "[SEP]", "[PAD]", "[PAD]", "[PAD]", "[PAD]"],
+          "ids": [2, 1, 1, 3, 0, 0, 0, 0],
+          "type_ids": [0, 0, 0, 0, 0, 0, 0, 0],
+          "attention_mask": [1, 1, 1, 1, 0, 0, 0, 0],
+          "special_tokens_mask": [1, 0, 0, 1, 1, 1, 1, 1],
+          "offsets": [[0, 0], [0, 1], [1, 2], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0]],
+          "word_ids": [null, 0, 1, null, null, null, null, null],
+          "sequence_ids": [null, 0, 0, null, null, null, null, null],
+          "decoded": "",
+          "decoded_with_special_tokens": "[CLS] [UNK] [UNK] [SEP] [PAD] [PAD] [PAD] [PAD]"
+        },
+        {
+          "tokens": ["[CLS]", "[UNK]", "h", "##i", "[SEP]", "[PAD]", "[PAD]", "[PAD]"],
+          "ids": [2, 1, 77, 204, 3, 0, 0, 0],
+          "type_ids": [0, 0, 0, 0, 0, 0, 0, 0],
+          "attention_mask": [1, 1, 1, 1, 1, 0, 0, 0],
+          "special_tokens_mask": [1, 0, 0, 0, 1, 1, 1, 1],
+          "offsets": [[0, 0], [0, 1], [2, 3], [3, 4], [0, 0], [0, 0], [0, 0], [0, 0]],
+          "word_ids": [null, 0, 1, 1, null, null, null, null],
+          "sequence_ids": [null, 0, 0, 0, null, null, null, null],
+          "decoded": "hi",
+          "decoded_with_special_tokens": "[CLS] [UNK] hi [SEP] [PAD] [PAD] [PAD]"
+        },
+        {
+          "tokens": ["[CLS]", "[UNK]", "[SEP]", "[PAD]", "[PAD]", "[PAD]", "[PAD]", "[PAD]"],
+          "ids": [2, 1, 3, 0, 0, 0, 0, 0],
+          "type_ids": [0, 0, 0, 0, 0, 0, 0, 0],
+          "attention_mask": [1, 1, 1, 0, 0, 0, 0, 0],
+          "special_tokens_mask": [1, 0, 1, 1, 1, 1, 1, 1],
+          "offsets": [[0, 0], [0, 4], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0]],
+          "word_ids": [null, 0, null, null, null, null, null, null],
+          "sequence_ids": [null, 0, null, null, null, null, null, null],
+          "decoded": "",
+          "decoded_with_special_tokens": "[CLS] [UNK] [SEP] [PAD] [PAD] [PAD] [PAD] [PAD]"
+        },
+        {
+          "tokens": ["[CLS]", "h", "##ell", "##o", "w", "##orld", "[SEP]", "[PAD]"],
+          "ids": [2, 77, 33526, 219, 92, 51459, 3, 0],
+          "type_ids": [0, 0, 0, 0, 0, 0, 0, 0],
+          "attention_mask": [1, 1, 1, 1, 1, 1, 1, 0],
+          "special_tokens_mask": [1, 0, 0, 0, 0, 0, 1, 1],
+          "offsets": [[0, 0], [0, 1], [1, 4], [4, 5], [6, 7], [7, 11], [0, 0], [0, 0]],
+          "word_ids": [null, 0, 0, 0, 1, 1, null, null],
+          "sequence_ids": [null, 0, 0, 0, 0, 0, null, null],
+          "decoded": "hello world",
+          "decoded_with_special_tokens": "[CLS] hello world [SEP] [PAD]"
+        },
+        {
+          "tokens": ["[CLS]", "[MASK]", "[SEP]", "[PAD]", "[PAD]", "[PAD]", "[PAD]", "[PAD]"],
+          "ids": [2, 4, 3, 0, 0, 0, 0, 0],
+          "type_ids": [0, 0, 0, 0, 0, 0, 0, 0],
+          "attention_mask": [1, 1, 1, 0, 0, 0, 0, 0],
+          "special_tokens_mask": [1, 0, 1, 1, 1, 1, 1, 1],
+          "offsets": [[0, 0], [0, 6], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0]],
+          "word_ids": [null, 0, null, null, null, null, null, null],
+          "sequence_ids": [null, 0, null, null, null, null, null, null],
+          "decoded": "",
+          "decoded_with_special_tokens": "[CLS] [MASK] [SEP] [PAD] [PAD] [PAD] [PAD] [PAD]"
+        }
+      ]
+    },
+    {
+      "name": "pair-batch-right",
+      "pair_batch": [["Hello", "hello world"], ["tokenization", "hello world"], ["", "hello world"], ["你好", "hello world"], ["😊 hi", "hello world"], ["café", "hello world"], ["hello world", "hello world"], ["[MASK]", "hello world"]],
+      "padding": {
+        "direction": "right",
+        "pad_to_multiple_of": 8
+      },
+      "truncation": {
+        "max_length": 8,
+        "direction": "right",
+        "strategy": "longest_first"
+      },
+      "expected": [
+        {
+          "tokens": ["[CLS]", "He", "##ll", "[SEP]", "h", "##ell", "##o", "[SEP]"],
+          "ids": [2, 47733, 41430, 3, 77, 33526, 219, 3],
+          "type_ids": [0, 0, 0, 0, 1, 1, 1, 1],
+          "attention_mask": [1, 1, 1, 1, 1, 1, 1, 1],
+          "special_tokens_mask": [1, 0, 0, 1, 0, 0, 0, 1],
+          "offsets": [[0, 0], [0, 2], [2, 4], [0, 0], [0, 1], [1, 4], [4, 5], [0, 0]],
+          "word_ids": [null, 0, 0, null, 0, 0, 0, null],
+          "sequence_ids": [null, 0, 0, null, 1, 1, 1, null],
+          "decoded": "Hell hello",
+          "decoded_with_special_tokens": "[CLS] Hell [SEP] hello [SEP]"
+        },
+        {
+          "tokens": ["[CLS]", "to", "##k", "[SEP]", "h", "##ell", "##o", "[SEP]"],
+          "ids": [2, 24832, 258, 3, 77, 33526, 219, 3],
+          "type_ids": [0, 0, 0, 0, 1, 1, 1, 1],
+          "attention_mask": [1, 1, 1, 1, 1, 1, 1, 1],
+          "special_tokens_mask": [1, 0, 0, 1, 0, 0, 0, 1],
+          "offsets": [[0, 0], [0, 2], [2, 3], [0, 0], [0, 1], [1, 4], [4, 5], [0, 0]],
+          "word_ids": [null, 0, 0, null, 0, 0, 0, null],
+          "sequence_ids": [null, 0, 0, null, 1, 1, 1, null],
+          "decoded": "tok hello",
+          "decoded_with_special_tokens": "[CLS] tok [SEP] hello [SEP]"
+        },
+        {
+          "tokens": ["[CLS]", "[SEP]", "h", "##ell", "##o", "w", "##orld", "[SEP]"],
+          "ids": [2, 3, 77, 33526, 219, 92, 51459, 3],
+          "type_ids": [0, 0, 1, 1, 1, 1, 1, 1],
+          "attention_mask": [1, 1, 1, 1, 1, 1, 1, 1],
+          "special_tokens_mask": [1, 1, 0, 0, 0, 0, 0, 1],
+          "offsets": [[0, 0], [0, 0], [0, 1], [1, 4], [4, 5], [6, 7], [7, 11], [0, 0]],
+          "word_ids": [null, null, 0, 0, 0, 1, 1, null],
+          "sequence_ids": [null, null, 1, 1, 1, 1, 1, null],
+          "decoded": "hello world",
+          "decoded_with_special_tokens": "[CLS] [SEP] hello world [SEP]"
+        },
+        {
+          "tokens": ["[CLS]", "[UNK]", "[UNK]", "[SEP]", "h", "##ell", "##o", "[SEP]"],
+          "ids": [2, 1, 1, 3, 77, 33526, 219, 3],
+          "type_ids": [0, 0, 0, 0, 1, 1, 1, 1],
+          "attention_mask": [1, 1, 1, 1, 1, 1, 1, 1],
+          "special_tokens_mask": [1, 0, 0, 1, 0, 0, 0, 1],
+          "offsets": [[0, 0], [0, 1], [1, 2], [0, 0], [0, 1], [1, 4], [4, 5], [0, 0]],
+          "word_ids": [null, 0, 1, null, 0, 0, 0, null],
+          "sequence_ids": [null, 0, 0, null, 1, 1, 1, null],
+          "decoded": "hello",
+          "decoded_with_special_tokens": "[CLS] [UNK] [UNK] [SEP] hello [SEP]"
+        },
+        {
+          "tokens": ["[CLS]", "[UNK]", "h", "[SEP]", "h", "##ell", "##o", "[SEP]"],
+          "ids": [2, 1, 77, 3, 77, 33526, 219, 3],
+          "type_ids": [0, 0, 0, 0, 1, 1, 1, 1],
+          "attention_mask": [1, 1, 1, 1, 1, 1, 1, 1],
+          "special_tokens_mask": [1, 0, 0, 1, 0, 0, 0, 1],
+          "offsets": [[0, 0], [0, 1], [2, 3], [0, 0], [0, 1], [1, 4], [4, 5], [0, 0]],
+          "word_ids": [null, 0, 1, null, 0, 0, 0, null],
+          "sequence_ids": [null, 0, 0, null, 1, 1, 1, null],
+          "decoded": "h hello",
+          "decoded_with_special_tokens": "[CLS] [UNK] h [SEP] hello [SEP]"
+        },
+        {
+          "tokens": ["[CLS]", "[UNK]", "[SEP]", "h", "##ell", "##o", "w", "[SEP]"],
+          "ids": [2, 1, 3, 77, 33526, 219, 92, 3],
+          "type_ids": [0, 0, 0, 1, 1, 1, 1, 1],
+          "attention_mask": [1, 1, 1, 1, 1, 1, 1, 1],
+          "special_tokens_mask": [1, 0, 1, 0, 0, 0, 0, 1],
+          "offsets": [[0, 0], [0, 4], [0, 0], [0, 1], [1, 4], [4, 5], [6, 7], [0, 0]],
+          "word_ids": [null, 0, null, 0, 0, 0, 1, null],
+          "sequence_ids": [null, 0, null, 1, 1, 1, 1, null],
+          "decoded": "hello w",
+          "decoded_with_special_tokens": "[CLS] [UNK] [SEP] hello w [SEP]"
+        },
+        {
+          "tokens": ["[CLS]", "h", "##ell", "[SEP]", "h", "##ell", "##o", "[SEP]"],
+          "ids": [2, 77, 33526, 3, 77, 33526, 219, 3],
+          "type_ids": [0, 0, 0, 0, 1, 1, 1, 1],
+          "attention_mask": [1, 1, 1, 1, 1, 1, 1, 1],
+          "special_tokens_mask": [1, 0, 0, 1, 0, 0, 0, 1],
+          "offsets": [[0, 0], [0, 1], [1, 4], [0, 0], [0, 1], [1, 4], [4, 5], [0, 0]],
+          "word_ids": [null, 0, 0, null, 0, 0, 0, null],
+          "sequence_ids": [null, 0, 0, null, 1, 1, 1, null],
+          "decoded": "hell hello",
+          "decoded_with_special_tokens": "[CLS] hell [SEP] hello [SEP]"
+        },
+        {
+          "tokens": ["[CLS]", "[MASK]", "[SEP]", "h", "##ell", "##o", "w", "[SEP]"],
+          "ids": [2, 4, 3, 77, 33526, 219, 92, 3],
+          "type_ids": [0, 0, 0, 1, 1, 1, 1, 1],
+          "attention_mask": [1, 1, 1, 1, 1, 1, 1, 1],
+          "special_tokens_mask": [1, 0, 1, 0, 0, 0, 0, 1],
+          "offsets": [[0, 0], [0, 6], [0, 0], [0, 1], [1, 4], [4, 5], [6, 7], [0, 0]],
+          "word_ids": [null, 0, null, 0, 0, 0, 1, null],
+          "sequence_ids": [null, 0, null, 1, 1, 1, 1, null],
+          "decoded": "hello w",
+          "decoded_with_special_tokens": "[CLS] [MASK] [SEP] hello w [SEP]"
+        }
+      ]
+    },
+    {
+      "name": "language-0-pair-False",
+      "input": "안녕하세요. 한국어 토크나이저입니다.",
+      "pair": null,
+      "expected": {
+        "tokens": ["[CLS]", "[UNK]", ".", "[UNK]", "[UNK]", ".", "[SEP]"],
+        "ids": [2, 1, 20, 1, 1, 20, 3],
+        "type_ids": [0, 0, 0, 0, 0, 0, 0],
+        "attention_mask": [1, 1, 1, 1, 1, 1, 1],
+        "special_tokens_mask": [1, 0, 0, 0, 0, 0, 1],
+        "offsets": [[0, 0], [0, 5], [5, 6], [7, 10], [11, 19], [19, 20], [0, 0]],
+        "word_ids": [null, 0, 1, 2, 3, 4, null],
+        "sequence_ids": [null, 0, 0, 0, 0, 0, null],
+        "decoded": "..",
+        "decoded_with_special_tokens": "[CLS] [UNK]. [UNK] [UNK]. [SEP]"
+      }
+    },
+    {
+      "name": "language-0-pair-True",
+      "input": "안녕하세요. 한국어 토크나이저입니다.",
+      "pair": "서울에서 NLP 모델을 테스트합니다!",
+      "expected": {
+        "tokens": ["[CLS]", "[UNK]", ".", "[UNK]", "[UNK]", ".", "[SEP]", "[UNK]", "N", "##L", "##P", "[UNK]", "[UNK]", "!", "[SEP]"],
+        "ids": [2, 1, 20, 1, 1, 20, 3, 1, 51, 246, 273, 1, 1, 8, 3],
+        "type_ids": [0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1],
+        "attention_mask": [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        "special_tokens_mask": [1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1],
+        "offsets": [[0, 0], [0, 5], [5, 6], [7, 10], [11, 19], [19, 20], [0, 0], [0, 4], [5, 6], [6, 7], [7, 8], [9, 12], [13, 19], [19, 20], [0, 0]],
+        "word_ids": [null, 0, 1, 2, 3, 4, null, 0, 1, 1, 1, 2, 3, 4, null],
+        "sequence_ids": [null, 0, 0, 0, 0, 0, null, 1, 1, 1, 1, 1, 1, 1, null],
+        "decoded": ".. NLP!",
+        "decoded_with_special_tokens": "[CLS] [UNK]. [UNK] [UNK]. [SEP] [UNK] NLP [UNK] [UNK]! [SEP]"
+      }
+    },
+    {
+      "name": "language-1-pair-False",
+      "input": "서울에서 NLP 모델을 테스트합니다!",
+      "pair": null,
+      "expected": {
+        "tokens": ["[CLS]", "[UNK]", "N", "##L", "##P", "[UNK]", "[UNK]", "!", "[SEP]"],
+        "ids": [2, 1, 51, 246, 273, 1, 1, 8, 3],
+        "type_ids": [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        "attention_mask": [1, 1, 1, 1, 1, 1, 1, 1, 1],
+        "special_tokens_mask": [1, 0, 0, 0, 0, 0, 0, 0, 1],
+        "offsets": [[0, 0], [0, 4], [5, 6], [6, 7], [7, 8], [9, 12], [13, 19], [19, 20], [0, 0]],
+        "word_ids": [null, 0, 1, 1, 1, 2, 3, 4, null],
+        "sequence_ids": [null, 0, 0, 0, 0, 0, 0, 0, null],
+        "decoded": "NLP!",
+        "decoded_with_special_tokens": "[CLS] [UNK] NLP [UNK] [UNK]! [SEP]"
+      }
+    },
+    {
+      "name": "language-1-pair-True",
+      "input": "서울에서 NLP 모델을 테스트합니다!",
+      "pair": "한글과 漢字, English 123",
+      "expected": {
+        "tokens": ["[CLS]", "[UNK]", "N", "##L", "##P", "[UNK]", "[UNK]", "!", "[SEP]", "[UNK]", "[UNK]", "[UNK]", ",", "En", "##g", "##l", "##ish", "123", "[SEP]"],
+        "ids": [2, 1, 51, 246, 273, 1, 1, 8, 3, 1, 1, 1, 18, 43304, 211, 220, 46406, 28456, 3],
+        "type_ids": [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        "attention_mask": [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        "special_tokens_mask": [1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+        "offsets": [[0, 0], [0, 4], [5, 6], [6, 7], [7, 8], [9, 12], [13, 19], [19, 20], [0, 0], [0, 3], [4, 5], [5, 6], [6, 7], [8, 10], [10, 11], [11, 12], [12, 15], [16, 19], [0, 0]],
+        "word_ids": [null, 0, 1, 1, 1, 2, 3, 4, null, 0, 1, 2, 3, 4, 4, 4, 4, 5, null],
+        "sequence_ids": [null, 0, 0, 0, 0, 0, 0, 0, null, 1, 1, 1, 1, 1, 1, 1, 1, 1, null],
+        "decoded": "NLP!, English 123",
+        "decoded_with_special_tokens": "[CLS] [UNK] NLP [UNK] [UNK]! [SEP] [UNK] [UNK] [UNK], English 123 [SEP]"
+      }
+    },
+    {
+      "name": "language-2-pair-False",
+      "input": "한글과 漢字, English 123",
+      "pair": null,
+      "expected": {
+        "tokens": ["[CLS]", "[UNK]", "[UNK]", "[UNK]", ",", "En", "##g", "##l", "##ish", "123", "[SEP]"],
+        "ids": [2, 1, 1, 1, 18, 43304, 211, 220, 46406, 28456, 3],
+        "type_ids": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        "attention_mask": [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        "special_tokens_mask": [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+        "offsets": [[0, 0], [0, 3], [4, 5], [5, 6], [6, 7], [8, 10], [10, 11], [11, 12], [12, 15], [16, 19], [0, 0]],
+        "word_ids": [null, 0, 1, 2, 3, 4, 4, 4, 4, 5, null],
+        "sequence_ids": [null, 0, 0, 0, 0, 0, 0, 0, 0, 0, null],
+        "decoded": ", English 123",
+        "decoded_with_special_tokens": "[CLS] [UNK] [UNK] [UNK], English 123 [SEP]"
+      }
+    },
+    {
+      "name": "language-2-pair-True",
+      "input": "한글과 漢字, English 123",
+      "pair": "가각간 가각간",
+      "expected": {
+        "tokens": ["[CLS]", "[UNK]", "[UNK]", "[UNK]", ",", "En", "##g", "##l", "##ish", "123", "[SEP]", "[UNK]", "[UNK]", "[SEP]"],
+        "ids": [2, 1, 1, 1, 18, 43304, 211, 220, 46406, 28456, 3, 1, 1, 3],
+        "type_ids": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1],
+        "attention_mask": [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        "special_tokens_mask": [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1],
+        "offsets": [[0, 0], [0, 3], [4, 5], [5, 6], [6, 7], [8, 10], [10, 11], [11, 12], [12, 15], [16, 19], [0, 0], [0, 3], [4, 12], [0, 0]],
+        "word_ids": [null, 0, 1, 2, 3, 4, 4, 4, 4, 5, null, 0, 1, null],
+        "sequence_ids": [null, 0, 0, 0, 0, 0, 0, 0, 0, 0, null, 1, 1, null],
+        "decoded": ", English 123",
+        "decoded_with_special_tokens": "[CLS] [UNK] [UNK] [UNK], English 123 [SEP] [UNK] [UNK] [SEP]"
+      }
+    },
+    {
+      "name": "language-3-pair-False",
+      "input": "가각간 가각간",
+      "pair": null,
+      "expected": {
+        "tokens": ["[CLS]", "[UNK]", "[UNK]", "[SEP]"],
+        "ids": [2, 1, 1, 3],
+        "type_ids": [0, 0, 0, 0],
+        "attention_mask": [1, 1, 1, 1],
+        "special_tokens_mask": [1, 0, 0, 1],
+        "offsets": [[0, 0], [0, 3], [4, 12], [0, 0]],
+        "word_ids": [null, 0, 1, null],
+        "sequence_ids": [null, 0, 0, null],
+        "decoded": "",
+        "decoded_with_special_tokens": "[CLS] [UNK] [UNK] [SEP]"
+      }
+    },
+    {
+      "name": "language-3-pair-True",
+      "input": "가각간 가각간",
+      "pair": "中文分词测试。你好，世界！",
+      "expected": {
+        "tokens": ["[CLS]", "[UNK]", "[UNK]", "[SEP]", "[UNK]", "[UNK]", "[UNK]", "[UNK]", "[UNK]", "[UNK]", "[UNK]", "[UNK]", "[UNK]", "[UNK]", "[UNK]", "[UNK]", "[UNK]", "[SEP]"],
+        "ids": [2, 1, 1, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3],
+        "type_ids": [0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        "attention_mask": [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        "special_tokens_mask": [1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+        "offsets": [[0, 0], [0, 3], [4, 12], [0, 0], [0, 1], [1, 2], [2, 3], [3, 4], [4, 5], [5, 6], [6, 7], [7, 8], [8, 9], [9, 10], [10, 11], [11, 12], [12, 13], [0, 0]],
+        "word_ids": [null, 0, 1, null, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, null],
+        "sequence_ids": [null, 0, 0, null, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, null],
+        "decoded": "",
+        "decoded_with_special_tokens": "[CLS] [UNK] [UNK] [SEP] [UNK] [UNK] [UNK] [UNK] [UNK] [UNK] [UNK] [UNK] [UNK] [UNK] [UNK] [UNK] [UNK] [SEP]"
+      }
+    },
+    {
+      "name": "language-4-pair-False",
+      "input": "中文分词测试。你好，世界！",
+      "pair": null,
+      "expected": {
+        "tokens": ["[CLS]", "[UNK]", "[UNK]", "[UNK]", "[UNK]", "[UNK]", "[UNK]", "[UNK]", "[UNK]", "[UNK]", "[UNK]", "[UNK]", "[UNK]", "[UNK]", "[SEP]"],
+        "ids": [2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3],
+        "type_ids": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        "attention_mask": [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        "special_tokens_mask": [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+        "offsets": [[0, 0], [0, 1], [1, 2], [2, 3], [3, 4], [4, 5], [5, 6], [6, 7], [7, 8], [8, 9], [9, 10], [10, 11], [11, 12], [12, 13], [0, 0]],
+        "word_ids": [null, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, null],
+        "sequence_ids": [null, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, null],
+        "decoded": "",
+        "decoded_with_special_tokens": "[CLS] [UNK] [UNK] [UNK] [UNK] [UNK] [UNK] [UNK] [UNK] [UNK] [UNK] [UNK] [UNK] [UNK] [SEP]"
+      }
+    },
+    {
+      "name": "language-4-pair-True",
+      "input": "中文分词测试。你好，世界！",
+      "pair": "简体中文與繁體中文",
+      "expected": {
+        "tokens": ["[CLS]", "[UNK]", "[UNK]", "[UNK]", "[UNK]", "[UNK]", "[UNK]", "[UNK]", "[UNK]", "[UNK]", "[UNK]", "[UNK]", "[UNK]", "[UNK]", "[SEP]", "[UNK]", "[UNK]", "[UNK]", "[UNK]", "[UNK]", "[UNK]", "[UNK]", "[UNK]", "[UNK]", "[SEP]"],
+        "ids": [2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3],
+        "type_ids": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        "attention_mask": [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        "special_tokens_mask": [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+        "offsets": [[0, 0], [0, 1], [1, 2], [2, 3], [3, 4], [4, 5], [5, 6], [6, 7], [7, 8], [8, 9], [9, 10], [10, 11], [11, 12], [12, 13], [0, 0], [0, 1], [1, 2], [2, 3], [3, 4], [4, 5], [5, 6], [6, 7], [7, 8], [8, 9], [0, 0]],
+        "word_ids": [null, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, null, 0, 1, 2, 3, 4, 5, 6, 7, 8, null],
+        "sequence_ids": [null, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, null, 1, 1, 1, 1, 1, 1, 1, 1, 1, null],
+        "decoded": "",
+        "decoded_with_special_tokens": "[CLS] [UNK] [UNK] [UNK] [UNK] [UNK] [UNK] [UNK] [UNK] [UNK] [UNK] [UNK] [UNK] [UNK] [SEP] [UNK] [UNK] [UNK] [UNK] [UNK] [UNK] [UNK] [UNK] [UNK] [SEP]"
+      }
+    },
+    {
+      "name": "language-5-pair-False",
+      "input": "简体中文與繁體中文",
+      "pair": null,
+      "expected": {
+        "tokens": ["[CLS]", "[UNK]", "[UNK]", "[UNK]", "[UNK]", "[UNK]", "[UNK]", "[UNK]", "[UNK]", "[UNK]", "[SEP]"],
+        "ids": [2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3],
+        "type_ids": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        "attention_mask": [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        "special_tokens_mask": [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+        "offsets": [[0, 0], [0, 1], [1, 2], [2, 3], [3, 4], [4, 5], [5, 6], [6, 7], [7, 8], [8, 9], [0, 0]],
+        "word_ids": [null, 0, 1, 2, 3, 4, 5, 6, 7, 8, null],
+        "sequence_ids": [null, 0, 0, 0, 0, 0, 0, 0, 0, 0, null],
+        "decoded": "",
+        "decoded_with_special_tokens": "[CLS] [UNK] [UNK] [UNK] [UNK] [UNK] [UNK] [UNK] [UNK] [UNK] [SEP]"
+      }
+    },
+    {
+      "name": "language-5-pair-True",
+      "input": "简体中文與繁體中文",
+      "pair": "𠀀中文😀한국어",
+      "expected": {
+        "tokens": ["[CLS]", "[UNK]", "[UNK]", "[UNK]", "[UNK]", "[UNK]", "[UNK]", "[UNK]", "[UNK]", "[UNK]", "[SEP]", "[UNK]", "[UNK]", "[UNK]", "[UNK]", "[SEP]"],
+        "ids": [2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 1, 1, 1, 1, 3],
+        "type_ids": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1],
+        "attention_mask": [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        "special_tokens_mask": [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1],
+        "offsets": [[0, 0], [0, 1], [1, 2], [2, 3], [3, 4], [4, 5], [5, 6], [6, 7], [7, 8], [8, 9], [0, 0], [0, 1], [1, 2], [2, 3], [3, 7], [0, 0]],
+        "word_ids": [null, 0, 1, 2, 3, 4, 5, 6, 7, 8, null, 0, 1, 2, 3, null],
+        "sequence_ids": [null, 0, 0, 0, 0, 0, 0, 0, 0, 0, null, 1, 1, 1, 1, null],
+        "decoded": "",
+        "decoded_with_special_tokens": "[CLS] [UNK] [UNK] [UNK] [UNK] [UNK] [UNK] [UNK] [UNK] [UNK] [SEP] [UNK] [UNK] [UNK] [UNK] [SEP]"
+      }
+    },
+    {
+      "name": "language-6-pair-False",
+      "input": "𠀀中文😀한국어",
+      "pair": null,
+      "expected": {
+        "tokens": ["[CLS]", "[UNK]", "[UNK]", "[UNK]", "[UNK]", "[SEP]"],
+        "ids": [2, 1, 1, 1, 1, 3],
+        "type_ids": [0, 0, 0, 0, 0, 0],
+        "attention_mask": [1, 1, 1, 1, 1, 1],
+        "special_tokens_mask": [1, 0, 0, 0, 0, 1],
+        "offsets": [[0, 0], [0, 1], [1, 2], [2, 3], [3, 7], [0, 0]],
+        "word_ids": [null, 0, 1, 2, 3, null],
+        "sequence_ids": [null, 0, 0, 0, 0, null],
+        "decoded": "",
+        "decoded_with_special_tokens": "[CLS] [UNK] [UNK] [UNK] [UNK] [SEP]"
+      }
+    },
+    {
+      "name": "language-6-pair-True",
+      "input": "𠀀中文😀한국어",
+      "pair": "İ I ı i café é",
+      "expected": {
+        "tokens": ["[CLS]", "[UNK]", "[UNK]", "[UNK]", "[UNK]", "[SEP]", "[UNK]", "I", "[UNK]", "i", "[UNK]", "[UNK]", "[SEP]"],
+        "ids": [2, 1, 1, 1, 1, 3, 1, 46, 1, 78, 1, 1, 3],
+        "type_ids": [0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1],
+        "attention_mask": [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        "special_tokens_mask": [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1],
+        "offsets": [[0, 0], [0, 1], [1, 2], [2, 3], [3, 7], [0, 0], [0, 1], [2, 3], [4, 5], [6, 7], [8, 12], [13, 15], [0, 0]],
+        "word_ids": [null, 0, 1, 2, 3, null, 0, 1, 2, 3, 4, 5, null],
+        "sequence_ids": [null, 0, 0, 0, 0, null, 1, 1, 1, 1, 1, 1, null],
+        "decoded": "I i",
+        "decoded_with_special_tokens": "[CLS] [UNK] [UNK] [UNK] [UNK] [SEP] [UNK] I [UNK] i [UNK] [UNK] [SEP]"
+      }
+    },
+    {
+      "name": "language-7-pair-False",
+      "input": "İ I ı i café é",
+      "pair": null,
+      "expected": {
+        "tokens": ["[CLS]", "[UNK]", "I", "[UNK]", "i", "[UNK]", "[UNK]", "[SEP]"],
+        "ids": [2, 1, 46, 1, 78, 1, 1, 3],
+        "type_ids": [0, 0, 0, 0, 0, 0, 0, 0],
+        "attention_mask": [1, 1, 1, 1, 1, 1, 1, 1],
+        "special_tokens_mask": [1, 0, 0, 0, 0, 0, 0, 1],
+        "offsets": [[0, 0], [0, 1], [2, 3], [4, 5], [6, 7], [8, 12], [13, 15], [0, 0]],
+        "word_ids": [null, 0, 1, 2, 3, 4, 5, null],
+        "sequence_ids": [null, 0, 0, 0, 0, 0, 0, null],
+        "decoded": "I i",
+        "decoded_with_special_tokens": "[CLS] [UNK] I [UNK] i [UNK] [UNK] [SEP]"
+      }
+    },
+    {
+      "name": "language-7-pair-True",
+      "input": "İ I ı i café é",
+      "pair": "العَرَبِيَّة لغة جميلة، مرحباً بالعالم!",
+      "expected": {
+        "tokens": ["[CLS]", "[UNK]", "I", "[UNK]", "i", "[UNK]", "[UNK]", "[SEP]", "[UNK]", "لغة", "جميلة", "،", "[UNK]", "بالعالم", "!", "[SEP]"],
+        "ids": [2, 1, 46, 1, 78, 1, 1, 3, 1, 5944, 8526, 103, 1, 19495, 8, 3],
+        "type_ids": [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1],
+        "attention_mask": [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        "special_tokens_mask": [1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1],
+        "offsets": [[0, 0], [0, 1], [2, 3], [4, 5], [6, 7], [8, 12], [13, 15], [0, 0], [0, 12], [13, 16], [17, 22], [22, 23], [24, 30], [31, 38], [38, 39], [0, 0]],
+        "word_ids": [null, 0, 1, 2, 3, 4, 5, null, 0, 1, 2, 3, 4, 5, 6, null],
+        "sequence_ids": [null, 0, 0, 0, 0, 0, 0, null, 1, 1, 1, 1, 1, 1, 1, null],
+        "decoded": "I i لغة جميلة ، بالعالم!",
+        "decoded_with_special_tokens": "[CLS] [UNK] I [UNK] i [UNK] [UNK] [SEP] [UNK] لغة جميلة ، [UNK] بالعالم! [SEP]"
+      }
+    },
+    {
+      "name": "language-8-pair-False",
+      "input": "العَرَبِيَّة لغة جميلة، مرحباً بالعالم!",
+      "pair": null,
+      "expected": {
+        "tokens": ["[CLS]", "[UNK]", "لغة", "جميلة", "،", "[UNK]", "بالعالم", "!", "[SEP]"],
+        "ids": [2, 1, 5944, 8526, 103, 1, 19495, 8, 3],
+        "type_ids": [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        "attention_mask": [1, 1, 1, 1, 1, 1, 1, 1, 1],
+        "special_tokens_mask": [1, 0, 0, 0, 0, 0, 0, 0, 1],
+        "offsets": [[0, 0], [0, 12], [13, 16], [17, 22], [22, 23], [24, 30], [31, 38], [38, 39], [0, 0]],
+        "word_ids": [null, 0, 1, 2, 3, 4, 5, 6, null],
+        "sequence_ids": [null, 0, 0, 0, 0, 0, 0, 0, null],
+        "decoded": "لغة جميلة ، بالعالم!",
+        "decoded_with_special_tokens": "[CLS] [UNK] لغة جميلة ، [UNK] بالعالم! [SEP]"
+      }
+    },
+    {
+      "name": "language-8-pair-True",
+      "input": "العَرَبِيَّة لغة جميلة، مرحباً بالعالم!",
+      "pair": "İstanbul IĞDIR ıslak şeker",
+      "expected": {
+        "tokens": ["[CLS]", "[UNK]", "لغة", "جميلة", "،", "[UNK]", "بالعالم", "!", "[SEP]", "[UNK]", "[UNK]", "[UNK]", "[UNK]", "[SEP]"],
+        "ids": [2, 1, 5944, 8526, 103, 1, 19495, 8, 3, 1, 1, 1, 1, 3],
+        "type_ids": [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1],
+        "attention_mask": [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        "special_tokens_mask": [1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1],
+        "offsets": [[0, 0], [0, 12], [13, 16], [17, 22], [22, 23], [24, 30], [31, 38], [38, 39], [0, 0], [0, 8], [9, 14], [15, 20], [21, 26], [0, 0]],
+        "word_ids": [null, 0, 1, 2, 3, 4, 5, 6, null, 0, 1, 2, 3, null],
+        "sequence_ids": [null, 0, 0, 0, 0, 0, 0, 0, null, 1, 1, 1, 1, null],
+        "decoded": "لغة جميلة ، بالعالم!",
+        "decoded_with_special_tokens": "[CLS] [UNK] لغة جميلة ، [UNK] بالعالم! [SEP] [UNK] [UNK] [UNK] [UNK] [SEP]"
+      }
+    },
+    {
+      "name": "language-9-pair-False",
+      "input": "İstanbul IĞDIR ıslak şeker",
+      "pair": null,
+      "expected": {
+        "tokens": ["[CLS]", "[UNK]", "[UNK]", "[UNK]", "[UNK]", "[SEP]"],
+        "ids": [2, 1, 1, 1, 1, 3],
+        "type_ids": [0, 0, 0, 0, 0, 0],
+        "attention_mask": [1, 1, 1, 1, 1, 1],
+        "special_tokens_mask": [1, 0, 0, 0, 0, 1],
+        "offsets": [[0, 0], [0, 8], [9, 14], [15, 20], [21, 26], [0, 0]],
+        "word_ids": [null, 0, 1, 2, 3, null],
+        "sequence_ids": [null, 0, 0, 0, 0, null],
+        "decoded": "",
+        "decoded_with_special_tokens": "[CLS] [UNK] [UNK] [UNK] [UNK] [SEP]"
+      }
+    },
+    {
+      "name": "language-9-pair-True",
+      "input": "İstanbul IĞDIR ıslak şeker",
+      "pair": "नमस्ते दुनिया हिंदी தமிழ் తెలుగు",
+      "expected": {
+        "tokens": ["[CLS]", "[UNK]", "[UNK]", "[UNK]", "[UNK]", "[SEP]", "[UNK]", "[UNK]", "[UNK]", "[UNK]", "[UNK]", "[SEP]"],
+        "ids": [2, 1, 1, 1, 1, 3, 1, 1, 1, 1, 1, 3],
+        "type_ids": [0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1],
+        "attention_mask": [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        "special_tokens_mask": [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1],
+        "offsets": [[0, 0], [0, 8], [9, 14], [15, 20], [21, 26], [0, 0], [0, 6], [7, 13], [14, 19], [20, 25], [26, 32], [0, 0]],
+        "word_ids": [null, 0, 1, 2, 3, null, 0, 1, 2, 3, 4, null],
+        "sequence_ids": [null, 0, 0, 0, 0, null, 1, 1, 1, 1, 1, null],
+        "decoded": "",
+        "decoded_with_special_tokens": "[CLS] [UNK] [UNK] [UNK] [UNK] [SEP] [UNK] [UNK] [UNK] [UNK] [UNK] [SEP]"
+      }
+    },
+    {
+      "name": "language-10-pair-False",
+      "input": "नमस्ते दुनिया हिंदी தமிழ் తెలుగు",
+      "pair": null,
+      "expected": {
+        "tokens": ["[CLS]", "[UNK]", "[UNK]", "[UNK]", "[UNK]", "[UNK]", "[SEP]"],
+        "ids": [2, 1, 1, 1, 1, 1, 3],
+        "type_ids": [0, 0, 0, 0, 0, 0, 0],
+        "attention_mask": [1, 1, 1, 1, 1, 1, 1],
+        "special_tokens_mask": [1, 0, 0, 0, 0, 0, 1],
+        "offsets": [[0, 0], [0, 6], [7, 13], [14, 19], [20, 25], [26, 32], [0, 0]],
+        "word_ids": [null, 0, 1, 2, 3, 4, null],
+        "sequence_ids": [null, 0, 0, 0, 0, 0, null],
+        "decoded": "",
+        "decoded_with_special_tokens": "[CLS] [UNK] [UNK] [UNK] [UNK] [UNK] [SEP]"
+      }
+    },
+    {
+      "name": "language-10-pair-True",
+      "input": "नमस्ते दुनिया हिंदी தமிழ் తెలుగు",
+      "pair": "[MASK] 테스트 [SEP]",
+      "expected": {
+        "tokens": ["[CLS]", "[UNK]", "[UNK]", "[UNK]", "[UNK]", "[UNK]", "[SEP]", "[MASK]", "[UNK]", "[SEP]", "[SEP]"],
+        "ids": [2, 1, 1, 1, 1, 1, 3, 4, 1, 3, 3],
+        "type_ids": [0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1],
+        "attention_mask": [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        "special_tokens_mask": [1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1],
+        "offsets": [[0, 0], [0, 6], [7, 13], [14, 19], [20, 25], [26, 32], [0, 0], [0, 6], [7, 10], [11, 16], [0, 0]],
+        "word_ids": [null, 0, 1, 2, 3, 4, null, 0, 1, 2, null],
+        "sequence_ids": [null, 0, 0, 0, 0, 0, null, 1, 1, 1, null],
+        "decoded": "",
+        "decoded_with_special_tokens": "[CLS] [UNK] [UNK] [UNK] [UNK] [UNK] [SEP] [MASK] [UNK] [SEP] [SEP]"
+      }
+    },
+    {
+      "name": "language-11-pair-False",
+      "input": "[MASK] 테스트 [SEP]",
+      "pair": null,
+      "expected": {
+        "tokens": ["[CLS]", "[MASK]", "[UNK]", "[SEP]", "[SEP]"],
+        "ids": [2, 4, 1, 3, 3],
+        "type_ids": [0, 0, 0, 0, 0],
+        "attention_mask": [1, 1, 1, 1, 1],
+        "special_tokens_mask": [1, 0, 0, 0, 1],
+        "offsets": [[0, 0], [0, 6], [7, 10], [11, 16], [0, 0]],
+        "word_ids": [null, 0, 1, 2, null],
+        "sequence_ids": [null, 0, 0, 0, null],
+        "decoded": "",
+        "decoded_with_special_tokens": "[CLS] [MASK] [UNK] [SEP] [SEP]"
+      }
+    },
+    {
+      "name": "language-11-pair-True",
+      "input": "[MASK] 테스트 [SEP]",
+      "pair": "a\u0000b\t한국어\n中文",
+      "expected": {
+        "tokens": ["[CLS]", "[MASK]", "[UNK]", "[SEP]", "[SEP]", "a", "##b", "[UNK]", "[UNK]", "[UNK]", "[SEP]"],
+        "ids": [2, 4, 1, 3, 3, 70, 249, 1, 1, 1, 3],
+        "type_ids": [0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1],
+        "attention_mask": [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        "special_tokens_mask": [1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1],
+        "offsets": [[0, 0], [0, 6], [7, 10], [11, 16], [0, 0], [0, 1], [2, 3], [4, 7], [8, 9], [9, 10], [0, 0]],
+        "word_ids": [null, 0, 1, 2, null, 0, 0, 1, 2, 3, null],
+        "sequence_ids": [null, 0, 0, 0, null, 1, 1, 1, 1, 1, null],
+        "decoded": "ab",
+        "decoded_with_special_tokens": "[CLS] [MASK] [UNK] [SEP] [SEP] ab [UNK] [UNK] [UNK] [SEP]"
+      }
+    },
+    {
+      "name": "language-12-pair-False",
+      "input": "a\u0000b\t한국어\n中文",
+      "pair": null,
+      "expected": {
+        "tokens": ["[CLS]", "a", "##b", "[UNK]", "[UNK]", "[UNK]", "[SEP]"],
+        "ids": [2, 70, 249, 1, 1, 1, 3],
+        "type_ids": [0, 0, 0, 0, 0, 0, 0],
+        "attention_mask": [1, 1, 1, 1, 1, 1, 1],
+        "special_tokens_mask": [1, 0, 0, 0, 0, 0, 1],
+        "offsets": [[0, 0], [0, 1], [2, 3], [4, 7], [8, 9], [9, 10], [0, 0]],
+        "word_ids": [null, 0, 0, 1, 2, 3, null],
+        "sequence_ids": [null, 0, 0, 0, 0, 0, null],
+        "decoded": "ab",
+        "decoded_with_special_tokens": "[CLS] ab [UNK] [UNK] [UNK] [SEP]"
+      }
+    },
+    {
+      "name": "language-12-pair-True",
+      "input": "a\u0000b\t한국어\n中文",
+      "pair": "",
+      "expected": {
+        "tokens": ["[CLS]", "a", "##b", "[UNK]", "[UNK]", "[UNK]", "[SEP]", "[SEP]"],
+        "ids": [2, 70, 249, 1, 1, 1, 3, 3],
+        "type_ids": [0, 0, 0, 0, 0, 0, 0, 1],
+        "attention_mask": [1, 1, 1, 1, 1, 1, 1, 1],
+        "special_tokens_mask": [1, 0, 0, 0, 0, 0, 1, 1],
+        "offsets": [[0, 0], [0, 1], [2, 3], [4, 7], [8, 9], [9, 10], [0, 0], [0, 0]],
+        "word_ids": [null, 0, 0, 1, 2, 3, null, null],
+        "sequence_ids": [null, 0, 0, 0, 0, 0, null, null],
+        "decoded": "ab",
+        "decoded_with_special_tokens": "[CLS] ab [UNK] [UNK] [UNK] [SEP] [SEP]"
+      }
+    },
+    {
+      "name": "language-13-pair-False",
+      "input": "",
+      "pair": null,
+      "expected": {
+        "tokens": ["[CLS]", "[SEP]"],
+        "ids": [2, 3],
+        "type_ids": [0, 0],
+        "attention_mask": [1, 1],
+        "special_tokens_mask": [1, 1],
+        "offsets": [[0, 0], [0, 0]],
+        "word_ids": [null, null],
+        "sequence_ids": [null, null],
+        "decoded": "",
+        "decoded_with_special_tokens": "[CLS] [SEP]"
+      }
+    },
+    {
+      "name": "language-13-pair-True",
+      "input": "",
+      "pair": "！？。，「」【】",
+      "expected": {
+        "tokens": ["[CLS]", "[SEP]", "[UNK]", "[UNK]", "[UNK]", "[UNK]", "[UNK]", "[UNK]", "[UNK]", "[UNK]", "[SEP]"],
+        "ids": [2, 3, 1, 1, 1, 1, 1, 1, 1, 1, 3],
+        "type_ids": [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        "attention_mask": [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        "special_tokens_mask": [1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+        "offsets": [[0, 0], [0, 0], [0, 1], [1, 2], [2, 3], [3, 4], [4, 5], [5, 6], [6, 7], [7, 8], [0, 0]],
+        "word_ids": [null, null, 0, 1, 2, 3, 4, 5, 6, 7, null],
+        "sequence_ids": [null, null, 1, 1, 1, 1, 1, 1, 1, 1, null],
+        "decoded": "",
+        "decoded_with_special_tokens": "[CLS] [SEP] [UNK] [UNK] [UNK] [UNK] [UNK] [UNK] [UNK] [UNK] [SEP]"
+      }
+    },
+    {
+      "name": "language-14-pair-False",
+      "input": "！？。，「」【】",
+      "pair": null,
+      "expected": {
+        "tokens": ["[CLS]", "[UNK]", "[UNK]", "[UNK]", "[UNK]", "[UNK]", "[UNK]", "[UNK]", "[UNK]", "[SEP]"],
+        "ids": [2, 1, 1, 1, 1, 1, 1, 1, 1, 3],
+        "type_ids": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        "attention_mask": [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        "special_tokens_mask": [1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+        "offsets": [[0, 0], [0, 1], [1, 2], [2, 3], [3, 4], [4, 5], [5, 6], [6, 7], [7, 8], [0, 0]],
+        "word_ids": [null, 0, 1, 2, 3, 4, 5, 6, 7, null],
+        "sequence_ids": [null, 0, 0, 0, 0, 0, 0, 0, 0, null],
+        "decoded": "",
+        "decoded_with_special_tokens": "[CLS] [UNK] [UNK] [UNK] [UNK] [UNK] [UNK] [UNK] [UNK] [SEP]"
+      }
+    },
+    {
+      "name": "language-14-pair-True",
+      "input": "！？。，「」【】",
+      "pair": "안녕하세요. 한국어 토크나이저입니다.",
+      "expected": {
+        "tokens": ["[CLS]", "[UNK]", "[UNK]", "[UNK]", "[UNK]", "[UNK]", "[UNK]", "[UNK]", "[UNK]", "[SEP]", "[UNK]", ".", "[UNK]", "[UNK]", ".", "[SEP]"],
+        "ids": [2, 1, 1, 1, 1, 1, 1, 1, 1, 3, 1, 20, 1, 1, 20, 3],
+        "type_ids": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1],
+        "attention_mask": [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        "special_tokens_mask": [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1],
+        "offsets": [[0, 0], [0, 1], [1, 2], [2, 3], [3, 4], [4, 5], [5, 6], [6, 7], [7, 8], [0, 0], [0, 5], [5, 6], [7, 10], [11, 19], [19, 20], [0, 0]],
+        "word_ids": [null, 0, 1, 2, 3, 4, 5, 6, 7, null, 0, 1, 2, 3, 4, null],
+        "sequence_ids": [null, 0, 0, 0, 0, 0, 0, 0, 0, null, 1, 1, 1, 1, 1, null],
+        "decoded": "..",
+        "decoded_with_special_tokens": "[CLS] [UNK] [UNK] [UNK] [UNK] [UNK] [UNK] [UNK] [UNK] [SEP] [UNK]. [UNK] [UNK]. [SEP]"
+      }
+    },
+    {
+      "name": "arabert-added-0",
+      "input": "هذا [بريد] جديد",
+      "expected": {
+        "tokens": ["[CLS]", "هذا", "[بريد]", "جديد", "[SEP]"],
+        "ids": [2, 434, 6, 1463, 3],
+        "type_ids": [0, 0, 0, 0, 0],
+        "attention_mask": [1, 1, 1, 1, 1],
+        "special_tokens_mask": [1, 0, 0, 0, 1],
+        "offsets": [[0, 0], [0, 3], [4, 10], [11, 15], [0, 0]],
+        "word_ids": [null, 0, 1, 2, null],
+        "sequence_ids": [null, 0, 0, 0, null],
+        "decoded": "هذا جديد",
+        "decoded_with_special_tokens": "[CLS] هذا [بريد] جديد [SEP]"
+      }
+    },
+    {
+      "name": "arabert-added-1",
+      "input": "هذا[بريد]جديد",
+      "expected": {
+        "tokens": ["[CLS]", "هذا", "[", "بريد", "]", "جديد", "[SEP]"],
+        "ids": [2, 434, 64, 10033, 66, 1463, 3],
+        "type_ids": [0, 0, 0, 0, 0, 0, 0],
+        "attention_mask": [1, 1, 1, 1, 1, 1, 1],
+        "special_tokens_mask": [1, 0, 0, 0, 0, 0, 1],
+        "offsets": [[0, 0], [0, 3], [3, 4], [4, 8], [8, 9], [9, 13], [0, 0]],
+        "word_ids": [null, 0, 1, 2, 3, 4, null],
+        "sequence_ids": [null, 0, 0, 0, 0, 0, null],
+        "decoded": "هذا [ بريد ] جديد",
+        "decoded_with_special_tokens": "[CLS] هذا [ بريد ] جديد [SEP]"
+      }
+    },
+    {
+      "name": "arabert-added-2",
+      "input": "[مستخدم] [رابط]",
+      "expected": {
+        "tokens": ["[CLS]", "[مستخدم]", "[رابط]", "[SEP]"],
+        "ids": [2, 7, 5, 3],
+        "type_ids": [0, 0, 0, 0],
+        "attention_mask": [1, 1, 1, 1],
+        "special_tokens_mask": [1, 0, 0, 1],
+        "offsets": [[0, 0], [0, 8], [9, 15], [0, 0]],
+        "word_ids": [null, 0, 1, null],
+        "sequence_ids": [null, 0, 0, null],
+        "decoded": "",
+        "decoded_with_special_tokens": "[CLS] [مستخدم] [رابط] [SEP]"
+      }
+    },
+    {
+      "name": "arabert-added-3",
+      "input": " [بريد]\t[مستخدم] ",
+      "expected": {
+        "tokens": ["[CLS]", "[بريد]", "[مستخدم]", "[SEP]"],
+        "ids": [2, 6, 7, 3],
+        "type_ids": [0, 0, 0, 0],
+        "attention_mask": [1, 1, 1, 1],
+        "special_tokens_mask": [1, 0, 0, 1],
+        "offsets": [[0, 0], [1, 7], [8, 16], [0, 0]],
+        "word_ids": [null, 0, 1, null],
+        "sequence_ids": [null, 0, 0, null],
+        "decoded": "",
+        "decoded_with_special_tokens": "[CLS] [بريد] [مستخدم] [SEP]"
+      }
+    },
+    {
+      "name": "arabert-added-4",
+      "input": "[رابط]، نص",
+      "expected": {
+        "tokens": ["[CLS]", "[رابط]", "،", "نص", "[SEP]"],
+        "ids": [2, 5, 103, 2295, 3],
+        "type_ids": [0, 0, 0, 0, 0],
+        "attention_mask": [1, 1, 1, 1, 1],
+        "special_tokens_mask": [1, 0, 0, 0, 1],
+        "offsets": [[0, 0], [0, 6], [6, 7], [8, 10], [0, 0]],
+        "word_ids": [null, 0, 1, 2, null],
+        "sequence_ids": [null, 0, 0, 0, null],
+        "decoded": "، نص",
+        "decoded_with_special_tokens": "[CLS] [رابط] ، نص [SEP]"
+      }
+    },
+    {
+      "name": "arabert-added-5",
+      "input": "نصّ[بريد]",
+      "expected": {
+        "tokens": ["[CLS]", "[UNK]", "[", "بريد", "]", "[SEP]"],
+        "ids": [2, 1, 64, 10033, 66, 3],
+        "type_ids": [0, 0, 0, 0, 0, 0],
+        "attention_mask": [1, 1, 1, 1, 1, 1],
+        "special_tokens_mask": [1, 0, 0, 0, 0, 1],
+        "offsets": [[0, 0], [0, 3], [3, 4], [4, 8], [8, 9], [0, 0]],
+        "word_ids": [null, 0, 1, 2, 3, null],
+        "sequence_ids": [null, 0, 0, 0, 0, null],
+        "decoded": "[ بريد ]",
+        "decoded_with_special_tokens": "[CLS] [UNK] [ بريد ] [SEP]"
+      }
+    },
+    {
+      "name": "arabert-added-6",
+      "input": "😀[رابط]😀",
+      "expected": {
+        "tokens": ["[CLS]", "[UNK]", "[رابط]", "[UNK]", "[SEP]"],
+        "ids": [2, 1, 5, 1, 3],
+        "type_ids": [0, 0, 0, 0, 0],
+        "attention_mask": [1, 1, 1, 1, 1],
+        "special_tokens_mask": [1, 0, 0, 0, 1],
+        "offsets": [[0, 0], [0, 1], [1, 7], [7, 8], [0, 0]],
+        "word_ids": [null, 0, 1, 2, null],
+        "sequence_ids": [null, 0, 0, 0, null],
+        "decoded": "",
+        "decoded_with_special_tokens": "[CLS] [UNK] [رابط] [UNK] [SEP]"
+      }
+    }
+  ]
+}

@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:isolate';
 
+import 'added_token.dart';
+import 'added_vocabulary.dart';
 import 'encoding.dart';
 import 'pre_tokenizer.dart';
 import 'tokenizer_json_parser.dart';
@@ -241,7 +243,9 @@ class WordPieceTokenizer {
   int _getOptimalWorkerCount(int count) => (count ~/ 4).clamp(1, 4);
 
   /// The vocabulary used for token lookup.
-  final Vocabulary vocab;
+  Vocabulary get vocab => _added.vocab;
+  final Vocabulary _modelVocab;
+  late AddedVocabulary _added;
 
   /// The configuration for this tokenizer.
   final WordPieceConfig config;
@@ -259,15 +263,33 @@ class WordPieceTokenizer {
   /// - [vocab]: The vocabulary containing token-to-ID mappings.
   /// - [config]: Optional configuration (defaults to standard BERT uncased).
   WordPieceTokenizer({
-    required this.vocab,
+    required Vocabulary vocab,
     this.config = const WordPieceConfig(),
-  }) {
+  }) : _modelVocab = vocab {
     _preTokenizer = BertPreTokenizer(
       lowercase: config.lowercase,
       stripAccents: config.stripAccents,
       handleChineseChars: config.handleChineseChars,
     );
+    _added = AddedVocabulary.empty(vocab);
+    addTokens([
+      for (final token in SpecialTokens.defaults.where(vocab.contains))
+        AddedToken(token, special: true),
+    ]);
   }
+
+  /// Registers tokens and returns the number of new or changed definitions.
+  /// Existing IDs are preserved; identical definitions and empty tokens return
+  /// zero. New IDs do not resize model embeddings. Registration is atomic.
+  int addTokens(List<AddedToken> tokens) {
+    final (snapshot, count) = _added.register(tokens, _preTokenizer);
+    _added = snapshot;
+    return count;
+  }
+
+  /// Registers raw, special tokens omitted by decode's default skip mode.
+  int addSpecialTokens(List<String> tokens) =>
+      addTokens(tokens.map((t) => AddedToken(t, special: true)).toList());
 
   /// Returns the current padding configuration, or `null` if disabled.
   PaddingConfig? get padding => _paddingConfig;
@@ -556,7 +578,7 @@ class WordPieceTokenizer {
         );
 
     final vocab = Vocabulary.fromMap(
-      parsed.vocab,
+      (json['model']['vocab'] as Map<String, dynamic>).cast<String, int>(),
       subwordPrefix: config.subwordPrefix,
     );
 
@@ -571,6 +593,18 @@ class WordPieceTokenizer {
       cleanText: normalizer?['clean_text'] as bool? ?? (normalizer != null),
       split: json['pre_tokenizer'] != null,
     );
+    tokenizer._added = AddedVocabulary.empty(vocab);
+    tokenizer.addTokens([
+      for (final entry in json['added_tokens'] as List<dynamic>? ?? const [])
+        AddedToken(
+          entry['content'] as String,
+          singleWord: entry['single_word'] as bool? ?? false,
+          lstrip: entry['lstrip'] as bool? ?? false,
+          rstrip: entry['rstrip'] as bool? ?? false,
+          normalized: entry['normalized'] as bool?,
+          special: entry['special'] as bool? ?? false,
+        ),
+    ]);
     final padding = json['padding'] as Map<String, dynamic>?;
     if (padding != null) {
       final strategy = padding['strategy'];
@@ -643,60 +677,30 @@ class WordPieceTokenizer {
   Encoding _content(String text) {
     final builder = EncodingBuilder();
     var wordId = 0;
-    var position = 0;
-    final added =
-        (_json?['added_tokens'] as List<dynamic>? ??
-                SpecialTokens.defaults
-                    .where(vocab.contains)
-                    .map(
-                      (token) => <String, dynamic>{
-                        'content': token,
-                        'id': vocab.tokenToId(token),
-                      },
-                    )
-                    .toList())
-            .cast<Map<String, dynamic>>();
-    final contents = added.map((e) => e['content'] as String).toList()
-      ..sort((a, b) => b.length.compareTo(a.length));
-    final pattern = contents.isEmpty
-        ? null
-        : RegExp(contents.map(RegExp.escape).join('|'));
-    void appendText(String part) {
-      for (final preToken in _preTokenizer.preTokenize(part)) {
+    for (final (piece, id) in _added.extract(text, _preTokenizer)) {
+      if (id != null) {
+        builder.addToken(
+          token: piece.text,
+          id: id,
+          typeId: 0,
+          offset: (piece.start, piece.end),
+          wordId: wordId++,
+        );
+        continue;
+      }
+      for (final preToken in _preTokenizer.splitNormalized(piece)) {
         for (final token in _tokenizeWord(preToken.text)) {
-          final span = preToken.originalSpan(
-            token.startOffset,
-            token.endOffset,
-          );
           builder.addToken(
             token: token.token,
             id: token.id,
             typeId: 0,
-            offset: (position + span.$1, position + span.$2),
+            offset: preToken.originalSpan(token.startOffset, token.endOffset),
             wordId: wordId,
           );
         }
         wordId++;
       }
-      position += part.runes.length;
     }
-
-    var start = 0;
-    for (final match in pattern?.allMatches(text) ?? const <RegExpMatch>[]) {
-      appendText(text.substring(start, match.start));
-      final token = match.group(0)!;
-      final end = position + token.runes.length;
-      builder.addToken(
-        token: token,
-        id: vocab.tokenToId(token),
-        typeId: 0,
-        offset: (position, end),
-        wordId: wordId++,
-      );
-      position = end;
-      start = match.end;
-    }
-    appendText(text.substring(start));
     return builder.build();
   }
 
@@ -907,6 +911,17 @@ class WordPieceTokenizer {
     );
   }
 
+  WordPieceTokenizer _snapshot() {
+    final result = WordPieceTokenizer(vocab: _modelVocab, config: config);
+    result._added = _added;
+    result._preTokenizer = _preTokenizer;
+    result._json = _json;
+    result._overrideTemplate = _overrideTemplate;
+    result._paddingConfig = _paddingConfig;
+    result._truncationConfig = _truncationConfig;
+    return result;
+  }
+
   /// Encodes multiple texts in parallel using isolates.
   ///
   /// For large batches, this method distributes work across multiple isolates
@@ -935,6 +950,7 @@ class WordPieceTokenizer {
       return encodeBatch(texts, addSpecialTokens: addSpecialTokens);
     }
 
+    final snapshot = _snapshot();
     final workerCount = numWorkers ?? _getOptimalWorkerCount(texts.length);
     final chunkSize = (texts.length / workerCount).ceil();
 
@@ -946,11 +962,11 @@ class WordPieceTokenizer {
       );
       futures.add(
         Isolate.run(
-          () => encodeBatch(chunk, addSpecialTokens: addSpecialTokens),
+          () => snapshot.encodeBatch(chunk, addSpecialTokens: addSpecialTokens),
         ),
       );
     }
-    return _applyBatchPostProcessing(
+    return snapshot._applyBatchPostProcessing(
       (await Future.wait(futures)).expand((e) => e).toList(),
     );
   }
@@ -974,6 +990,7 @@ class WordPieceTokenizer {
       );
     }
 
+    final snapshot = _snapshot();
     final workerCount = numWorkers ?? _getOptimalWorkerCount(pairs.length);
     final chunkSize = (pairs.length / workerCount).ceil();
 
@@ -985,7 +1002,7 @@ class WordPieceTokenizer {
       );
       futures.add(
         Isolate.run(
-          () => encodePairBatch(
+          () => snapshot.encodePairBatch(
             chunk,
             addSpecialTokens: addSpecialTokens,
             maxLength: maxLength,
@@ -994,7 +1011,7 @@ class WordPieceTokenizer {
         ),
       );
     }
-    return _applyBatchPostProcessing(
+    return snapshot._applyBatchPostProcessing(
       (await Future.wait(futures)).expand((e) => e).toList(),
     );
   }
@@ -1090,7 +1107,7 @@ class WordPieceTokenizer {
     int startIndex, {
     required bool isSubword,
   }) {
-    final trie = isSubword ? vocab.subwordTrie : vocab.trie;
+    final trie = isSubword ? _modelVocab.subwordTrie : _modelVocab.trie;
     final match = trie.findLongestPrefix(word, startIndex);
     if (match != null) {
       return _TrieMatchResult(endIndex: match.end, tokenId: match.tokenId);
@@ -1103,7 +1120,7 @@ class WordPieceTokenizer {
           ? '${config.subwordPrefix}$firstChar'
           : firstChar;
 
-      if (vocab.contains(tokenToCheck)) {
+      if (_modelVocab.contains(tokenToCheck)) {
         return _TrieMatchResult(
           endIndex: startIndex + 1,
           tokenId: vocab.tokenToId(tokenToCheck),
@@ -1130,16 +1147,14 @@ class WordPieceTokenizer {
   /// ```
   String decode(List<int> ids, {bool skipSpecialTokens = true}) {
     final tokens = ids
-        .map(vocab.idToToken)
-        .where(
-          (token) =>
-              !skipSpecialTokens ||
-              !(_json == null
-                  ? vocab.isSpecialToken(token)
-                  : (_json!['added_tokens'] as List<dynamic>? ?? []).any(
-                      (e) => e['content'] == token && e['special'] == true,
-                    )),
-        )
+        .where((id) {
+          if (!skipSpecialTokens) return true;
+          if (_added.specialIds.contains(id)) return false;
+          return _json != null ||
+              _added.tokens.containsKey(id) ||
+              !vocab.isSpecialToken(vocab.idToToken(id));
+        })
+        .map((id) => _added.decoded[id] ?? vocab.idToToken(id))
         .toList();
     final decoder = _json?['decoder'] as Map<String, dynamic>?;
     if (_json != null && decoder == null) return tokens.join(' ');

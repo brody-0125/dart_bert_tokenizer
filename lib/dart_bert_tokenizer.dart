@@ -9,6 +9,7 @@
 ///
 /// - WordPiece tokenization with supported Hugging Face JSON pipelines
 /// - Support for single text and text pair encoding
+/// - Dynamic added tokens with word boundaries, whitespace and normalized matching
 /// - Batch processing with optional parallel execution using isolates
 /// - Configurable padding and truncation strategies
 /// - Pre-tokenization with BERT-style normalization
@@ -59,6 +60,7 @@
 /// ```
 library;
 
+export 'src/added_token.dart' show AddedToken;
 export 'src/encoding.dart' show Encoding, EncodingBuilder, TruncationStrategy;
 export 'src/pre_tokenizer.dart' show BertPreTokenizer, PreToken;
 export 'src/trie.dart' show Trie, TrieNode, TrieMatch;

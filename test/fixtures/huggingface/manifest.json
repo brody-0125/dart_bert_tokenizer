@@ -67,7 +67,7 @@
     "revision": "016fb9d6768f522a59c6e0d2d5d5d43a4e1bff60",
     "sha256": "d9797bf02285035bba059782638b8c0aa130b7c2ca2d5dc2c30327586b3c773d",
     "license": "Not specified in model metadata",
-    "expected_error": "AddedToken.single_word is not supported"
+    "language_cases": true
   },
   {
     "name": "ai4bharat--IndicBERTv2-MLM-only",
