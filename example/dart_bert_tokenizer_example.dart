@@ -18,7 +18,9 @@ void main() {
   print('');
 
   print('=== Decoding ===');
-  print('Decoded: "${tokenizer.decode(encoding.ids, skipSpecialTokens: true)}"');
+  print(
+    'Decoded: "${tokenizer.decode(encoding.ids, skipSpecialTokens: true)}"',
+  );
   print('');
 
   print('=== Sentence Pair ===');
@@ -41,7 +43,7 @@ void main() {
   print('');
 
   print('=== Truncation ===');
-  final longText = 'This is a very long sentence that needs truncation';
+  const longText = 'This is a very long sentence that needs truncation';
   final truncated = tokenizer.encode(longText).withTruncation(maxLength: 6);
   print('Original: "$longText"');
   print('Truncated: ${truncated.tokens}');
@@ -103,9 +105,15 @@ void main() {
 
   print('=== Vocabulary ===');
   print('Size: ${tokenizer.vocab.size}');
-  print('[CLS]=${tokenizer.vocab.clsTokenId}, [SEP]=${tokenizer.vocab.sepTokenId}, [PAD]=${tokenizer.vocab.padTokenId}');
-  print('Special tokens (single): ${tokenizer.numSpecialTokensToAdd(isPair: false)}');
-  print('Special tokens (pair): ${tokenizer.numSpecialTokensToAdd(isPair: true)}');
+  print(
+    '[CLS]=${tokenizer.vocab.clsTokenId}, [SEP]=${tokenizer.vocab.sepTokenId}, [PAD]=${tokenizer.vocab.padTokenId}',
+  );
+  print(
+    'Special tokens (single): ${tokenizer.numSpecialTokensToAdd(isPair: false)}',
+  );
+  print(
+    'Special tokens (pair): ${tokenizer.numSpecialTokensToAdd(isPair: true)}',
+  );
   print('');
 
   print('=== Encoding Merge ===');
@@ -123,15 +131,49 @@ WordPieceTokenizer _loadTokenizer() {
 
   print('Using demo vocabulary...\n');
   final vocab = Vocabulary.fromTokens([
-    '[PAD]', ...List.generate(99, (i) => '[unused$i]'),
-    '[UNK]', '[CLS]', '[SEP]', '[MASK]',
+    '[PAD]',
+    ...List.generate(99, (i) => '[unused$i]'),
+    '[UNK]',
+    '[CLS]',
+    '[SEP]',
+    '[MASK]',
     ...List.generate(896, (i) => '[unused${99 + i}]'),
-    'the', 'a', 'is', 'it', 'this', 'that', 'what', 'how',
-    'hello', 'world', 'test', 'word', 'short', 'long', 'very',
-    'sentence', 'bit', 'longer', 'longest', 'here', 'needs',
-    'be', 'to', 'hi', 'truncation',
-    ',', '.', '!', '?', "'",
-    '##s', '##ed', '##ing', '##er', '##est', '##ly',
+    'the',
+    'a',
+    'is',
+    'it',
+    'this',
+    'that',
+    'what',
+    'how',
+    'hello',
+    'world',
+    'test',
+    'word',
+    'short',
+    'long',
+    'very',
+    'sentence',
+    'bit',
+    'longer',
+    'longest',
+    'here',
+    'needs',
+    'be',
+    'to',
+    'hi',
+    'truncation',
+    ',',
+    '.',
+    '!',
+    '?',
+    "'",
+    '##s',
+    '##ed',
+    '##ing',
+    '##er',
+    '##est',
+    '##ly',
   ]);
   return WordPieceTokenizer(vocab: vocab);
 }

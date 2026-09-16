@@ -238,13 +238,19 @@ class WordPieceConfig {
 /// - [Encoding] for the result of tokenization
 /// - [WordPieceConfig] for tokenizer configuration options
 class WordPieceTokenizer {
+  int _getOptimalWorkerCount(int count) => (count ~/ 4).clamp(1, 4);
+
   /// The vocabulary used for token lookup.
   final Vocabulary vocab;
 
   /// The configuration for this tokenizer.
   final WordPieceConfig config;
 
-  late final BertPreTokenizer _preTokenizer;
+  late BertPreTokenizer _preTokenizer;
+  Map<String, dynamic>? _json;
+  bool _overrideTemplate = false;
+  String get _unknownToken =>
+      (_json?['model'] as Map?)?['unk_token'] as String? ?? SpecialTokens.unk;
   PaddingConfig? _paddingConfig;
   TruncationConfig? _truncationConfig;
 
@@ -286,6 +292,12 @@ class WordPieceTokenizer {
     int? length,
     int? padToMultipleOf,
   }) {
+    if (length != null && length < 0) {
+      throw ArgumentError.value(length, 'length');
+    }
+    if (padToMultipleOf != null && padToMultipleOf <= 0) {
+      throw ArgumentError.value(padToMultipleOf, 'padToMultipleOf');
+    }
     _paddingConfig = PaddingConfig(
       direction: direction,
       length: length,
@@ -319,6 +331,7 @@ class WordPieceTokenizer {
     TruncationDirection direction = TruncationDirection.right,
     TruncationStrategy strategy = TruncationStrategy.longestFirst,
   }) {
+    if (maxLength < 0) throw ArgumentError.value(maxLength, 'maxLength');
     _truncationConfig = TruncationConfig(
       maxLength: maxLength,
       direction: direction,
@@ -338,21 +351,19 @@ class WordPieceTokenizer {
   Encoding _applyPostProcessing(Encoding encoding) {
     var result = encoding;
 
-    if (_truncationConfig != null) {
-      result = result.withTruncation(
-        maxLength: _truncationConfig!.maxLength,
-        truncateFromEnd:
-            _truncationConfig!.direction == TruncationDirection.right,
-      );
-    }
-
     if (_paddingConfig != null) {
       final padOnRight = _paddingConfig!.direction == PaddingDirection.right;
 
       if (_paddingConfig!.length != null) {
         result = result.withPadding(
           targetLength: _paddingConfig!.length!,
-          padTokenId: vocab.padTokenId,
+          padTokenId:
+              (_json?['padding'] as Map?)?['pad_id'] as int? ??
+              vocab.padTokenId,
+          padToken:
+              (_json?['padding'] as Map?)?['pad_token'] as String? ??
+              SpecialTokens.pad,
+          padTypeId: (_json?['padding'] as Map?)?['pad_type_id'] as int? ?? 0,
           padOnRight: padOnRight,
         );
       }
@@ -360,7 +371,13 @@ class WordPieceTokenizer {
       if (_paddingConfig!.padToMultipleOf != null) {
         result = result.withPaddingToMultipleOf(
           multiple: _paddingConfig!.padToMultipleOf!,
-          padTokenId: vocab.padTokenId,
+          padTokenId:
+              (_json?['padding'] as Map?)?['pad_id'] as int? ??
+              vocab.padTokenId,
+          padToken:
+              (_json?['padding'] as Map?)?['pad_token'] as String? ??
+              SpecialTokens.pad,
+          padTypeId: (_json?['padding'] as Map?)?['pad_type_id'] as int? ?? 0,
           padOnRight: padOnRight,
         );
       }
@@ -373,18 +390,6 @@ class WordPieceTokenizer {
     if (encodings.isEmpty) return encodings;
 
     var results = encodings;
-    if (_truncationConfig != null) {
-      results = results
-          .map(
-            (e) => e.withTruncation(
-              maxLength: _truncationConfig!.maxLength,
-              truncateFromEnd:
-                  _truncationConfig!.direction == TruncationDirection.right,
-            ),
-          )
-          .toList();
-    }
-
     if (_paddingConfig != null) {
       final padOnRight = _paddingConfig!.direction == PaddingDirection.right;
 
@@ -409,7 +414,14 @@ class WordPieceTokenizer {
           .map(
             (e) => e.withPadding(
               targetLength: targetLength,
-              padTokenId: vocab.padTokenId,
+              padTokenId:
+                  (_json?['padding'] as Map?)?['pad_id'] as int? ??
+                  vocab.padTokenId,
+              padToken:
+                  (_json?['padding'] as Map?)?['pad_token'] as String? ??
+                  SpecialTokens.pad,
+              padTypeId:
+                  (_json?['padding'] as Map?)?['pad_type_id'] as int? ?? 0,
               padOnRight: padOnRight,
             ),
           )
@@ -482,7 +494,7 @@ class WordPieceTokenizer {
   }) async {
     final content = await File(path).readAsString();
     return _fromParsedTokenizerJson(
-      jsonDecode(content) as Map<String, dynamic>,
+      _decodeJson(content),
       configOverride: configOverride,
     );
   }
@@ -497,7 +509,7 @@ class WordPieceTokenizer {
   }) {
     final content = File(path).readAsStringSync();
     return _fromParsedTokenizerJson(
-      jsonDecode(content) as Map<String, dynamic>,
+      _decodeJson(content),
       configOverride: configOverride,
     );
   }
@@ -511,9 +523,17 @@ class WordPieceTokenizer {
     WordPieceConfig? configOverride,
   }) {
     return _fromParsedTokenizerJson(
-      jsonDecode(jsonString) as Map<String, dynamic>,
+      _decodeJson(jsonString),
       configOverride: configOverride,
     );
+  }
+
+  static Map<String, dynamic> _decodeJson(String content) {
+    final value = jsonDecode(content);
+    if (value is! Map<String, dynamic>) {
+      throw const FormatException('tokenizer.json must be an object');
+    }
+    return value;
   }
 
   static WordPieceTokenizer _fromParsedTokenizerJson(
@@ -522,7 +542,8 @@ class WordPieceTokenizer {
   }) {
     final parsed = parseTokenizerJson(json);
 
-    final config = configOverride ??
+    final config =
+        configOverride ??
         WordPieceConfig(
           lowercase: parsed.lowercase,
           stripAccents: parsed.stripAccents,
@@ -538,13 +559,59 @@ class WordPieceTokenizer {
       subwordPrefix: config.subwordPrefix,
     );
 
-    return WordPieceTokenizer(vocab: vocab, config: config);
+    final tokenizer = WordPieceTokenizer(vocab: vocab, config: config)
+      .._json = json
+      .._overrideTemplate = configOverride != null;
+    final normalizer = json['normalizer'] as Map<String, dynamic>?;
+    tokenizer._preTokenizer = BertPreTokenizer(
+      lowercase: config.lowercase,
+      stripAccents: config.stripAccents,
+      handleChineseChars: config.handleChineseChars,
+      cleanText: normalizer?['clean_text'] as bool? ?? (normalizer != null),
+      split: json['pre_tokenizer'] != null,
+    );
+    final padding = json['padding'] as Map<String, dynamic>?;
+    if (padding != null) {
+      final strategy = padding['strategy'];
+      tokenizer.enablePadding(
+        length: strategy is Map ? strategy['Fixed'] as int? : null,
+        direction: padding['direction'] == 'Left'
+            ? PaddingDirection.left
+            : PaddingDirection.right,
+        padToMultipleOf: padding['pad_to_multiple_of'] as int?,
+      );
+    }
+    final truncation = json['truncation'] as Map<String, dynamic>?;
+    if (truncation != null) {
+      tokenizer.enableTruncation(
+        maxLength: truncation['max_length'] as int,
+        direction: truncation['direction'] == 'Left'
+            ? TruncationDirection.left
+            : TruncationDirection.right,
+        strategy: switch (truncation['strategy']) {
+          'OnlyFirst' => TruncationStrategy.onlyFirst,
+          'OnlySecond' => TruncationStrategy.onlySecond,
+          _ => TruncationStrategy.longestFirst,
+        },
+      );
+    }
+    return tokenizer;
   }
 
   /// Returns the number of special tokens that will be added during encoding.
   ///
   /// - [isPair]: Whether encoding a text pair (adds extra `[SEP]` token).
   int numSpecialTokensToAdd({bool isPair = false}) {
+    if (_json != null && !_overrideTemplate) {
+      final processor = _json!['post_processor'] as Map<String, dynamic>?;
+      if (processor == null) return 0;
+      if (processor['type'] == 'BertProcessing') return isPair ? 3 : 2;
+      final template = processor[isPair ? 'pair' : 'single'] as List<dynamic>?;
+      if (template == null) {
+        throw const FormatException('Missing post-processor template');
+      }
+      return template.where((e) => e['SpecialToken'] != null).length;
+    }
     var count = 0;
     if (config.addClsToken) count++;
     if (config.addSepToken) count++;
@@ -569,48 +636,220 @@ class WordPieceTokenizer {
   /// print(encoding.tokens); // ['[CLS]', 'hello', ',', 'world', '!', '[SEP]']
   /// print(encoding.ids);    // [101, 7592, 1010, 2088, 999, 102]
   /// ```
-  Encoding encode(String text, {bool? addSpecialTokens}) {
-    final shouldAddCls = addSpecialTokens ?? config.addClsToken;
-    final shouldAddSep = addSpecialTokens ?? config.addSepToken;
+  Encoding encode(String text, {bool? addSpecialTokens}) =>
+      _encode(text, addSpecialTokens: addSpecialTokens);
 
+  Encoding _content(String text) {
     final builder = EncodingBuilder();
+    var wordId = 0;
+    var position = 0;
+    final added =
+        (_json?['added_tokens'] as List<dynamic>? ??
+                SpecialTokens.defaults
+                    .where(vocab.contains)
+                    .map(
+                      (token) => <String, dynamic>{
+                        'content': token,
+                        'id': vocab.tokenToId(token),
+                      },
+                    )
+                    .toList())
+            .cast<Map<String, dynamic>>();
+    final contents = added.map((e) => e['content'] as String).toList()
+      ..sort((a, b) => b.length.compareTo(a.length));
+    final pattern = contents.isEmpty
+        ? null
+        : RegExp(contents.map(RegExp.escape).join('|'));
+    void appendText(String part) {
+      for (final preToken in _preTokenizer.preTokenize(part)) {
+        for (final token in _tokenizeWord(preToken.text)) {
+          final span = preToken.originalSpan(
+            token.startOffset,
+            token.endOffset,
+          );
+          builder.addToken(
+            token: token.token,
+            id: token.id,
+            typeId: 0,
+            offset: (position + span.$1, position + span.$2),
+            wordId: wordId,
+          );
+        }
+        wordId++;
+      }
+      position += part.runes.length;
+    }
 
-    if (shouldAddCls) {
+    var start = 0;
+    for (final match in pattern?.allMatches(text) ?? const <RegExpMatch>[]) {
+      appendText(text.substring(start, match.start));
+      final token = match.group(0)!;
+      final end = position + token.runes.length;
+      builder.addToken(
+        token: token,
+        id: vocab.tokenToId(token),
+        typeId: 0,
+        offset: (position, end),
+        wordId: wordId++,
+      );
+      position = end;
+      start = match.end;
+    }
+    appendText(text.substring(start));
+    return builder.build();
+  }
+
+  Encoding _encode(
+    String text, {
+    String? pair,
+    bool? addSpecialTokens,
+    int? maxLength,
+    TruncationStrategy? truncationStrategy,
+  }) {
+    var first = _content(text);
+    var second = pair == null ? null : _content(pair);
+    final addCls = addSpecialTokens ?? config.addClsToken;
+    final addSep = addSpecialTokens ?? config.addSepToken;
+    var reserved = (addCls ? 1 : 0) + (addSep ? (pair == null ? 1 : 2) : 0);
+    final processor = _json?['post_processor'] as Map<String, dynamic>?;
+    List<dynamic>? template;
+    if (_json != null && !_overrideTemplate) {
+      if (processor == null) {
+        template = [
+          {
+            'Sequence': {'id': 'A', 'type_id': 0},
+          },
+          if (pair != null)
+            {
+              'Sequence': {'id': 'B', 'type_id': 1},
+            },
+        ];
+      } else if (processor['type'] == 'TemplateProcessing') {
+        template =
+            processor[pair == null ? 'single' : 'pair'] as List<dynamic>?;
+        if (template == null) {
+          throw const FormatException('Missing post-processor template');
+        }
+      } else if (processor['type'] == 'BertProcessing') {
+        template = [
+          {
+            'SpecialToken': {'id': processor['cls'][0], 'type_id': 0},
+          },
+          {
+            'Sequence': {'id': 'A', 'type_id': 0},
+          },
+          {
+            'SpecialToken': {'id': processor['sep'][0], 'type_id': 0},
+          },
+          if (pair != null) ...[
+            {
+              'Sequence': {'id': 'B', 'type_id': 1},
+            },
+            {
+              'SpecialToken': {'id': processor['sep'][0], 'type_id': 1},
+            },
+          ],
+        ];
+      }
+      if (template != null) {
+        if (addSpecialTokens == false) {
+          template = template.where((e) => e['Sequence'] != null).toList();
+        }
+        reserved = template.where((e) => e['SpecialToken'] != null).length;
+      }
+    }
+    final limit = maxLength ?? _truncationConfig?.maxLength;
+    if (limit != null) {
+      if (limit < reserved) {
+        throw ArgumentError.value(
+          limit,
+          'maxLength',
+          'Too small for special tokens',
+        );
+      }
+      final right = _truncationConfig?.direction != TruncationDirection.left;
+      if (second == null) {
+        first = first.withTruncation(
+          maxLength: limit - reserved,
+          truncateFromEnd: right,
+        );
+      } else {
+        final truncated = Encoding.truncatePair(
+          encodingA: first,
+          encodingB: second,
+          maxLength: limit,
+          numSpecialTokens: reserved,
+          truncateFromEnd: right,
+          strategy:
+              truncationStrategy ??
+              _truncationConfig?.strategy ??
+              TruncationStrategy.longestFirst,
+        );
+        first = truncated.$1;
+        second = truncated.$2;
+      }
+    }
+    final builder = EncodingBuilder();
+    void append(Encoding encoding, int sequence, [int? typeId]) {
+      for (var i = 0; i < encoding.length; i++) {
+        builder.addToken(
+          token: encoding.tokens[i],
+          id: encoding.ids[i],
+          typeId: typeId ?? sequence,
+          offset: encoding.offsets[i],
+          wordId: encoding.wordIds[i],
+          sequenceId: sequence,
+        );
+      }
+    }
+
+    if (template != null) {
+      for (final entry in template) {
+        final sequence = entry['Sequence'];
+        final special = entry['SpecialToken'];
+        if (sequence != null) {
+          final index = sequence['id'] == 'A' ? 0 : 1;
+          append(
+            index == 0 ? first : second!,
+            index,
+            sequence['type_id'] as int,
+          );
+        } else if (special != null) {
+          final token = special['id'] as String;
+          builder.addSpecialToken(
+            token: token,
+            id: vocab.tokenToId(token),
+            typeId: special['type_id'] as int,
+          );
+        }
+      }
+      return _applyPostProcessing(builder.build());
+    }
+    if (addCls) {
       builder.addSpecialToken(
         token: SpecialTokens.cls,
         id: vocab.clsTokenId,
         typeId: 0,
       );
     }
-
-    final preTokens = _preTokenizer.preTokenize(text);
-
-    for (var wordIdx = 0; wordIdx < preTokens.length; wordIdx++) {
-      final preToken = preTokens[wordIdx];
-      final wordTokens = _tokenizeWord(preToken.text);
-
-      for (final tokenInfo in wordTokens) {
-        builder.addToken(
-          token: tokenInfo.token,
-          id: tokenInfo.id,
-          typeId: 0,
-          offset: (
-            preToken.start + tokenInfo.startOffset,
-            preToken.start + tokenInfo.endOffset,
-          ),
-          wordId: wordIdx,
-        );
-      }
-    }
-
-    if (shouldAddSep) {
+    append(first, 0);
+    if (addSep) {
       builder.addSpecialToken(
         token: SpecialTokens.sep,
         id: vocab.sepTokenId,
         typeId: 0,
       );
     }
-
+    if (second != null) {
+      append(second, 1);
+      if (addSep) {
+        builder.addSpecialToken(
+          token: SpecialTokens.sep,
+          id: vocab.sepTokenId,
+          typeId: 1,
+        );
+      }
+    }
     return _applyPostProcessing(builder.build());
   }
 
@@ -641,97 +880,13 @@ class WordPieceTokenizer {
     bool? addSpecialTokens,
     int? maxLength,
     TruncationStrategy truncationStrategy = TruncationStrategy.longestFirst,
-  }) {
-    final shouldAddCls = addSpecialTokens ?? config.addClsToken;
-    final shouldAddSep = addSpecialTokens ?? config.addSepToken;
-
-    final encodingA = encode(textA, addSpecialTokens: false);
-    final encodingB = encode(textB, addSpecialTokens: false);
-
-    final effectiveMaxLength = maxLength ?? _truncationConfig?.maxLength;
-    final effectiveStrategy = _truncationConfig?.strategy ?? truncationStrategy;
-
-    final (truncatedA, truncatedB) = effectiveMaxLength != null
-        ? Encoding.truncatePair(
-            encodingA: encodingA,
-            encodingB: encodingB,
-            maxLength: effectiveMaxLength,
-            strategy: effectiveStrategy,
-            numSpecialTokens: numSpecialTokensToAdd(isPair: true),
-          )
-        : (encodingA, encodingB);
-
-    final builder = EncodingBuilder();
-
-    if (shouldAddCls) {
-      builder.addSpecialToken(
-        token: SpecialTokens.cls,
-        id: vocab.clsTokenId,
-        typeId: 0,
-      );
-    }
-
-    for (var i = 0; i < truncatedA.length; i++) {
-      builder.addToken(
-        token: truncatedA.tokens[i],
-        id: truncatedA.ids[i],
-        typeId: 0,
-        offset: truncatedA.offsets[i],
-        wordId: truncatedA.wordIds[i],
-      );
-    }
-
-    if (shouldAddSep) {
-      builder.addSpecialToken(
-        token: SpecialTokens.sep,
-        id: vocab.sepTokenId,
-        typeId: 0,
-      );
-    }
-
-    final wordIdOffset = truncatedA.wordIds.where((id) => id != null).length;
-    for (var i = 0; i < truncatedB.length; i++) {
-      final originalWordId = truncatedB.wordIds[i];
-      builder.addToken(
-        token: truncatedB.tokens[i],
-        id: truncatedB.ids[i],
-        typeId: 1,
-        offset: truncatedB.offsets[i],
-        wordId: originalWordId != null ? wordIdOffset + originalWordId : null,
-      );
-    }
-
-    if (shouldAddSep) {
-      builder.addSpecialToken(
-        token: SpecialTokens.sep,
-        id: vocab.sepTokenId,
-        typeId: 1,
-      );
-    }
-
-    var result = builder.build();
-    if (_paddingConfig != null) {
-      final padOnRight = _paddingConfig!.direction == PaddingDirection.right;
-
-      if (_paddingConfig!.length != null) {
-        result = result.withPadding(
-          targetLength: _paddingConfig!.length!,
-          padTokenId: vocab.padTokenId,
-          padOnRight: padOnRight,
-        );
-      }
-
-      if (_paddingConfig!.padToMultipleOf != null) {
-        result = result.withPaddingToMultipleOf(
-          multiple: _paddingConfig!.padToMultipleOf!,
-          padTokenId: vocab.padTokenId,
-          padOnRight: padOnRight,
-        );
-      }
-    }
-
-    return result;
-  }
+  }) => _encode(
+    textA,
+    pair: textB,
+    addSpecialTokens: addSpecialTokens,
+    maxLength: maxLength,
+    truncationStrategy: _truncationConfig?.strategy ?? truncationStrategy,
+  );
 
   /// Encodes multiple texts in a batch.
   ///
@@ -744,19 +899,11 @@ class WordPieceTokenizer {
   /// Returns a list of [Encoding] objects with consistent lengths (if padding
   /// is enabled).
   List<Encoding> encodeBatch(List<String> texts, {bool? addSpecialTokens}) {
-    final savedPadding = _paddingConfig;
-    final savedTruncation = _truncationConfig;
-    _paddingConfig = null;
-    _truncationConfig = null;
-
-    final encodings = texts
-        .map((text) => encode(text, addSpecialTokens: addSpecialTokens))
-        .toList();
-
-    _paddingConfig = savedPadding;
-    _truncationConfig = savedTruncation;
-
-    return _applyBatchPostProcessing(encodings);
+    return _applyBatchPostProcessing(
+      texts
+          .map((text) => encode(text, addSpecialTokens: addSpecialTokens))
+          .toList(),
+    );
   }
 
   /// Encodes multiple texts in parallel using isolates.
@@ -780,6 +927,9 @@ class WordPieceTokenizer {
     bool? addSpecialTokens,
     int? numWorkers,
   }) async {
+    if (numWorkers != null && numWorkers <= 0) {
+      throw ArgumentError.value(numWorkers, 'numWorkers');
+    }
     if (texts.length < _kMinBatchSizeForParallel) {
       return encodeBatch(texts, addSpecialTokens: addSpecialTokens);
     }
@@ -787,38 +937,21 @@ class WordPieceTokenizer {
     final workerCount = numWorkers ?? _getOptimalWorkerCount(texts.length);
     final chunkSize = (texts.length / workerCount).ceil();
 
-    final vocabTokens = vocab.tokens;
-    final futures = <Future<List<_EncodingData>>>[];
-
-    for (var i = 0; i < workerCount; i++) {
-      final start = i * chunkSize;
-      if (start >= texts.length) break;
-
-      final end = (start + chunkSize).clamp(0, texts.length);
-      final chunk = texts.sublist(start, end);
-
+    final futures = <Future<List<Encoding>>>[];
+    for (var start = 0; start < texts.length; start += chunkSize) {
+      final chunk = texts.sublist(
+        start,
+        (start + chunkSize).clamp(0, texts.length),
+      );
       futures.add(
         Isolate.run(
-          () => _encodeChunkInIsolate(
-            chunk,
-            vocabTokens,
-            config,
-            addSpecialTokens,
-          ),
+          () => encodeBatch(chunk, addSpecialTokens: addSpecialTokens),
         ),
       );
     }
-
-    final results = await Future.wait(futures);
-
-    final encodings = <Encoding>[];
-    for (final chunkResults in results) {
-      for (final data in chunkResults) {
-        encodings.add(data.toEncoding());
-      }
-    }
-
-    return _applyBatchPostProcessing(encodings);
+    return _applyBatchPostProcessing(
+      (await Future.wait(futures)).expand((e) => e).toList(),
+    );
   }
 
   Future<List<Encoding>> encodePairBatchParallel(
@@ -828,6 +961,9 @@ class WordPieceTokenizer {
     TruncationStrategy truncationStrategy = TruncationStrategy.longestFirst,
     int? numWorkers,
   }) async {
+    if (numWorkers != null && numWorkers <= 0) {
+      throw ArgumentError.value(numWorkers, 'numWorkers');
+    }
     if (pairs.length < _kMinBatchSizeForParallel) {
       return encodePairBatch(
         pairs,
@@ -840,79 +976,26 @@ class WordPieceTokenizer {
     final workerCount = numWorkers ?? _getOptimalWorkerCount(pairs.length);
     final chunkSize = (pairs.length / workerCount).ceil();
 
-    final vocabTokens = vocab.tokens;
-    final effectiveMaxLength = maxLength ?? _truncationConfig?.maxLength;
-    final futures = <Future<List<_EncodingData>>>[];
-
-    for (var i = 0; i < workerCount; i++) {
-      final start = i * chunkSize;
-      if (start >= pairs.length) break;
-
-      final end = (start + chunkSize).clamp(0, pairs.length);
-      final chunk = pairs.sublist(start, end);
-      final chunkData = chunk.map((p) => [p.$1, p.$2]).toList();
+    final futures = <Future<List<Encoding>>>[];
+    for (var start = 0; start < pairs.length; start += chunkSize) {
+      final chunk = pairs.sublist(
+        start,
+        (start + chunkSize).clamp(0, pairs.length),
+      );
       futures.add(
         Isolate.run(
-          () => _encodePairChunkInIsolate(
-            chunkData,
-            vocabTokens,
-            config,
-            addSpecialTokens,
-            effectiveMaxLength,
-            truncationStrategy,
+          () => encodePairBatch(
+            chunk,
+            addSpecialTokens: addSpecialTokens,
+            maxLength: maxLength,
+            truncationStrategy: truncationStrategy,
           ),
         ),
       );
     }
-
-    final results = await Future.wait(futures);
-    final encodings = <Encoding>[];
-    for (final chunkResults in results) {
-      for (final data in chunkResults) {
-        encodings.add(data.toEncoding());
-      }
-    }
-
-    if (_paddingConfig != null) {
-      final padOnRight = _paddingConfig!.direction == PaddingDirection.right;
-
-      int targetLength;
-      if (_paddingConfig!.length != null) {
-        targetLength = _paddingConfig!.length!;
-      } else {
-        targetLength = encodings
-            .map((e) => e.length)
-            .reduce((a, b) => a > b ? a : b);
-      }
-
-      if (_paddingConfig!.padToMultipleOf != null) {
-        final multiple = _paddingConfig!.padToMultipleOf!;
-        final remainder = targetLength % multiple;
-        if (remainder != 0) {
-          targetLength += multiple - remainder;
-        }
-      }
-
-      return encodings
-          .map(
-            (e) => e.withPadding(
-              targetLength: targetLength,
-              padTokenId: vocab.padTokenId,
-              padOnRight: padOnRight,
-            ),
-          )
-          .toList();
-    }
-
-    return encodings;
-  }
-
-  int _getOptimalWorkerCount(int batchSize) {
-    const maxWorkers = 4;
-    const minItemsPerWorker = 4;
-
-    final workersByItems = (batchSize / minItemsPerWorker).floor();
-    return workersByItems.clamp(1, maxWorkers);
+    return _applyBatchPostProcessing(
+      (await Future.wait(futures)).expand((e) => e).toList(),
+    );
   }
 
   /// Encodes multiple text pairs in a batch.
@@ -927,55 +1010,19 @@ class WordPieceTokenizer {
     int? maxLength,
     TruncationStrategy truncationStrategy = TruncationStrategy.longestFirst,
   }) {
-    final savedPadding = _paddingConfig;
-    _paddingConfig = null;
-
-    final encodings = pairs
-        .map(
-          (pair) => encodePair(
-            pair.$1,
-            pair.$2,
-            addSpecialTokens: addSpecialTokens,
-            maxLength: maxLength,
-            truncationStrategy: truncationStrategy,
-          ),
-        )
-        .toList();
-
-    _paddingConfig = savedPadding;
-
-    if (_paddingConfig != null) {
-      final padOnRight = _paddingConfig!.direction == PaddingDirection.right;
-
-      int targetLength;
-      if (_paddingConfig!.length != null) {
-        targetLength = _paddingConfig!.length!;
-      } else {
-        targetLength = encodings
-            .map((e) => e.length)
-            .reduce((a, b) => a > b ? a : b);
-      }
-
-      if (_paddingConfig!.padToMultipleOf != null) {
-        final multiple = _paddingConfig!.padToMultipleOf!;
-        final remainder = targetLength % multiple;
-        if (remainder != 0) {
-          targetLength += multiple - remainder;
-        }
-      }
-
-      return encodings
+    return _applyBatchPostProcessing(
+      pairs
           .map(
-            (e) => e.withPadding(
-              targetLength: targetLength,
-              padTokenId: vocab.padTokenId,
-              padOnRight: padOnRight,
+            (pair) => encodePair(
+              pair.$1,
+              pair.$2,
+              addSpecialTokens: addSpecialTokens,
+              maxLength: maxLength,
+              truncationStrategy: truncationStrategy,
             ),
           )
-          .toList();
-    }
-
-    return encodings;
+          .toList(),
+    );
   }
 
   List<_TokenInfo> _tokenizeWord(String word) {
@@ -983,11 +1030,11 @@ class WordPieceTokenizer {
       return [];
     }
 
-    if (word.length > config.maxWordLength) {
+    if (word.runes.length > config.maxWordLength) {
       return [
         _TokenInfo(
-          token: SpecialTokens.unk,
-          id: vocab.unkTokenId,
+          token: _unknownToken,
+          id: vocab.tokenToId(_unknownToken),
           startOffset: 0,
           endOffset: word.length,
         ),
@@ -1008,8 +1055,8 @@ class WordPieceTokenizer {
       if (match == null) {
         return [
           _TokenInfo(
-            token: SpecialTokens.unk,
-            id: vocab.unkTokenId,
+            token: _unknownToken,
+            id: vocab.tokenToId(_unknownToken),
             startOffset: 0,
             endOffset: word.length,
           ),
@@ -1081,27 +1128,47 @@ class WordPieceTokenizer {
   /// print(text); // 'hello , world !'
   /// ```
   String decode(List<int> ids, {bool skipSpecialTokens = true}) {
+    final tokens = ids
+        .map(vocab.idToToken)
+        .where(
+          (token) =>
+              !skipSpecialTokens ||
+              !(_json == null
+                  ? vocab.isSpecialToken(token)
+                  : (_json!['added_tokens'] as List<dynamic>? ?? []).any(
+                      (e) => e['content'] == token && e['special'] == true,
+                    )),
+        )
+        .toList();
+    final decoder = _json?['decoder'] as Map<String, dynamic>?;
+    if (_json != null && decoder == null) return tokens.join(' ');
+    final prefix = decoder?['prefix'] as String? ?? config.subwordPrefix;
     final buffer = StringBuffer();
-    var isFirst = true;
-
-    for (final id in ids) {
-      final token = vocab.idToToken(id);
-
-      if (skipSpecialTokens && vocab.isSpecialToken(token)) {
-        continue;
+    for (var i = 0; i < tokens.length; i++) {
+      var token = tokens[i];
+      if (token.startsWith(prefix) && (i > 0 || _json == null)) {
+        token = token.substring(prefix.length);
+      } else if (i > 0) {
+        token = ' $token';
       }
-
-      if (token.startsWith(config.subwordPrefix)) {
-        buffer.write(token.substring(config.subwordPrefix.length));
-      } else {
-        if (!isFirst) {
-          buffer.write(' ');
+      if (decoder?['cleanup'] == true) {
+        for (final entry in const {
+          ' .': '.',
+          ' ?': '?',
+          ' !': '!',
+          ' ,': ',',
+          " ' ": "'",
+          " n't": "n't",
+          " 'm": "'m",
+          " 's": "'s",
+          " 've": "'ve",
+          " 're": "'re",
+        }.entries) {
+          token = token.replaceAll(entry.key, entry.value);
         }
-        buffer.write(token);
-        isFirst = false;
       }
+      buffer.write(token);
     }
-
     return buffer.toString();
   }
 
@@ -1152,100 +1219,4 @@ class _TrieMatchResult {
   final int tokenId;
 
   const _TrieMatchResult({required this.endIndex, required this.tokenId});
-}
-
-class _EncodingData {
-  final List<String> tokens;
-  final List<int> ids;
-  final List<int> typeIds;
-  final List<int> attentionMask;
-  final List<int> specialTokensMask;
-  final List<List<int>> offsets;
-  final List<int?> wordIds;
-  final List<int?> sequenceIds;
-
-  const _EncodingData({
-    required this.tokens,
-    required this.ids,
-    required this.typeIds,
-    required this.attentionMask,
-    required this.specialTokensMask,
-    required this.offsets,
-    required this.wordIds,
-    required this.sequenceIds,
-  });
-
-  factory _EncodingData.fromEncoding(Encoding encoding) {
-    return _EncodingData(
-      tokens: encoding.tokens.toList(),
-      ids: encoding.ids.toList(),
-      typeIds: encoding.typeIds.toList(),
-      attentionMask: encoding.attentionMask.toList(),
-      specialTokensMask: encoding.specialTokensMask.toList(),
-      offsets: encoding.offsets.map((o) => [o.$1, o.$2]).toList(),
-      wordIds: encoding.wordIds.toList(),
-      sequenceIds: encoding.sequenceIds.toList(),
-    );
-  }
-
-  Encoding toEncoding() {
-    return Encoding(
-      tokens: tokens,
-      ids: ids,
-      typeIds: typeIds,
-      attentionMask: attentionMask,
-      specialTokensMask: specialTokensMask,
-      offsets: offsets.map((o) => (o[0], o[1])).toList(),
-      wordIds: wordIds,
-      sequenceIds: sequenceIds,
-    );
-  }
-}
-
-List<_EncodingData> _encodeChunkInIsolate(
-  List<String> texts,
-  List<String> vocabTokens,
-  WordPieceConfig config,
-  bool? addSpecialTokens,
-) {
-  final vocab = Vocabulary.fromTokens(
-    vocabTokens,
-    subwordPrefix: config.subwordPrefix,
-  );
-  final tokenizer = WordPieceTokenizer(vocab: vocab, config: config);
-  final results = <_EncodingData>[];
-  for (final text in texts) {
-    final encoding = tokenizer.encode(text, addSpecialTokens: addSpecialTokens);
-    results.add(_EncodingData.fromEncoding(encoding));
-  }
-
-  return results;
-}
-
-List<_EncodingData> _encodePairChunkInIsolate(
-  List<List<String>> pairs,
-  List<String> vocabTokens,
-  WordPieceConfig config,
-  bool? addSpecialTokens,
-  int? maxLength,
-  TruncationStrategy truncationStrategy,
-) {
-  final vocab = Vocabulary.fromTokens(
-    vocabTokens,
-    subwordPrefix: config.subwordPrefix,
-  );
-  final tokenizer = WordPieceTokenizer(vocab: vocab, config: config);
-  final results = <_EncodingData>[];
-  for (final pair in pairs) {
-    final encoding = tokenizer.encodePair(
-      pair[0],
-      pair[1],
-      addSpecialTokens: addSpecialTokens,
-      maxLength: maxLength,
-      truncationStrategy: truncationStrategy,
-    );
-    results.add(_EncodingData.fromEncoding(encoding));
-  }
-
-  return results;
 }

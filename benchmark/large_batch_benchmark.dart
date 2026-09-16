@@ -20,13 +20,19 @@ void main() async {
   print('');
 
   // Generate longer, more realistic texts
-  final longTexts = List.generate(500, (i) => '''
+  final longTexts = List.generate(
+    500,
+    (i) =>
+        '''
 Sentence $i: Machine learning is a subset of artificial intelligence that enables
 systems to learn and improve from experience without being explicitly programmed.
 Deep learning, a subset of machine learning, uses neural networks with many layers
 to analyze various factors of data. Natural language processing is a branch of AI
 that helps computers understand, interpret and manipulate human language.
-'''.replaceAll('\n', ' ').trim());
+'''
+            .replaceAll('\n', ' ')
+            .trim(),
+  );
 
   print('-' * 70);
   print('Test: 500 long texts (~50 tokens each)');
@@ -45,13 +51,18 @@ that helps computers understand, interpret and manipulate human language.
   final totalTokens = seqResults.fold<int>(0, (sum, e) => sum + e.length);
   print('  Time: ${seqMs}ms');
   print('  Total tokens: $totalTokens');
-  print('  Throughput: ${(totalTokens / seqMs * 1000 / 1000000).toStringAsFixed(2)}M tokens/sec');
+  print(
+    '  Throughput: ${(totalTokens / seqMs * 1000 / 1000000).toStringAsFixed(2)}M tokens/sec',
+  );
 
   // Parallel with different worker counts
   for (final workers in [2, 4]) {
     print('\nParallel processing ($workers workers)...');
     final swPar = Stopwatch()..start();
-    final parResults = await tokenizer.encodeBatchParallel(longTexts, numWorkers: workers);
+    final parResults = await tokenizer.encodeBatchParallel(
+      longTexts,
+      numWorkers: workers,
+    );
     swPar.stop();
     final parMs = swPar.elapsedMilliseconds;
 

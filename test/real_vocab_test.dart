@@ -69,7 +69,7 @@ void main() async {
 
   // Test decode
   print('=== Decode Test ===\n');
-  final originalText = 'Hello, how are you today?';
+  const originalText = 'Hello, how are you today?';
   final enc = tokenizer.encode(originalText);
   final decoded = tokenizer.decode(enc.ids);
   print('Original: "$originalText"');
@@ -82,30 +82,37 @@ void main() async {
   stopwatch.reset();
   stopwatch.start();
 
-  final batchTexts = List.generate(100, (i) => 'This is test sentence number $i.');
+  final batchTexts = List.generate(
+    100,
+    (i) => 'This is test sentence number $i.',
+  );
   final batchEncodings = tokenizer.encodeBatch(batchTexts);
 
   print('Encoded 100 sentences in ${stopwatch.elapsedMilliseconds}ms');
-  print('Average tokens per sentence: ${batchEncodings.map((e) => e.length).reduce((a, b) => a + b) / batchEncodings.length}');
+  print(
+    'Average tokens per sentence: ${batchEncodings.map((e) => e.length).reduce((a, b) => a + b) / batchEncodings.length}',
+  );
   print('');
 
   // Test special characters and edge cases
   print('=== Edge Cases ===\n');
 
   final edgeCases = [
-    '',  // empty
-    '   ',  // whitespace only
-    '!!!???',  // punctuation only
-    '12345',  // numbers
-    'café',  // accents
-    '你好世界',  // Chinese
-    'Hello 世界!',  // mixed
-    'a' * 100,  // long word (should be [UNK])
+    '', // empty
+    '   ', // whitespace only
+    '!!!???', // punctuation only
+    '12345', // numbers
+    'café', // accents
+    '你好世界', // Chinese
+    'Hello 世界!', // mixed
+    'a' * 100, // long word (should be [UNK])
   ];
 
   for (final text in edgeCases) {
     final encoding = tokenizer.encode(text);
-    final display = text.isEmpty ? '(empty)' : (text.trim().isEmpty ? '(whitespace)' : text);
+    final display = text.isEmpty
+        ? '(empty)'
+        : (text.trim().isEmpty ? '(whitespace)' : text);
     print('$display -> ${encoding.tokens}');
   }
 
@@ -114,7 +121,7 @@ void main() async {
   // Performance test
   print('=== Performance Test ===\n');
 
-  final longText = '''
+  const longText = '''
   Natural language processing (NLP) is a subfield of linguistics, computer science,
   and artificial intelligence concerned with the interactions between computers and
   human language, in particular how to program computers to process and analyze large
@@ -132,9 +139,13 @@ void main() async {
 
   final elapsed = stopwatch.elapsedMilliseconds;
   print('Tokenized long text $iterations times in ${elapsed}ms');
-  print('Average: ${(elapsed / iterations).toStringAsFixed(2)}ms per tokenization');
+  print(
+    'Average: ${(elapsed / iterations).toStringAsFixed(2)}ms per tokenization',
+  );
 
   final singleEncoding = tokenizer.encode(longText);
   print('Tokens per text: ${singleEncoding.length}');
-  print('Throughput: ${(singleEncoding.length * iterations / elapsed * 1000).toStringAsFixed(0)} tokens/sec');
+  print(
+    'Throughput: ${(singleEncoding.length * iterations / elapsed * 1000).toStringAsFixed(0)} tokens/sec',
+  );
 }

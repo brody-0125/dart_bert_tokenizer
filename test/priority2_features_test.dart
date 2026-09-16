@@ -3,6 +3,8 @@
 /// - sequenceIds property
 /// - Fluent padding/truncation configuration
 /// - Encoding.merge() method
+library;
+
 import 'package:test/test.dart';
 import 'package:dart_bert_tokenizer/dart_bert_tokenizer.dart';
 
@@ -391,10 +393,7 @@ void main() {
           strategy: TruncationStrategy.longestFirst,
         );
 
-      final encoding = tok.encodePair(
-        'very long first sentence here',
-        'short',
-      );
+      final encoding = tok.encodePair('very long first sentence here', 'short');
 
       expect(encoding.length, lessThanOrEqualTo(10));
     });

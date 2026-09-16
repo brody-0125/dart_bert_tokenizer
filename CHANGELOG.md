@@ -9,7 +9,30 @@
 - Add `Vocabulary.fromMap()` factory for token-to-ID map construction
 - Automatically extract normalizer, post-processor, and added tokens from JSON
 - Support optional `configOverride` parameter for advanced configuration
-- 25 new tests including vocab.txt vs tokenizer.json equivalence verification
+- Add pinned Hugging Face network fixtures for uncased, cased, multilingual BERT
+  and MiniLM, plus reproducible offline goldens from tokenizers 0.23.2.
+- Preserve original Unicode code-point offsets through normalization; fix
+  non-BMP lowercasing, canonical accent removal and CJK alignment.
+- Keep word IDs local to each input sequence and preserve them during truncation.
+- Truncate content before adding special tokens; apply padding after pair
+  construction and retain JSON settings in parallel batches.
+- Honor JSON decoder cleanup, null components, exact added tokens, supported
+  templates, and serialized padding/truncation settings. Reject unsupported
+  pipeline components and added-token flags explicitly.
+- Validate invalid lengths, worker counts, vocabulary IDs and impossible pair
+  truncation requests. Support custom unknown and padding metadata.
+- Keep legacy vocab.txt decoding; JSON WordPiece cleanup produces punctuation
+  without preceding spaces. Offsets now consistently refer to original Unicode
+  code points rather than normalized UTF-16 positions.
+- Document the HF 0.23.2 early-left-truncation word-ID discrepancy; retain correct
+  original word IDs and verify against HF's post-process reference path.
+- Add Linux/Windows, minimum SDK/stable, analysis and network fixture CI.
+
+## 1.0.2
+
+- Add project configuration files (.gitignore).
+- Update .pubignore for cleaner package distribution.
+  (Restored from the published 1.0.2 archive.)
 
 ## 1.0.1
 

@@ -365,6 +365,7 @@ class Encoding {
     required int targetLength,
     required int padTokenId,
     String padToken = '[PAD]',
+    int padTypeId = 0,
     bool padOnRight = true,
   }) {
     if (length >= targetLength) {
@@ -383,7 +384,8 @@ class Encoding {
     }
     paddedIds.setRange(dstOffset, dstOffset + srcLen, ids);
 
-    final paddedTypeIds = Uint8List(targetLength);
+    final paddedTypeIds = Uint8List(targetLength)
+      ..fillRange(0, targetLength, padTypeId);
     paddedTypeIds.setRange(dstOffset, dstOffset + srcLen, typeIds);
 
     final paddedAttentionMask = Uint8List(targetLength);
@@ -428,6 +430,7 @@ class Encoding {
     required int multiple,
     required int padTokenId,
     String padToken = '[PAD]',
+    int padTypeId = 0,
     bool padOnRight = true,
   }) {
     if (multiple <= 0) return this;
@@ -440,6 +443,7 @@ class Encoding {
       targetLength: targetLength,
       padTokenId: padTokenId,
       padToken: padToken,
+      padTypeId: padTypeId,
       padOnRight: padOnRight,
     );
   }
@@ -520,6 +524,7 @@ class Encoding {
     required int maxLength,
     TruncationStrategy strategy = TruncationStrategy.longestFirst,
     int numSpecialTokens = 3,
+    bool truncateFromEnd = true,
   }) {
     final availableLength = maxLength - numSpecialTokens;
     if (availableLength <= 0) {
@@ -535,21 +540,38 @@ class Encoding {
 
     switch (strategy) {
       case TruncationStrategy.longestFirst:
-        return _truncateLongestFirst(encodingA, encodingB, tokensToRemove);
+        return _truncateLongestFirst(
+          encodingA,
+          encodingB,
+          tokensToRemove,
+          truncateFromEnd,
+        );
 
       case TruncationStrategy.onlyFirst:
         final newLengthA = encodingA.length - tokensToRemove;
         if (newLengthA <= 0) {
-          return (Encoding.empty(), encodingB);
+          throw ArgumentError('The first sequence cannot satisfy truncation');
         }
-        return (encodingA.withTruncation(maxLength: newLengthA), encodingB);
+        return (
+          encodingA.withTruncation(
+            maxLength: newLengthA,
+            truncateFromEnd: truncateFromEnd,
+          ),
+          encodingB,
+        );
 
       case TruncationStrategy.onlySecond:
         final newLengthB = encodingB.length - tokensToRemove;
         if (newLengthB <= 0) {
-          return (encodingA, Encoding.empty());
+          throw ArgumentError('The second sequence cannot satisfy truncation');
         }
-        return (encodingA, encodingB.withTruncation(maxLength: newLengthB));
+        return (
+          encodingA,
+          encodingB.withTruncation(
+            maxLength: newLengthB,
+            truncateFromEnd: truncateFromEnd,
+          ),
+        );
 
       case TruncationStrategy.doNotTruncate:
         return (encodingA, encodingB);
@@ -560,12 +582,14 @@ class Encoding {
     Encoding encodingA,
     Encoding encodingB,
     int tokensToRemove,
+    bool truncateFromEnd,
   ) {
     var lengthA = encodingA.length;
     var lengthB = encodingB.length;
 
     for (var i = 0; i < tokensToRemove; i++) {
-      if (lengthA > lengthB) {
+      if (lengthA > lengthB ||
+          (lengthA == lengthB && encodingA.length <= encodingB.length)) {
         lengthA--;
       } else {
         lengthB--;
@@ -573,10 +597,16 @@ class Encoding {
     }
 
     final truncatedA = lengthA < encodingA.length
-        ? encodingA.withTruncation(maxLength: lengthA)
+        ? encodingA.withTruncation(
+            maxLength: lengthA,
+            truncateFromEnd: truncateFromEnd,
+          )
         : encodingA;
     final truncatedB = lengthB < encodingB.length
-        ? encodingB.withTruncation(maxLength: lengthB)
+        ? encodingB.withTruncation(
+            maxLength: lengthB,
+            truncateFromEnd: truncateFromEnd,
+          )
         : encodingB;
 
     return (truncatedA, truncatedB);

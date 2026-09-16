@@ -21,7 +21,9 @@ void main() async {
   final sw = Stopwatch()..start();
   final tokenizer = WordPieceTokenizer.fromVocabFileSync(vocabPath);
   sw.stop();
-  print('Vocabulary loaded: ${tokenizer.vocab.size} tokens in ${sw.elapsedMilliseconds}ms');
+  print(
+    'Vocabulary loaded: ${tokenizer.vocab.size} tokens in ${sw.elapsedMilliseconds}ms',
+  );
   print('');
 
   // Run benchmarks
@@ -38,15 +40,59 @@ void main() async {
 
 Future<void> _runWithDemoVocab() async {
   final vocab = Vocabulary.fromTokens([
-    '[PAD]', ...List.generate(99, (i) => '[unused$i]'),
-    '[UNK]', '[CLS]', '[SEP]', '[MASK]',
+    '[PAD]',
+    ...List.generate(99, (i) => '[unused$i]'),
+    '[UNK]',
+    '[CLS]',
+    '[SEP]',
+    '[MASK]',
     ...List.generate(896, (i) => '[unused${99 + i}]'),
-    'the', 'a', 'is', 'it', 'this', 'that', 'what', 'how', 'to', 'of', 'and',
-    'hello', 'world', 'test', 'word', 'sentence', 'text', 'quick', 'brown',
-    'fox', 'jumps', 'over', 'lazy', 'dog', 'machine', 'learning', 'deep',
-    'neural', 'network', 'transformer', 'bert', 'token', 'embedding',
-    ',', '.', '!', '?', "'",
-    '##s', '##ed', '##ing', '##er', '##est', '##ly', '##tion', '##ment',
+    'the',
+    'a',
+    'is',
+    'it',
+    'this',
+    'that',
+    'what',
+    'how',
+    'to',
+    'of',
+    'and',
+    'hello',
+    'world',
+    'test',
+    'word',
+    'sentence',
+    'text',
+    'quick',
+    'brown',
+    'fox',
+    'jumps',
+    'over',
+    'lazy',
+    'dog',
+    'machine',
+    'learning',
+    'deep',
+    'neural',
+    'network',
+    'transformer',
+    'bert',
+    'token',
+    'embedding',
+    ',',
+    '.',
+    '!',
+    '?',
+    "'",
+    '##s',
+    '##ed',
+    '##ing',
+    '##er',
+    '##est',
+    '##ly',
+    '##tion',
+    '##ment',
   ]);
   final tokenizer = WordPieceTokenizer(vocab: vocab);
 
@@ -58,11 +104,7 @@ Future<void> _runWithDemoVocab() async {
 }
 
 String? _findVocabFile() {
-  final paths = [
-    'vocab.txt',
-    'benchmark/vocab.txt',
-    '../vocab.txt',
-  ];
+  final paths = ['vocab.txt', 'benchmark/vocab.txt', '../vocab.txt'];
   for (final path in paths) {
     if (File(path).existsSync()) return path;
   }
@@ -77,7 +119,10 @@ Future<void> _runSingleEncodingBenchmark(WordPieceTokenizer tokenizer) async {
   final testCases = [
     ('Short', 'Hello, world!'),
     ('Medium', 'The quick brown fox jumps over the lazy dog.'),
-    ('Long', 'Machine learning is a subset of artificial intelligence that enables systems to learn and improve from experience without being explicitly programmed. Deep learning, a subset of machine learning, uses neural networks with many layers.'),
+    (
+      'Long',
+      'Machine learning is a subset of artificial intelligence that enables systems to learn and improve from experience without being explicitly programmed. Deep learning, a subset of machine learning, uses neural networks with many layers.',
+    ),
   ];
 
   for (final (name, text) in testCases) {
@@ -106,8 +151,10 @@ Future<void> _runBatchEncodingBenchmark(WordPieceTokenizer tokenizer) async {
   print('2. BATCH ENCODING (Sequential)');
   print('-' * 70);
 
-  final texts = List.generate(100, (i) =>
-    'This is test sentence number $i for batch encoding benchmark.');
+  final texts = List.generate(
+    100,
+    (i) => 'This is test sentence number $i for batch encoding benchmark.',
+  );
 
   // Warmup
   tokenizer.encodeBatch(texts.take(10).toList());
@@ -121,8 +168,12 @@ Future<void> _runBatchEncodingBenchmark(WordPieceTokenizer tokenizer) async {
     sw.stop();
 
     final totalTokens = results.fold<int>(0, (sum, e) => sum + e.length);
-    final tokensPerMs = (totalTokens / sw.elapsedMilliseconds).toStringAsFixed(0);
-    print('  Batch $batchSize: ${sw.elapsedMilliseconds}ms ($tokensPerMs tokens/ms)');
+    final tokensPerMs = (totalTokens / sw.elapsedMilliseconds).toStringAsFixed(
+      0,
+    );
+    print(
+      '  Batch $batchSize: ${sw.elapsedMilliseconds}ms ($tokensPerMs tokens/ms)',
+    );
   }
   print('');
 }
@@ -132,9 +183,12 @@ Future<void> _runParallelBenchmark(WordPieceTokenizer tokenizer) async {
   print('3. PARALLEL vs SEQUENTIAL BATCH ENCODING');
   print('-' * 70);
 
-  final texts = List.generate(100, (i) =>
-    'This is test sentence number $i for parallel encoding benchmark. '
-    'Machine learning and deep learning are transforming many industries.');
+  final texts = List.generate(
+    100,
+    (i) =>
+        'This is test sentence number $i for parallel encoding benchmark. '
+        'Machine learning and deep learning are transforming many industries.',
+  );
 
   // Warmup
   tokenizer.encodeBatch(texts.take(10).toList());
@@ -153,7 +207,8 @@ Future<void> _runParallelBenchmark(WordPieceTokenizer tokenizer) async {
     final parResults = await tokenizer.encodeBatchParallel(batch);
     swPar.stop();
 
-    final speedup = (swSeq.elapsedMilliseconds / swPar.elapsedMilliseconds).toStringAsFixed(2);
+    final speedup = (swSeq.elapsedMilliseconds / swPar.elapsedMilliseconds)
+        .toStringAsFixed(2);
     final seqMs = swSeq.elapsedMilliseconds;
     final parMs = swPar.elapsedMilliseconds;
 
@@ -236,7 +291,8 @@ Future<void> _runMemoryBenchmark(WordPieceTokenizer tokenizer) async {
   final beforeTypeIds = numTokens * 8;
   final beforeAttention = numTokens * 8;
   final beforeSpecial = numTokens * 8;
-  final totalBefore = beforeIds + beforeTypeIds + beforeAttention + beforeSpecial;
+  final totalBefore =
+      beforeIds + beforeTypeIds + beforeAttention + beforeSpecial;
 
   // After optimization: Int32List (4 bytes) and Uint8List (1 byte)
   final afterIds = numTokens * 4; // Int32List

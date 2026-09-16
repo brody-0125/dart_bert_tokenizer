@@ -145,8 +145,10 @@ void main() {
       final tokens = preTokenizer.preTokenize('hello, world!');
 
       expect(tokens.length, equals(4));
-      expect(tokens.map((t) => t.text).toList(),
-          equals(['hello', ',', 'world', '!']));
+      expect(
+        tokens.map((t) => t.text).toList(),
+        equals(['hello', ',', 'world', '!']),
+      );
     });
 
     test('lowercase', () {
@@ -312,8 +314,10 @@ void main() {
       // First sentence should have typeId = 0
       // Second sentence should have typeId = 1
       final sepIndex = encoding.tokens.indexOf('[SEP]');
-      expect(encoding.typeIds.sublist(0, sepIndex + 1).every((t) => t == 0),
-          isTrue);
+      expect(
+        encoding.typeIds.sublist(0, sepIndex + 1).every((t) => t == 0),
+        isTrue,
+      );
     });
 
     test('decode', () {

@@ -33,7 +33,8 @@ Map<String, dynamic> _buildMinimalTokenizerJson({
     'version': '1.0',
     'truncation': null,
     'padding': null,
-    'added_tokens': addedTokens ??
+    'added_tokens':
+        addedTokens ??
         [
           {
             'id': 0,
@@ -81,7 +82,8 @@ Map<String, dynamic> _buildMinimalTokenizerJson({
             'normalized': false,
           },
         ],
-    'normalizer': normalizer ??
+    'normalizer':
+        normalizer ??
         {
           'type': 'BertNormalizer',
           'clean_text': true,
@@ -90,7 +92,8 @@ Map<String, dynamic> _buildMinimalTokenizerJson({
           'lowercase': true,
         },
     'pre_tokenizer': {'type': 'BertPreTokenizer'},
-    'post_processor': postProcessor ??
+    'post_processor':
+        postProcessor ??
         {
           'type': 'TemplateProcessing',
           'single': [
@@ -149,8 +152,9 @@ void main() {
   group('fromTokenizerJsonString', () {
     test('creates a tokenizer from minimal JSON', () {
       final json = _buildMinimalTokenizerJson();
-      final tokenizer =
-          WordPieceTokenizer.fromTokenizerJsonString(jsonEncode(json));
+      final tokenizer = WordPieceTokenizer.fromTokenizerJsonString(
+        jsonEncode(json),
+      );
 
       final encoding = tokenizer.encode('hello world');
       expect(encoding.tokens, equals(['[CLS]', 'hello', 'world', '[SEP]']));
@@ -159,8 +163,9 @@ void main() {
 
     test('handles subword tokenization', () {
       final json = _buildMinimalTokenizerJson();
-      final tokenizer =
-          WordPieceTokenizer.fromTokenizerJsonString(jsonEncode(json));
+      final tokenizer = WordPieceTokenizer.fromTokenizerJsonString(
+        jsonEncode(json),
+      );
 
       final encoding = tokenizer.encode('testing');
       expect(encoding.tokens, equals(['[CLS]', 'test', '##ing', '[SEP]']));
@@ -168,8 +173,9 @@ void main() {
 
     test('handles unknown tokens', () {
       final json = _buildMinimalTokenizerJson();
-      final tokenizer =
-          WordPieceTokenizer.fromTokenizerJsonString(jsonEncode(json));
+      final tokenizer = WordPieceTokenizer.fromTokenizerJsonString(
+        jsonEncode(json),
+      );
 
       final encoding = tokenizer.encode('xyz');
       expect(encoding.tokens, equals(['[CLS]', '[UNK]', '[SEP]']));
@@ -187,8 +193,9 @@ void main() {
           'lowercase': true,
         },
       );
-      final tokenizer =
-          WordPieceTokenizer.fromTokenizerJsonString(jsonEncode(json));
+      final tokenizer = WordPieceTokenizer.fromTokenizerJsonString(
+        jsonEncode(json),
+      );
 
       expect(tokenizer.config.lowercase, isTrue);
       expect(tokenizer.config.stripAccents, isTrue);
@@ -205,8 +212,9 @@ void main() {
           'lowercase': false,
         },
       );
-      final tokenizer =
-          WordPieceTokenizer.fromTokenizerJsonString(jsonEncode(json));
+      final tokenizer = WordPieceTokenizer.fromTokenizerJsonString(
+        jsonEncode(json),
+      );
 
       expect(tokenizer.config.lowercase, isFalse);
       expect(tokenizer.config.stripAccents, isFalse);
@@ -223,8 +231,9 @@ void main() {
           'lowercase': false,
         },
       );
-      final tokenizer =
-          WordPieceTokenizer.fromTokenizerJsonString(jsonEncode(json));
+      final tokenizer = WordPieceTokenizer.fromTokenizerJsonString(
+        jsonEncode(json),
+      );
 
       expect(tokenizer.config.lowercase, isFalse);
       expect(tokenizer.config.stripAccents, isTrue);
@@ -234,20 +243,22 @@ void main() {
       final json = _buildMinimalTokenizerJson(normalizer: null);
       // Need to set normalizer to null explicitly in the map
       json['normalizer'] = null;
-      final tokenizer =
-          WordPieceTokenizer.fromTokenizerJsonString(jsonEncode(json));
+      final tokenizer = WordPieceTokenizer.fromTokenizerJsonString(
+        jsonEncode(json),
+      );
 
-      expect(tokenizer.config.lowercase, isTrue);
-      expect(tokenizer.config.stripAccents, isTrue);
-      expect(tokenizer.config.handleChineseChars, isTrue);
+      expect(tokenizer.config.lowercase, isFalse);
+      expect(tokenizer.config.stripAccents, isFalse);
+      expect(tokenizer.config.handleChineseChars, isFalse);
     });
   });
 
   group('post_processor extraction', () {
     test('extracts addClsToken and addSepToken from template', () {
       final json = _buildMinimalTokenizerJson();
-      final tokenizer =
-          WordPieceTokenizer.fromTokenizerJsonString(jsonEncode(json));
+      final tokenizer = WordPieceTokenizer.fromTokenizerJsonString(
+        jsonEncode(json),
+      );
 
       expect(tokenizer.config.addClsToken, isTrue);
       expect(tokenizer.config.addSepToken, isTrue);
@@ -267,8 +278,9 @@ void main() {
           ],
         },
       );
-      final tokenizer =
-          WordPieceTokenizer.fromTokenizerJsonString(jsonEncode(json));
+      final tokenizer = WordPieceTokenizer.fromTokenizerJsonString(
+        jsonEncode(json),
+      );
 
       expect(tokenizer.config.addClsToken, isFalse);
       expect(tokenizer.config.addSepToken, isTrue);
@@ -277,11 +289,12 @@ void main() {
     test('defaults when post_processor is null', () {
       final json = _buildMinimalTokenizerJson(postProcessor: null);
       json['post_processor'] = null;
-      final tokenizer =
-          WordPieceTokenizer.fromTokenizerJsonString(jsonEncode(json));
+      final tokenizer = WordPieceTokenizer.fromTokenizerJsonString(
+        jsonEncode(json),
+      );
 
-      expect(tokenizer.config.addClsToken, isTrue);
-      expect(tokenizer.config.addSepToken, isTrue);
+      expect(tokenizer.config.addClsToken, isFalse);
+      expect(tokenizer.config.addSepToken, isFalse);
     });
   });
 
@@ -317,11 +330,13 @@ void main() {
 
       expect(
         () => WordPieceTokenizer.fromTokenizerJsonString(jsonEncode(json)),
-        throwsA(isA<FormatException>().having(
-          (e) => e.message,
-          'message',
-          contains('BPE'),
-        )),
+        throwsA(
+          isA<FormatException>().having(
+            (e) => e.message,
+            'message',
+            contains('BPE'),
+          ),
+        ),
       );
     });
 
@@ -361,10 +376,12 @@ void main() {
           },
         ],
       );
-      final tokenizer =
-          WordPieceTokenizer.fromTokenizerJsonString(jsonEncode(json));
+      final tokenizer = WordPieceTokenizer.fromTokenizerJsonString(
+        jsonEncode(json),
+      );
 
-      expect(tokenizer.convertTokensToIds(['[CUSTOM]']), equals([999999]));
+      // HF assigns added-only tokens after the model vocabulary, ignoring a stale serialized ID.
+      expect(tokenizer.convertTokensToIds(['[CUSTOM]']), equals([14]));
     });
 
     test('does not override vocab entries with added_tokens', () {
@@ -381,8 +398,9 @@ void main() {
           },
         ],
       );
-      final tokenizer =
-          WordPieceTokenizer.fromTokenizerJsonString(jsonEncode(json));
+      final tokenizer = WordPieceTokenizer.fromTokenizerJsonString(
+        jsonEncode(json),
+      );
 
       // [PAD] should keep its original ID 0 from vocab, not 9999
       expect(tokenizer.convertTokensToIds(['[PAD]']), equals([0]));
@@ -392,15 +410,17 @@ void main() {
   group('model config extraction', () {
     test('extracts max_input_chars_per_word', () {
       final json = _buildMinimalTokenizerJson(maxInputCharsPerWord: 50);
-      final tokenizer =
-          WordPieceTokenizer.fromTokenizerJsonString(jsonEncode(json));
+      final tokenizer = WordPieceTokenizer.fromTokenizerJsonString(
+        jsonEncode(json),
+      );
       expect(tokenizer.config.maxWordLength, equals(50));
     });
 
     test('extracts continuing_subword_prefix', () {
       final json = _buildMinimalTokenizerJson(subwordPrefix: '@@');
-      final tokenizer =
-          WordPieceTokenizer.fromTokenizerJsonString(jsonEncode(json));
+      final tokenizer = WordPieceTokenizer.fromTokenizerJsonString(
+        jsonEncode(json),
+      );
       expect(tokenizer.config.subwordPrefix, equals('@@'));
     });
   });
@@ -452,10 +472,16 @@ void main() {
         final vocabEncoding = vocabTokenizer.encode(text);
         final jsonEncoding = jsonTokenizer.encode(text);
 
-        expect(jsonEncoding.ids, equals(vocabEncoding.ids),
-            reason: 'IDs mismatch for "$text"');
-        expect(jsonEncoding.tokens, equals(vocabEncoding.tokens),
-            reason: 'Tokens mismatch for "$text"');
+        expect(
+          jsonEncoding.ids,
+          equals(vocabEncoding.ids),
+          reason: 'IDs mismatch for "$text"',
+        );
+        expect(
+          jsonEncoding.tokens,
+          equals(vocabEncoding.tokens),
+          reason: 'Tokens mismatch for "$text"',
+        );
       }
     });
 
@@ -475,7 +501,7 @@ void main() {
     });
 
     test('produces identical encodings for subword-heavy text', () {
-      final text = 'Tokenization preprocessing unrecognizable';
+      const text = 'Tokenization preprocessing unrecognizable';
       final vocabEncoding = vocabTokenizer.encode(text);
       final jsonEncoding = jsonTokenizer.encode(text);
 
@@ -484,7 +510,7 @@ void main() {
     });
 
     test('produces identical encodings with special characters', () {
-      final text = 'café résumé naïve';
+      const text = 'café résumé naïve';
       final vocabEncoding = vocabTokenizer.encode(text);
       final jsonEncoding = jsonTokenizer.encode(text);
 
@@ -492,15 +518,16 @@ void main() {
       expect(jsonEncoding.tokens, equals(vocabEncoding.tokens));
     });
 
-    test('decode round-trip matches', () {
-      final text = 'Hello world, this is a test!';
+    test('JSON decoder cleanup differs from legacy vocab decoding', () {
+      const text = 'Hello world, this is a test!';
       final vocabEncoding = vocabTokenizer.encode(text);
       final jsonEncoding = jsonTokenizer.encode(text);
 
       final vocabDecoded = vocabTokenizer.decode(vocabEncoding.ids.toList());
       final jsonDecoded = jsonTokenizer.decode(jsonEncoding.ids.toList());
 
-      expect(jsonDecoded, equals(vocabDecoded));
+      expect(vocabDecoded, 'hello world , this is a test !');
+      expect(jsonDecoded, 'hello world, this is a test!');
     });
   });
 }

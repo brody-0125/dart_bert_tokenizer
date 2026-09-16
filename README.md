@@ -1,6 +1,6 @@
 # dart_bert_tokenizer
 
-![Dart](https://img.shields.io/badge/Dart-3.0+-0175C2.svg?logo=dart)
+![Dart](https://img.shields.io/badge/Dart-3.10.7+-0175C2.svg?logo=dart)
 ![License](https://img.shields.io/badge/License-MIT-yellow.svg)
 ![Hugging Face](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Compatible-FF6600)
 
@@ -8,12 +8,12 @@ A lightweight, pure Dart implementation of BERT WordPiece tokenizer.
 
 ## Features
 
-- **Pure Dart** - Zero dependencies, works everywhere (Flutter, Server, CLI, Web)
+- **Pure Dart** - Zero runtime dependencies for Flutter native, server and CLI applications
 - **Memory Efficient** - Typed arrays (`Int32List`, `Uint8List`) for 50-70% memory reduction
 - **Full API** - Encoding, decoding, padding, truncation, offset mapping
 - **Batch Processing** - Sequential and parallel (Isolate-based) batch encoding
 - **HuggingFace tokenizer.json** - Load directly from HuggingFace tokenizer files
-- **Well Tested** - 328 tests with 100% pass rate
+- **Well Tested** - Offline HF goldens and pinned network fixtures for four public models
 
 ## Installation
 
@@ -294,7 +294,7 @@ final tokenizer = WordPieceTokenizer(
 | Vocab loading | ~40ms (30K tokens) |
 | Memory (vocab) | ~5MB |
 | Lookup complexity | O(m) per token |
-| HuggingFace compatibility | 100% (34 test cases) |
+| HuggingFace compatibility | Verified fixtures; see supported pipelines below |
 
 ## Vocabulary Files
 
@@ -312,7 +312,7 @@ Download from HuggingFace:
 ## Testing
 
 ```bash
-# Run all tests (328 tests)
+# Run offline tests (network fixtures are opt-in)
 dart test
 
 # Run specific test file
@@ -328,7 +328,7 @@ dart run benchmark/hf_compatibility_benchmark.dart
 ### HuggingFace Compatibility Verification
 
 ```bash
-# Run HuggingFace compatibility benchmark (85 tests, 100% accuracy)
+# Run the legacy HuggingFace compatibility benchmark
 dart run benchmark/hf_compatibility_benchmark.dart
 
 # Regenerate benchmark expected values (requires Python + tokenizers)
@@ -339,3 +339,48 @@ python scripts/generate_hf_benchmark_data.py
 ## License
 
 MIT License
+
+
+## Hugging Face compatibility in 1.1.0
+
+Fixtures pin `google-bert/bert-base-uncased`, `google-bert/bert-base-cased`,
+`google-bert/bert-base-multilingual-cased` and
+`sentence-transformers/all-MiniLM-L6-v2` by commit SHA and file SHA-256.
+Python `tokenizers==0.23.2` generates the checked-in expected values. Tests compare
+IDs, tokens, type IDs, attention/special masks, offsets, word/sequence IDs and
+both decoder modes. See [fixture provenance and regeneration](test/fixtures/huggingface/README.md).
+
+Supported JSON components are WordPiece, BertNormalizer, BertPreTokenizer,
+BertProcessing, WordPiece decoder, and TemplateProcessing with one occurrence
+of each input sequence and single vocabulary-token special entries. Null
+normalizer, pre-tokenizer, post-processor and decoder preserve their respective
+absence. Exact added-token matching (`normalized`, `single_word`, `lstrip` and
+`rstrip` all false) is supported. Other component types, unsupported added-token
+flags and nonzero truncation stride fail explicitly with `FormatException`.
+Type IDs must fit the public `Uint8List` representation (0–255).
+
+JSON padding and truncation settings are applied, including MiniLM's serialized
+128-token padding. Use `noPadding()`/`noTruncation()` to disable them. JSON decoder
+cleanup is honored: for example `Hello, world!` decodes to `hello, world!` with
+the uncased JSON pipeline. The vocab.txt API keeps its legacy spaced decoding
+(`hello , world !`). `configOverride` overrides the exposed WordPiece settings
+and uses the legacy CLS/SEP configuration instead of the JSON template.
+
+Offsets and character lookup APIs use **original Unicode code-point indices**,
+not normalized-text indices or Dart UTF-16 code-unit indices. For example the
+`hello` in `😊 hello` spans `(2, 7)`. To extract it, use
+`String.fromCharCodes(text.runes.toList().sublist(2, 7))`.
+Word IDs restart at zero for each input sequence; use `sequenceIndex` for pair
+word/character lookups. Padding and special tokens have null word/sequence IDs.
+
+Original word IDs are retained during left truncation. This differs from HF
+0.23.2's early-truncation optimization in one documented boundary case; the
+fixture includes both the observed HF output and HF's full-encoding/post-process
+reference result. This package does not claim universal HF pipeline compatibility.
+
+```sh
+RUN_HF_NETWORK_TESTS=1 dart test test/huggingface_network_test.dart
+```
+
+Network failures or changed model bytes fail this opt-in suite. The default
+`dart test` runs the offline regression suite without downloading models.

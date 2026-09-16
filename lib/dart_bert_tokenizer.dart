@@ -57,7 +57,7 @@
 ///   'Third sentence.',
 /// ]);
 /// ```
-library dart_bert_tokenizer;
+library;
 
 export 'src/encoding.dart' show Encoding, EncodingBuilder, TruncationStrategy;
 export 'src/pre_tokenizer.dart' show BertPreTokenizer, PreToken;

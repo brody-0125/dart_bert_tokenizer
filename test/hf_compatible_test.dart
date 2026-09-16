@@ -1,6 +1,8 @@
 /// Test cases migrated from HuggingFace transformers test_tokenization_common.py
 ///
 /// These tests ensure compatibility with HuggingFace tokenizers behavior.
+library;
+
 import 'package:test/test.dart';
 import 'package:dart_bert_tokenizer/dart_bert_tokenizer.dart';
 
@@ -93,7 +95,10 @@ void main() {
       // Original tokens should be at the end
       expect(padded.tokens.last, equals('[SEP]'));
       // Attention mask should be 0 for padding
-      expect(padded.attentionMask.sublist(0, padCount), everyElement(equals(0)));
+      expect(
+        padded.attentionMask.sublist(0, padCount),
+        everyElement(equals(0)),
+      );
     });
 
     test('no padding when already at target length', () {
@@ -195,8 +200,9 @@ void main() {
 
   group('Truncation Tests (test_right_and_left_truncation)', () {
     test('right truncation (default)', () {
-      final encoding =
-          tokenizer.encode('This is a very long sentence for testing');
+      final encoding = tokenizer.encode(
+        'This is a very long sentence for testing',
+      );
       final truncated = encoding.withTruncation(
         maxLength: 5,
         truncateFromEnd: true,
@@ -209,8 +215,9 @@ void main() {
     });
 
     test('left truncation', () {
-      final encoding =
-          tokenizer.encode('This is a very long sentence for testing');
+      final encoding = tokenizer.encode(
+        'This is a very long sentence for testing',
+      );
       final originalLength = encoding.length;
       final truncated = encoding.withTruncation(
         maxLength: 5,
@@ -221,7 +228,9 @@ void main() {
       // Should keep ending tokens
       expect(truncated.tokens.last, equals('[SEP]'));
       expect(
-          truncated.tokens, equals(encoding.tokens.sublist(originalLength - 5)));
+        truncated.tokens,
+        equals(encoding.tokens.sublist(originalLength - 5)),
+      );
     });
 
     test('no truncation when under max length', () {
@@ -251,16 +260,26 @@ void main() {
     });
 
     test('special tokens can be retrieved by ID', () {
-      expect(tokenizer.vocab.idToToken(tokenizer.vocab.clsTokenId),
-          equals('[CLS]'));
-      expect(tokenizer.vocab.idToToken(tokenizer.vocab.sepTokenId),
-          equals('[SEP]'));
-      expect(tokenizer.vocab.idToToken(tokenizer.vocab.padTokenId),
-          equals('[PAD]'));
-      expect(tokenizer.vocab.idToToken(tokenizer.vocab.unkTokenId),
-          equals('[UNK]'));
-      expect(tokenizer.vocab.idToToken(tokenizer.vocab.maskTokenId),
-          equals('[MASK]'));
+      expect(
+        tokenizer.vocab.idToToken(tokenizer.vocab.clsTokenId),
+        equals('[CLS]'),
+      );
+      expect(
+        tokenizer.vocab.idToToken(tokenizer.vocab.sepTokenId),
+        equals('[SEP]'),
+      );
+      expect(
+        tokenizer.vocab.idToToken(tokenizer.vocab.padTokenId),
+        equals('[PAD]'),
+      );
+      expect(
+        tokenizer.vocab.idToToken(tokenizer.vocab.unkTokenId),
+        equals('[UNK]'),
+      );
+      expect(
+        tokenizer.vocab.idToToken(tokenizer.vocab.maskTokenId),
+        equals('[MASK]'),
+      );
     });
   });
 
@@ -274,8 +293,11 @@ void main() {
       expect(encoding.specialTokensMask.last, equals(1));
       // Middle tokens should not be special
       for (var i = 1; i < encoding.length - 1; i++) {
-        expect(encoding.specialTokensMask[i], equals(0),
-            reason: 'Token at index $i should not be special');
+        expect(
+          encoding.specialTokensMask[i],
+          equals(0),
+          reason: 'Token at index $i should not be special',
+        );
       }
     });
 
@@ -301,10 +323,12 @@ void main() {
     test('special tokens count matches mask', () {
       final encoding = tokenizer.encode('hello world');
 
-      final specialCount =
-          encoding.specialTokensMask.where((m) => m == 1).length;
-      final specialTokensInOutput =
-          encoding.tokens.where((t) => t.startsWith('[') && t.endsWith(']'));
+      final specialCount = encoding.specialTokensMask
+          .where((m) => m == 1)
+          .length;
+      final specialTokensInOutput = encoding.tokens.where(
+        (t) => t.startsWith('[') && t.endsWith(']'),
+      );
 
       expect(specialCount, equals(specialTokensInOutput.length));
     });
@@ -318,21 +342,30 @@ void main() {
     });
 
     test('pair sequence has correct type IDs', () {
-      final encoding = tokenizer.encodePair('first sentence', 'second sentence');
+      final encoding = tokenizer.encodePair(
+        'first sentence',
+        'second sentence',
+      );
 
       // Find the first [SEP] position (end of first sequence)
       final firstSepIndex = encoding.tokens.indexOf('[SEP]');
 
       // Everything before and including first [SEP] should be typeId = 0
       for (var i = 0; i <= firstSepIndex; i++) {
-        expect(encoding.typeIds[i], equals(0),
-            reason: 'Token at index $i should have typeId 0');
+        expect(
+          encoding.typeIds[i],
+          equals(0),
+          reason: 'Token at index $i should have typeId 0',
+        );
       }
 
       // Everything after first [SEP] should be typeId = 1
       for (var i = firstSepIndex + 1; i < encoding.length; i++) {
-        expect(encoding.typeIds[i], equals(1),
-            reason: 'Token at index $i should have typeId 1');
+        expect(
+          encoding.typeIds[i],
+          equals(1),
+          reason: 'Token at index $i should have typeId 1',
+        );
       }
     });
   });
@@ -340,16 +373,18 @@ void main() {
   group('Number of Added Tokens (test_number_of_added_tokens)', () {
     test('single sequence adds 2 special tokens', () {
       final encoding = tokenizer.encode('hello');
-      final specialCount =
-          encoding.specialTokensMask.where((m) => m == 1).length;
+      final specialCount = encoding.specialTokensMask
+          .where((m) => m == 1)
+          .length;
 
       expect(specialCount, equals(2)); // [CLS] and [SEP]
     });
 
     test('pair sequence adds 3 special tokens', () {
       final encoding = tokenizer.encodePair('hello', 'world');
-      final specialCount =
-          encoding.specialTokensMask.where((m) => m == 1).length;
+      final specialCount = encoding.specialTokensMask
+          .where((m) => m == 1)
+          .length;
 
       expect(specialCount, equals(3)); // [CLS], [SEP], [SEP]
     });
@@ -457,10 +492,7 @@ void main() {
     });
 
     test('batch pair encoding', () {
-      final pairs = [
-        ('question1', 'context1'),
-        ('question2', 'context2'),
-      ];
+      final pairs = [('question1', 'context1'), ('question2', 'context2')];
       final batch = tokenizer.encodePairBatch(pairs);
 
       expect(batch.length, equals(2));
@@ -475,7 +507,10 @@ void main() {
   group('Decode Tests', () {
     test('decode with special tokens', () {
       final encoding = tokenizer.encode('hello world');
-      final withSpecial = tokenizer.decode(encoding.ids, skipSpecialTokens: false);
+      final withSpecial = tokenizer.decode(
+        encoding.ids,
+        skipSpecialTokens: false,
+      );
 
       expect(withSpecial, contains('[CLS]'));
       expect(withSpecial, contains('[SEP]'));
@@ -483,7 +518,10 @@ void main() {
 
     test('decode without special tokens', () {
       final encoding = tokenizer.encode('hello world');
-      final withoutSpecial = tokenizer.decode(encoding.ids, skipSpecialTokens: true);
+      final withoutSpecial = tokenizer.decode(
+        encoding.ids,
+        skipSpecialTokens: true,
+      );
 
       expect(withoutSpecial, isNot(contains('[CLS]')));
       expect(withoutSpecial, isNot(contains('[SEP]')));
@@ -518,10 +556,16 @@ void main() {
       for (var i = 0; i < encoding.length; i++) {
         if (encoding.specialTokensMask[i] == 0) {
           final offset = encoding.offsets[i];
-          expect(offset.$1, lessThanOrEqualTo(offset.$2),
-              reason: 'Start should be <= end');
-          expect(offset.$2, greaterThan(0),
-              reason: 'Non-special tokens should have non-zero offsets');
+          expect(
+            offset.$1,
+            lessThanOrEqualTo(offset.$2),
+            reason: 'Start should be <= end',
+          );
+          expect(
+            offset.$2,
+            greaterThan(0),
+            reason: 'Non-special tokens should have non-zero offsets',
+          );
         }
       }
     });

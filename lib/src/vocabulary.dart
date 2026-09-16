@@ -52,7 +52,8 @@ class SpecialTokens {
 /// ```
 class Vocabulary {
   final Map<String, int> _tokenToId = {};
-  final List<String> _idToToken = [];
+  final Map<int, String> _idToToken = {};
+  int _size = 0;
   final Trie _trie = Trie();
   final Trie _subwordTrie = Trie();
 
@@ -63,7 +64,7 @@ class Vocabulary {
   Vocabulary({this.subwordPrefix = '##'});
 
   /// The number of tokens in this vocabulary.
-  int get size => _idToToken.length;
+  int get size => _size;
 
   /// Trie for looking up whole-word tokens.
   Trie get trie => _trie;
@@ -137,9 +138,11 @@ class Vocabulary {
   }) {
     final vocab = Vocabulary(subwordPrefix: subwordPrefix);
     for (final entry in tokenToId.entries) {
-      final token = entry.key.trim();
-      if (token.isEmpty) continue;
-      vocab._addToken(token, entry.value);
+      final token = entry.key;
+      if (entry.value < 0 || entry.value > 0x7fffffff) {
+        throw ArgumentError.value(entry.value, 'tokenToId', 'Invalid token ID');
+      }
+      vocab._addToken(token, entry.value, includeBracketed: true);
     }
     return vocab;
   }
@@ -160,18 +163,18 @@ class Vocabulary {
     return vocab;
   }
 
-  void _addToken(String token, int id) {
+  void _addToken(String token, int id, {bool includeBracketed = false}) {
     _tokenToId[token] = id;
 
-    while (_idToToken.length <= id) {
-      _idToToken.add('');
-    }
+    if (id >= _size) _size = id + 1;
     _idToToken[id] = token;
 
     if (token.startsWith(subwordPrefix)) {
       final subword = token.substring(subwordPrefix.length);
       _subwordTrie.insert(subword, id);
-    } else if (!token.startsWith('[') || !token.endsWith(']')) {
+    } else if (includeBracketed ||
+        !token.startsWith('[') ||
+        !token.endsWith(']')) {
       _trie.insert(token, id);
     }
   }
@@ -187,11 +190,7 @@ class Vocabulary {
   ///
   /// Returns `[UNK]` if the ID is out of range.
   String idToToken(int id) {
-    if (id < 0 || id >= _idToToken.length) {
-      return SpecialTokens.unk;
-    }
-    final token = _idToToken[id];
-    return token.isEmpty ? SpecialTokens.unk : token;
+    return _idToToken[id] ?? SpecialTokens.unk;
   }
 
   /// Returns whether the vocabulary contains the given token.
@@ -206,7 +205,8 @@ class Vocabulary {
   Map<String, int> get vocabularyMap => Map.unmodifiable(_tokenToId);
 
   /// Returns an unmodifiable list of all tokens in ID order.
-  List<String> get tokens => List.unmodifiable(_idToToken);
+  List<String> get tokens =>
+      List.unmodifiable(List.generate(_size, (i) => _idToToken[i] ?? ''));
 
   /// Finds the longest matching token starting at the given position.
   ///
