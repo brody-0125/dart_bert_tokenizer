@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:test/test.dart';
+import 'package:dart_bert_tokenizer/dart_bert_tokenizer.dart';
 
 import 'hf_fixture_support.dart';
 
@@ -31,6 +32,21 @@ void main() {
   for (final model in manifest) {
     final name = model['name'] as String;
     final raw = File('$directory/$name.reduced.json').readAsStringSync();
+    if (model['expected_error'] case final String error) {
+      test('HF unsupported pipeline: $name', () {
+        expect(
+          () => WordPieceTokenizer.fromTokenizerJsonString(raw),
+          throwsA(
+            isA<FormatException>().having(
+              (e) => e.message,
+              'message',
+              contains(error),
+            ),
+          ),
+        );
+      });
+      continue;
+    }
     final golden =
         jsonDecode(File('$directory/$name.golden.json').readAsStringSync())
             as Map<String, dynamic>;

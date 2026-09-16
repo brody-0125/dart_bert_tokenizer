@@ -10,7 +10,7 @@ from pathlib import Path
 from urllib.request import urlopen
 
 import tokenizers
-from tokenizers import Tokenizer
+from tokenizers import Tokenizer, BertWordPieceTokenizer
 
 ROOT = Path(__file__).resolve().parents[1]
 FIXTURES = ROOT / "test/fixtures/huggingface"
@@ -42,7 +42,7 @@ def expected(t, e):
     return result
 
 
-def cases(raw):
+def cases(raw, language_cases=False):
     result = []
     for i, text in enumerate(TEXTS):
         for special in (True, False):
@@ -53,12 +53,16 @@ def cases(raw):
     for direction in ("right", "left"):
         for strategy in ("longest_first", "only_first", "only_second"):
             t = Tokenizer.from_str(raw)
-            t.enable_truncation(10, direction=direction, strategy=strategy)
-            t.enable_padding(length=12, direction=direction)
             a, b = "Hello world again today", "tokenization is interesting today"
+            limit = 10
+            if language_cases:
+                lengths = [len(t.encode(text, add_special_tokens=False).ids) for text in (a, b)]
+                limit = max(lengths) + t.num_special_tokens_to_add(True) + 1
+            t.enable_truncation(limit, direction=direction, strategy=strategy)
+            t.enable_padding(length=limit + 2, direction=direction, pad_id=t.token_to_id("[PAD]"))
             result.append({"name": f"pair-{direction}-{strategy}", "input": a, "pair": b,
-                           "truncation": {"max_length": 10, "direction": direction, "strategy": strategy},
-                           "padding": {"length": 12, "direction": direction},
+                           "truncation": {"max_length": limit, "direction": direction, "strategy": strategy},
+                           "padding": {"length": limit + 2, "direction": direction},
                            "expected": expected(t, t.encode(a, b))})
     for a, b in [("tokenization", "Hello world"), ("", ""), ("你好", "😊 hi")]:
         t = Tokenizer.from_str(raw)
@@ -66,7 +70,7 @@ def cases(raw):
                        "expected": expected(t, t.encode(a, b))})
     for direction in ("left", "right"):
         t = Tokenizer.from_str(raw)
-        t.enable_padding(direction=direction, pad_to_multiple_of=8)
+        t.enable_padding(direction=direction, pad_to_multiple_of=8, pad_id=t.token_to_id("[PAD]"))
         texts = ["Hello", "tokenization", "", "你好", "😊 hi", "café", "hello world", "[MASK]"]
         result.append({"name": f"batch-{direction}", "batch": texts,
                        "padding": {"direction": direction, "pad_to_multiple_of": 8},
@@ -77,6 +81,19 @@ def cases(raw):
                        'padding': {'direction': direction, 'pad_to_multiple_of': 8},
                        'truncation': {'max_length': 8, 'direction': direction, 'strategy': 'longest_first'},
                        'expected': [expected(t, e) for e in t.encode_batch(pairs)]})
+    if language_cases:
+        texts = ['안녕하세요. 한국어 토크나이저입니다.', '서울에서 NLP 모델을 테스트합니다!',
+                 '한글과 漢字, English 123', '가각간 가각간',
+                 '中文分词测试。你好，世界！', '简体中文與繁體中文', '𠀀中文😀한국어',
+                 'İ I ı i café é', 'العَرَبِيَّة لغة جميلة، مرحباً بالعالم!',
+                 'İstanbul IĞDIR ıslak şeker', 'नमस्ते दुनिया हिंदी தமிழ் తెలుగు',
+                 '[MASK] 테스트 [SEP]', 'a\u0000b\t한국어\n中文', '', '！？。，「」【】']
+        for i, text in enumerate(texts):
+            for pair in (None, texts[(i + 1) % len(texts)]):
+                t = Tokenizer.from_str(raw)
+                result.append({'name': f'language-{i}-pair-{pair is not None}',
+                               'input': text, 'pair': pair,
+                               'expected': expected(t, t.encode(text, pair))})
     return result
 
 
@@ -84,17 +101,25 @@ def main():
     assert tokenizers.__version__ == "0.23.2", tokenizers.__version__
     CACHE.mkdir(parents=True, exist_ok=True)
     for model in json.loads((FIXTURES / "manifest.json").read_text(encoding="utf-8-sig")):
-        path = CACHE / (model["name"] + ".json")
+        source_file = model.get("source_file", "tokenizer.json")
+        path = CACHE / (model["name"] + (".vocab.txt" if source_file == "vocab.txt" else ".json"))
         if not path.exists():
-            url = f'https://huggingface.co/{model["repository"]}/resolve/{model["revision"]}/tokenizer.json'
+            url = f'https://huggingface.co/{model["repository"]}/resolve/{model["revision"]}/{source_file}'
             with urlopen(url, timeout=60) as response:
                 path.write_bytes(response.read())
         data = path.read_bytes()
         assert hashlib.sha256(data).hexdigest() == model["sha256"], model["name"]
-        raw = data.decode("utf-8")
+        raw = (BertWordPieceTokenizer(str(path), **model["wordpiece_options"]).to_str()
+               if source_file == "vocab.txt" else data.decode("utf-8"))
         pipeline = json.loads(raw)
         print(model["name"], {k: pipeline.get(k) for k in ("normalizer", "pre_tokenizer", "post_processor", "decoder", "padding", "truncation")})
-        output = {"oracle": "tokenizers==0.23.2", "model": model, "cases": cases(raw)}
+        if model.get('expected_error'):
+            # Keep the actual unsupported components; no model vocabulary is redistributed.
+            pipeline['model']['vocab'] = {pipeline['model']['unk_token']: 0}
+            (FIXTURES / (model['name'] + '.reduced.json')).write_text(
+                golden_json(pipeline) + '\n', encoding='utf-8')
+            continue
+        output = {"oracle": "tokenizers==0.23.2", "model": model, "cases": cases(raw, model.get("language_cases", False))}
         (FIXTURES / (model["name"] + ".golden.json")).write_text(
             golden_json(output) + "\n", encoding="utf-8")
         # Retain exactly the vocabulary entries used by the oracle results.
@@ -107,7 +132,7 @@ def main():
         used.update(entry['content'] for entry in pipeline['added_tokens'])
         pipeline['model']['vocab'] = {token: id for token, id in pipeline['model']['vocab'].items() if token in used}
         compact = json.dumps(pipeline, ensure_ascii=False)
-        assert cases(compact) == output['cases'], model['name']
+        assert cases(compact, model.get('language_cases', False)) == output['cases'], model['name']
         (FIXTURES / (model['name'] + '.reduced.json')).write_text(compact + '\n', encoding='utf-8')
     generate_synthetic()
 

@@ -11,6 +11,10 @@
 - Support optional `configOverride` parameter for advanced configuration
 - Add pinned Hugging Face network fixtures for uncased, cased, multilingual BERT
   and MiniLM, plus reproducible offline goldens from tokenizers 0.23.2.
+- Extend fixtures with KLUE Korean BERT/RoBERTa, Google/HFL Chinese BERT,
+  Arabic BERT, Turkish BERT and MuRIL; verify AraBERT/IndicBERT rejection
+  boundaries. Pin original JSON or vocabulary bytes and document conversion
+  settings, license provenance and Japanese morphology limitations.
 - Preserve original Unicode code-point offsets through normalization; fix
   non-BMP lowercasing, canonical accent removal and CJK alignment.
 - Keep word IDs local to each input sequence and preserve them during truncation.

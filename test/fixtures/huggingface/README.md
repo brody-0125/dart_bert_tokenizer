@@ -1,8 +1,19 @@
 # Hugging Face fixtures
 
-`manifest.json` pins four public WordPiece models by repository, commit SHA and
-the SHA-256 of the exact tokenizer.json bytes. The model metadata identifies
-their Apache-2.0 license; see LICENSE and the source repositories in the manifest.
+`manifest.json` pins thirteen executable model fixtures: eleven successful WordPiece
+pipelines and two explicitly unsupported pipelines. Repository revision and the
+SHA-256 of the exact source bytes are recorded. `source_file` defaults to
+`tokenizer.json`; three models instead use `vocab.txt`.
+
+Original creators and source links are identified by `repository` in the
+manifest. Google BERT, MiniLM and HFL fixtures retain Apache-2.0 terms (LICENSE).
+KLUE BERT/RoBERTa vocabulary subsets are modified from the KLUE team's models:
+only entries used by the oracle are retained; they remain CC-BY-SA-4.0
+(LICENSE-KLUE and the upstream license link in the manifest). They are not
+relicensed under this package's license. IndicBERT and Turkish BERT report MIT
+in their model cards. Arabic model metadata does not specify a license; the
+manifest records that limitation rather than inventing one. Fixtures are
+excluded from the published Dart package.
 
 The oracle is Python `tokenizers==0.23.2`, not a Transformers wrapper. Generate
 from the repository root (or pass the script's absolute path):
@@ -64,3 +75,34 @@ a claim that an upstream issue has been acknowledged or fixed.
 using Python's `unicodedata`; the generated file records its Unicode version.
 Hangul decomposition is algorithmic. The table deliberately does not perform
 compatibility transliteration of characters such as ø, ł or œ.
+
+## Language-specific model coverage
+
+- KLUE BERT/RoBERTa and Google/HFL Chinese BERT: official tokenizer JSON,
+  Korean NFC/NFD, mixed Han/Latin text, simplified/traditional Chinese,
+  supplementary Han characters and emoji. KLUE RoBERTa verifies distinct
+  sequence IDs even when both inputs have type ID zero.
+- asafaya Arabic BERT, dbmdz Turkish BERT and Google MuRIL: official vocab.txt,
+  converted by the pinned `BertWordPieceTokenizer` with the manifest's explicit
+  options. Turkish `do_lower_case=false` and MuRIL's explicit lowercase/accent
+  settings follow tokenizer_config.json; Arabic lowercasing follows its model
+  card. Remaining builder settings use the pinned HF defaults. These fixtures
+  validate that stated pipeline, not an unverified Transformers AutoTokenizer
+  equivalence. Network tests insert the full downloaded vocabulary into that
+  generated pipeline and check against the same offline oracle.
+- AraBERT v02 and IndicBERTv2: real unsupported AddedToken.single_word and
+  Whitespace configurations must produce specific FormatExceptions, both
+  offline and with the original downloaded files. Reduced negative fixtures
+  keep actual components and replace the vocabulary with a single unknown
+  token; no successful encoding compatibility is claimed.
+- Tohoku Japanese v3 and LINE Japanese DistilBERT remain outside executable
+  coverage: their documented inference pipelines require MeCab/UniDic, with
+  WordPiece and SentencePiece respectively. Loading just a vocabulary is not
+  a valid substitute for testing those models.
+
+Each successful added model runs singles, pairs, both padding/truncation
+directions, all three pair truncation strategies, batch and isolate paths.
+Padding explicitly uses the model's [PAD] ID (KLUE RoBERTa uses 1). Pair
+truncation lengths are chosen from actual token counts so only_first/only_second
+remain valid for language-specific vocabularies. Language cases include Arabic
+diacritics, Turkish I/İ/ı/i, Indic scripts, combining accents and control chars.

@@ -13,7 +13,7 @@ A lightweight, pure Dart implementation of BERT WordPiece tokenizer.
 - **Full API** - Encoding, decoding, padding, truncation, offset mapping
 - **Batch Processing** - Sequential and parallel (Isolate-based) batch encoding
 - **HuggingFace tokenizer.json** - Load directly from HuggingFace tokenizer files
-- **Well Tested** - Offline HF goldens and pinned network fixtures for four public models
+- **Well Tested** - Offline HF goldens and pinned network fixtures for eleven supported model pipelines and two unsupported-pipeline boundaries
 
 ## Installation
 
