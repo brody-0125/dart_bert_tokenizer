@@ -981,6 +981,173 @@
         "clean_text": true,
         "handle_chinese_chars": true,
         "strip_accents": false,
+        "lowercase": true
+      },
+      "pre_tokenizer": {
+        "type": "BertPreTokenizer"
+      },
+      "post_processor": {
+        "type": "TemplateProcessing",
+        "single": [
+          {
+            "SpecialToken": {
+              "id": "[CLS]",
+              "type_id": 0
+            }
+          },
+          {
+            "Sequence": {
+              "id": "A",
+              "type_id": 0
+            }
+          },
+          {
+            "SpecialToken": {
+              "id": "[SEP]",
+              "type_id": 0
+            }
+          }
+        ],
+        "pair": [
+          {
+            "SpecialToken": {
+              "id": "[CLS]",
+              "type_id": 0
+            }
+          },
+          {
+            "Sequence": {
+              "id": "A",
+              "type_id": 0
+            }
+          },
+          {
+            "SpecialToken": {
+              "id": "[SEP]",
+              "type_id": 0
+            }
+          },
+          {
+            "Sequence": {
+              "id": "B",
+              "type_id": 1
+            }
+          },
+          {
+            "SpecialToken": {
+              "id": "[SEP]",
+              "type_id": 1
+            }
+          }
+        ],
+        "special_tokens": {
+          "[CLS]": {
+            "id": "[CLS]",
+            "ids": [2],
+            "tokens": ["[CLS]"]
+          },
+          "[SEP]": {
+            "id": "[SEP]",
+            "ids": [3],
+            "tokens": ["[SEP]"]
+          }
+        }
+      },
+      "decoder": {
+        "type": "WordPiece",
+        "prefix": "##",
+        "cleanup": true
+      },
+      "model": {
+        "unk_token": "[UNK]",
+        "continuing_subword_prefix": "##",
+        "max_input_chars_per_word": 100,
+        "vocab": {
+          "[PAD]": 0,
+          "[UNK]": 1,
+          "[CLS]": 2,
+          "[SEP]": 3,
+          "[MASK]": 4,
+          "hello": 5,
+          "world": 6,
+          "a": 7,
+          "b": 8,
+          "ab": 9,
+          "##b": 10,
+          "cafe": 11,
+          "caf\u00e9": 12,
+          "e": 13,
+          "##x": 14,
+          "\ud83d\ude0a": 15,
+          "\ud801\udc28": 16,
+          ",": 17,
+          "!": 18,
+          "\u00f8": 19,
+          "\u0142": 20,
+          "\u0153": 21,
+          "\u00fe": 22,
+          "\u00f0": 23,
+          "i": 24,
+          "##i": 25
+        }
+      }
+    },
+    {
+      "version": "1.0",
+      "truncation": null,
+      "padding": null,
+      "added_tokens": [
+        {
+          "id": 0,
+          "special": true,
+          "content": "[PAD]",
+          "single_word": false,
+          "lstrip": false,
+          "rstrip": false,
+          "normalized": false
+        },
+        {
+          "id": 1,
+          "special": true,
+          "content": "[UNK]",
+          "single_word": false,
+          "lstrip": false,
+          "rstrip": false,
+          "normalized": false
+        },
+        {
+          "id": 2,
+          "special": true,
+          "content": "[CLS]",
+          "single_word": false,
+          "lstrip": false,
+          "rstrip": false,
+          "normalized": false
+        },
+        {
+          "id": 3,
+          "special": true,
+          "content": "[SEP]",
+          "single_word": false,
+          "lstrip": false,
+          "rstrip": false,
+          "normalized": false
+        },
+        {
+          "id": 4,
+          "special": true,
+          "content": "[MASK]",
+          "single_word": false,
+          "lstrip": false,
+          "rstrip": false,
+          "normalized": false
+        }
+      ],
+      "normalizer": {
+        "type": "BertNormalizer",
+        "clean_text": true,
+        "handle_chinese_chars": true,
+        "strip_accents": false,
         "lowercase": false
       },
       "pre_tokenizer": {
@@ -2527,8 +2694,50 @@
       }
     },
     {
-      "name": "no-normalization",
+      "name": "clean-text-false-unicode-whitespace",
+      "tokenizer_index": 5,
+      "input": "hello﻿worldhello",
+      "pair": null,
+      "add_special_tokens": true,
+      "padding": null,
+      "truncation": null,
+      "expected": {
+        "tokens": ["[CLS]", "[UNK]", "hello", "[SEP]"],
+        "ids": [2, 1, 5, 3],
+        "type_ids": [0, 0, 0, 0],
+        "attention_mask": [1, 1, 1, 1],
+        "special_tokens_mask": [1, 0, 0, 1],
+        "offsets": [[0, 0], [0, 11], [12, 17], [0, 0]],
+        "word_ids": [null, 0, 1, null],
+        "sequence_ids": [null, 0, 0, null],
+        "decoded": "hello",
+        "decoded_with_special_tokens": "[CLS] [UNK] hello [SEP]"
+      }
+    },
+    {
+      "name": "lowercase-expansion-without-accent-stripping",
       "tokenizer_index": 6,
+      "input": "İ hello",
+      "pair": null,
+      "add_special_tokens": true,
+      "padding": null,
+      "truncation": null,
+      "expected": {
+        "tokens": ["[CLS]", "[UNK]", "hello", "[SEP]"],
+        "ids": [2, 1, 5, 3],
+        "type_ids": [0, 0, 0, 0],
+        "attention_mask": [1, 1, 1, 1],
+        "special_tokens_mask": [1, 0, 0, 1],
+        "offsets": [[0, 0], [0, 1], [2, 7], [0, 0]],
+        "word_ids": [null, 0, 1, null],
+        "sequence_ids": [null, 0, 0, null],
+        "decoded": "hello",
+        "decoded_with_special_tokens": "[CLS] [UNK] hello [SEP]"
+      }
+    },
+    {
+      "name": "no-normalization",
+      "tokenizer_index": 7,
       "input": "café 😊",
       "pair": null,
       "add_special_tokens": true,
@@ -2549,7 +2758,7 @@
     },
     {
       "name": "custom-unknown",
-      "tokenizer_index": 7,
+      "tokenizer_index": 8,
       "input": "unrecognized",
       "pair": null,
       "add_special_tokens": true,
@@ -2570,7 +2779,7 @@
     },
     {
       "name": "bert-processing",
-      "tokenizer_index": 8,
+      "tokenizer_index": 9,
       "input": "hello",
       "pair": "world",
       "add_special_tokens": true,
@@ -2591,7 +2800,7 @@
     },
     {
       "name": "sequence-id-independent-of-type-id",
-      "tokenizer_index": 9,
+      "tokenizer_index": 10,
       "input": "hello",
       "pair": "world",
       "add_special_tokens": true,
@@ -2612,7 +2821,7 @@
     },
     {
       "name": "custom-padding-metadata",
-      "tokenizer_index": 10,
+      "tokenizer_index": 11,
       "input": "hello",
       "pair": null,
       "add_special_tokens": true,
@@ -2633,7 +2842,7 @@
     },
     {
       "name": "custom-subword-prefix",
-      "tokenizer_index": 11,
+      "tokenizer_index": 12,
       "input": "abb",
       "pair": null,
       "add_special_tokens": true,
@@ -2654,7 +2863,7 @@
     },
     {
       "name": "word-limit-counts-codepoints",
-      "tokenizer_index": 12,
+      "tokenizer_index": 13,
       "input": "😊😊 😊😊😊",
       "pair": null,
       "add_special_tokens": true,
@@ -2675,7 +2884,7 @@
     },
     {
       "name": "custom-added-token",
-      "tokenizer_index": 13,
+      "tokenizer_index": 14,
       "input": "hello<tag>world",
       "pair": null,
       "add_special_tokens": true,

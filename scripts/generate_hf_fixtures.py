@@ -167,6 +167,10 @@ def generate_synthetic():
     pipeline = deepcopy(base)
     pipeline['normalizer']['clean_text'] = False
     add('clean-text-false', pipeline, 'a\x00b\u200d world')
+    add('clean-text-false-unicode-whitespace', pipeline, 'hello\ufeffworld\u0085hello')
+    pipeline = deepcopy(base)
+    pipeline['normalizer']['strip_accents'] = False
+    add('lowercase-expansion-without-accent-stripping', pipeline, 'İ hello')
     pipeline = deepcopy(base)
     pipeline['normalizer']['lowercase'] = False
     pipeline['normalizer']['strip_accents'] = False

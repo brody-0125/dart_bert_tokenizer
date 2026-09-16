@@ -59,7 +59,7 @@ class BertPreTokenizer {
   static final _punctuation = RegExp(r'\p{P}', unicode: true);
   static final _control = RegExp(r'[\p{Cc}\p{Cf}]', unicode: true);
   static final _separator = RegExp(r'\p{Zs}', unicode: true);
-  static final _whitespace = RegExp(r'\s', unicode: true);
+  static final _whitespace = RegExp(r'\p{White_Space}', unicode: true);
 
   /// Normalizes and splits [text], preserving original code-point offsets.
   List<PreToken> preTokenize(String text) {
@@ -92,7 +92,10 @@ class BertPreTokenizer {
       }
       if (handleChineseChars && _isChineseChar(rune)) append(' ', position);
       var value = stripAccents ? _withoutAccents(rune) : char;
-      if (lowercase) value = value.toLowerCase();
+      if (lowercase) {
+        // Dart uses simple lowercase; Unicode full lowercase expands dotted I.
+        value = value.replaceAll('\u0130', 'i\u0307').toLowerCase();
+      }
       append(value, position);
       if (handleChineseChars && _isChineseChar(rune)) append(' ', position);
       position++;
