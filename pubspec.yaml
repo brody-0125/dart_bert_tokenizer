@@ -1,5 +1,5 @@
 name: dart_bert_tokenizer
-description: A lightweight, pure Dart implementation of BERT WordPiece tokenizer. 100% compatible with HuggingFace tokenizers.
+description: A pure Dart BERT WordPiece tokenizer with Hugging Face tokenizer.json loading, Unicode offsets, padding, truncation, and verified model fixtures.
 version: 1.1.0
 repository: https://github.com/brody-0125/dart_bert_tokenizer
 topics:
@@ -17,5 +17,6 @@ dependencies:
   # path: ^1.9.0
 
 dev_dependencies:
+  crypto: ^3.0.7
   lints: ^6.0.0
   test: ^1.25.6

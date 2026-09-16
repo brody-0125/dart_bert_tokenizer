@@ -10,6 +10,8 @@
 ///
 /// Based on HuggingFace transformers test_tokenization_common.py and
 /// tokenizers test_encoding.py patterns.
+library;
+
 import 'package:test/test.dart';
 import 'package:dart_bert_tokenizer/dart_bert_tokenizer.dart';
 
@@ -26,7 +28,10 @@ void main() {
   group('Basic Tokenization', () {
     group('Word Splitting', () {
       test('splits on whitespace', () {
-        final encoding = tokenizer.encode('hello world', addSpecialTokens: false);
+        final encoding = tokenizer.encode(
+          'hello world',
+          addSpecialTokens: false,
+        );
         expect(encoding.tokens, contains('hello'));
         expect(encoding.tokens, contains('world'));
       });
@@ -50,14 +55,20 @@ void main() {
       });
 
       test('splits words correctly for simple vocabulary', () {
-        final encoding = tokenizer.encode('the quick brown', addSpecialTokens: false);
+        final encoding = tokenizer.encode(
+          'the quick brown',
+          addSpecialTokens: false,
+        );
         expect(encoding.tokens, equals(['the', 'quick', 'brown']));
       });
     });
 
     group('Punctuation Handling', () {
       test('separates punctuation from words', () {
-        final encoding = tokenizer.encode('hello, world!', addSpecialTokens: false);
+        final encoding = tokenizer.encode(
+          'hello, world!',
+          addSpecialTokens: false,
+        );
         expect(encoding.tokens, contains('hello'));
         expect(encoding.tokens, contains(','));
         expect(encoding.tokens, contains('world'));
@@ -83,12 +94,18 @@ void main() {
       });
 
       test('handles hyphenated words', () {
-        final encoding = tokenizer.encode('well-known', addSpecialTokens: false);
+        final encoding = tokenizer.encode(
+          'well-known',
+          addSpecialTokens: false,
+        );
         expect(encoding.tokens, contains('-'));
       });
 
       test('handles periods and sentences', () {
-        final encoding = tokenizer.encode('Hello. World.', addSpecialTokens: false);
+        final encoding = tokenizer.encode(
+          'Hello. World.',
+          addSpecialTokens: false,
+        );
         expect(encoding.tokens.where((t) => t == '.').length, equals(2));
       });
     });
@@ -103,7 +120,10 @@ void main() {
       });
 
       test('lowercases mixed case', () {
-        final encoding = tokenizer.encode('HeLLo WoRLd', addSpecialTokens: false);
+        final encoding = tokenizer.encode(
+          'HeLLo WoRLd',
+          addSpecialTokens: false,
+        );
         expect(encoding.tokens, contains('hello'));
         expect(encoding.tokens, contains('world'));
       });
@@ -116,7 +136,10 @@ void main() {
       });
 
       test('handles various diacritics', () {
-        final encoding = tokenizer.encode('résumé naïve', addSpecialTokens: false);
+        final encoding = tokenizer.encode(
+          'résumé naïve',
+          addSpecialTokens: false,
+        );
         expect(encoding.tokens, contains('resume'));
         expect(encoding.tokens, contains('naive'));
       });
@@ -124,7 +147,10 @@ void main() {
       test('handles umlauts', () {
         final encoding = tokenizer.encode('über', addSpecialTokens: false);
         // Should normalize ü to u
-        expect(encoding.tokens.any((t) => t.contains('uber') || t.contains('##ber')), isTrue);
+        expect(
+          encoding.tokens.any((t) => t.contains('uber') || t.contains('##ber')),
+          isTrue,
+        );
       });
     });
 
@@ -160,14 +186,20 @@ void main() {
       });
 
       test('convert tokens to IDs matches encode IDs', () {
-        final encoding = tokenizer.encode('hello world', addSpecialTokens: false);
+        final encoding = tokenizer.encode(
+          'hello world',
+          addSpecialTokens: false,
+        );
         final idsFromTokens = tokenizer.convertTokensToIds(encoding.tokens);
 
         expect(idsFromTokens, equals(encoding.ids));
       });
 
       test('convert IDs to tokens matches encode tokens', () {
-        final encoding = tokenizer.encode('hello world', addSpecialTokens: false);
+        final encoding = tokenizer.encode(
+          'hello world',
+          addSpecialTokens: false,
+        );
         final tokensFromIds = tokenizer.convertIdsToTokens(encoding.ids);
 
         expect(tokensFromIds, equals(encoding.tokens));
@@ -182,18 +214,27 @@ void main() {
     group('Subword Splitting', () {
       test('splits unknown words into subwords', () {
         // "tokenization" should be split into "token" + "##ization"
-        final encoding = tokenizer.encode('tokenization', addSpecialTokens: false);
+        final encoding = tokenizer.encode(
+          'tokenization',
+          addSpecialTokens: false,
+        );
         expect(encoding.tokens.any((t) => t.startsWith('##')), isTrue);
       });
 
       test('subword tokens have ## prefix', () {
-        final encoding = tokenizer.encode('tokenization', addSpecialTokens: false);
+        final encoding = tokenizer.encode(
+          'tokenization',
+          addSpecialTokens: false,
+        );
         final subwords = encoding.tokens.where((t) => t.startsWith('##'));
         expect(subwords.every((t) => t.startsWith('##')), isTrue);
       });
 
       test('all subwords map to same word ID', () {
-        final encoding = tokenizer.encode('tokenization', addSpecialTokens: false);
+        final encoding = tokenizer.encode(
+          'tokenization',
+          addSpecialTokens: false,
+        );
         // All tokens should have wordId = 0 (single word)
         final nonNullWordIds = encoding.wordIds.where((w) => w != null);
         expect(nonNullWordIds.every((w) => w == 0), isTrue);
@@ -204,8 +245,11 @@ void main() {
         final range = encoding.wordToTokens(0);
 
         expect(range, isNotNull);
-        expect(range!.$2 - range.$1, greaterThan(1),
-            reason: 'tokenization should split into multiple subwords');
+        expect(
+          range!.$2 - range.$1,
+          greaterThan(1),
+          reason: 'tokenization should split into multiple subwords',
+        );
       });
 
       test('greedy matching prefers longer subwords', () {
@@ -240,7 +284,10 @@ void main() {
 
       test('partial unknown produces mixed tokens and [UNK]', () {
         // Mixed text with some known and some unknown
-        final encoding = tokenizer.encode('hello 你好 world', addSpecialTokens: false);
+        final encoding = tokenizer.encode(
+          'hello 你好 world',
+          addSpecialTokens: false,
+        );
         expect(encoding.tokens, contains('hello'));
         expect(encoding.tokens, contains('world'));
         expect(encoding.tokens, contains('[UNK]'));
@@ -252,8 +299,12 @@ void main() {
         final encoding = tokenizer.encode('你好');
         final unkIndex = encoding.tokens.indexOf('[UNK]');
         if (unkIndex >= 0) {
-          expect(encoding.specialTokensMask[unkIndex], equals(0),
-              reason: '[UNK] as vocabulary replacement should not be marked special');
+          expect(
+            encoding.specialTokensMask[unkIndex],
+            equals(0),
+            reason:
+                '[UNK] as vocabulary replacement should not be marked special',
+          );
         }
       });
     });
@@ -266,18 +317,27 @@ void main() {
       });
 
       test('handles zero-width characters', () {
-        final encoding = tokenizer.encode('hello\u200Bworld', addSpecialTokens: false);
+        final encoding = tokenizer.encode(
+          'hello\u200Bworld',
+          addSpecialTokens: false,
+        );
         // Zero-width space should be normalized away
         expect(encoding.isNotEmpty, isTrue);
       });
 
       test('handles control characters', () {
-        final encoding = tokenizer.encode('hello\u0000world', addSpecialTokens: false);
+        final encoding = tokenizer.encode(
+          'hello\u0000world',
+          addSpecialTokens: false,
+        );
         expect(encoding.isNotEmpty, isTrue);
       });
 
       test('handles mixed scripts', () {
-        final encoding = tokenizer.encode('Hello мир 世界', addSpecialTokens: false);
+        final encoding = tokenizer.encode(
+          'Hello мир 世界',
+          addSpecialTokens: false,
+        );
         expect(encoding.tokens, contains('hello'));
       });
     });
@@ -299,7 +359,10 @@ void main() {
       });
 
       test('character offsets span correct ranges for subwords', () {
-        final encoding = tokenizer.encode('tokenization', addSpecialTokens: false);
+        final encoding = tokenizer.encode(
+          'tokenization',
+          addSpecialTokens: false,
+        );
 
         // First subword should start at 0
         expect(encoding.offsets.first.$1, equals(0));
@@ -399,8 +462,11 @@ void main() {
         final encoding = tokenizer.encodePair('hello', 'world');
         for (var i = 0; i < encoding.length; i++) {
           if (encoding.specialTokensMask[i] == 1) {
-            expect(encoding.sequenceIds[i], isNull,
-                reason: 'Special token at $i should have null sequenceId');
+            expect(
+              encoding.sequenceIds[i],
+              isNull,
+              reason: 'Special token at $i should have null sequenceId',
+            );
           }
         }
       });
@@ -472,7 +538,10 @@ void main() {
       });
 
       test('both sequences are represented', () {
-        final encoding = tokenizer.encodePair('first sentence', 'second sentence');
+        final encoding = tokenizer.encodePair(
+          'first sentence',
+          'second sentence',
+        );
 
         expect(encoding.tokens, contains('first'));
         expect(encoding.tokens, contains('second'));
@@ -495,14 +564,20 @@ void main() {
 
         // Everything up to and including first SEP should be typeId 0
         for (var i = 0; i <= firstSepIdx; i++) {
-          expect(encoding.typeIds[i], equals(0),
-              reason: 'Token at $i should have typeId 0');
+          expect(
+            encoding.typeIds[i],
+            equals(0),
+            reason: 'Token at $i should have typeId 0',
+          );
         }
 
         // Everything after first SEP should be typeId 1
         for (var i = firstSepIdx + 1; i < encoding.length; i++) {
-          expect(encoding.typeIds[i], equals(1),
-              reason: 'Token at $i should have typeId 1');
+          expect(
+            encoding.typeIds[i],
+            equals(1),
+            reason: 'Token at $i should have typeId 1',
+          );
         }
       });
 
@@ -529,7 +604,10 @@ void main() {
 
     group('Pair with Special Characters', () {
       test('pair with punctuation', () {
-        final encoding = tokenizer.encodePair('Hello, how are you?', 'I am fine.');
+        final encoding = tokenizer.encodePair(
+          'Hello, how are you?',
+          'I am fine.',
+        );
 
         expect(encoding.tokens, contains(','));
         expect(encoding.tokens, contains('?'));
@@ -553,23 +631,18 @@ void main() {
 
     group('Batch Pair Encoding', () {
       test('encodePairBatch produces correct number of encodings', () {
-        final pairs = [
-          ('q1', 'a1'),
-          ('q2', 'a2'),
-          ('q3', 'a3'),
-        ];
+        final pairs = [('q1', 'a1'), ('q2', 'a2'), ('q3', 'a3')];
         final batch = tokenizer.encodePairBatch(pairs);
 
         expect(batch.length, equals(3));
       });
 
       test('batch pair encoding matches individual encoding', () {
-        final pairs = [
-          ('hello', 'world'),
-          ('foo', 'bar'),
-        ];
+        final pairs = [('hello', 'world'), ('foo', 'bar')];
         final batch = tokenizer.encodePairBatch(pairs);
-        final individual = pairs.map((p) => tokenizer.encodePair(p.$1, p.$2)).toList();
+        final individual = pairs
+            .map((p) => tokenizer.encodePair(p.$1, p.$2))
+            .toList();
 
         for (var i = 0; i < pairs.length; i++) {
           expect(batch[i].tokens, equals(individual[i].tokens));
@@ -613,7 +686,10 @@ void main() {
     group('Single Sequence Truncation', () {
       test('right truncation keeps beginning', () {
         final encoding = tokenizer.encode('one two three four five');
-        final truncated = encoding.withTruncation(maxLength: 5, truncateFromEnd: true);
+        final truncated = encoding.withTruncation(
+          maxLength: 5,
+          truncateFromEnd: true,
+        );
 
         expect(truncated.length, equals(5));
         expect(truncated.tokens.first, equals('[CLS]'));
@@ -622,7 +698,10 @@ void main() {
 
       test('left truncation keeps end', () {
         final encoding = tokenizer.encode('one two three four five');
-        final truncated = encoding.withTruncation(maxLength: 5, truncateFromEnd: false);
+        final truncated = encoding.withTruncation(
+          maxLength: 5,
+          truncateFromEnd: false,
+        );
 
         expect(truncated.length, equals(5));
         expect(truncated.tokens.last, equals('[SEP]'));
@@ -657,8 +736,9 @@ void main() {
       });
 
       test('enableTruncation with direction', () {
-        final rightTok = WordPieceTokenizer.fromVocabFileSync('vocab.txt')
-          ..enableTruncation(maxLength: 4, direction: TruncationDirection.right);
+        final rightTok = WordPieceTokenizer.fromVocabFileSync(
+          'vocab.txt',
+        )..enableTruncation(maxLength: 4, direction: TruncationDirection.right);
 
         final leftTok = WordPieceTokenizer.fromVocabFileSync('vocab.txt')
           ..enableTruncation(maxLength: 4, direction: TruncationDirection.left);
@@ -841,7 +921,10 @@ void main() {
         );
 
         expect(padded.length, equals(10));
-        expect(padded.tokens.sublist(encoding.length), everyElement(equals('[PAD]')));
+        expect(
+          padded.tokens.sublist(encoding.length),
+          everyElement(equals('[PAD]')),
+        );
       });
 
       test('right padded tokens are at end', () {
@@ -863,7 +946,10 @@ void main() {
           padTokenId: tokenizer.vocab.padTokenId,
         );
 
-        expect(padded.tokens.sublist(0, encoding.length), equals(encoding.tokens));
+        expect(
+          padded.tokens.sublist(0, encoding.length),
+          equals(encoding.tokens),
+        );
       });
     });
 
@@ -878,7 +964,10 @@ void main() {
         );
 
         expect(padded.length, equals(10));
-        expect(padded.tokens.sublist(0, padCount), everyElement(equals('[PAD]')));
+        expect(
+          padded.tokens.sublist(0, padCount),
+          everyElement(equals('[PAD]')),
+        );
       });
 
       test('left padded original content at end', () {
@@ -1032,7 +1121,9 @@ void main() {
       });
 
       test('no padding when exceeding target', () {
-        final encoding = tokenizer.encode('hello world this is a long sentence');
+        final encoding = tokenizer.encode(
+          'hello world this is a long sentence',
+        );
         final padded = encoding.withPadding(
           targetLength: 3,
           padTokenId: tokenizer.vocab.padTokenId,
@@ -1142,12 +1233,16 @@ void main() {
         );
 
         // Original tokens should have 1
-        expect(padded.attentionMask.sublist(0, encoding.length),
-            everyElement(equals(1)));
+        expect(
+          padded.attentionMask.sublist(0, encoding.length),
+          everyElement(equals(1)),
+        );
 
         // Padding should have 0
-        expect(padded.attentionMask.sublist(encoding.length),
-            everyElement(equals(0)));
+        expect(
+          padded.attentionMask.sublist(encoding.length),
+          everyElement(equals(0)),
+        );
       });
 
       test('attention mask pattern is [1,1,1,1,0,0,0]', () {
@@ -1172,12 +1267,13 @@ void main() {
         );
 
         // Padding should have 0
-        expect(padded.attentionMask.sublist(0, padCount),
-            everyElement(equals(0)));
+        expect(
+          padded.attentionMask.sublist(0, padCount),
+          everyElement(equals(0)),
+        );
 
         // Original tokens should have 1
-        expect(padded.attentionMask.sublist(padCount),
-            everyElement(equals(1)));
+        expect(padded.attentionMask.sublist(padCount), everyElement(equals(1)));
       });
 
       test('attention mask pattern is [0,0,0,1,1,1,1]', () {
@@ -1222,8 +1318,12 @@ void main() {
         // Shorter should have some 0s
         expect(shorter.attentionMask.contains(0), isTrue);
         // Longer might have all 1s if it's the longest
-        expect(longer.attentionMask.where((m) => m == 1).length,
-            greaterThanOrEqualTo(shorter.attentionMask.where((m) => m == 1).length));
+        expect(
+          longer.attentionMask.where((m) => m == 1).length,
+          greaterThanOrEqualTo(
+            shorter.attentionMask.where((m) => m == 1).length,
+          ),
+        );
       });
     });
 
@@ -1280,12 +1380,18 @@ void main() {
 
     group('Pair Sequence Type IDs', () {
       test('first sequence has typeId 0', () {
-        final encoding = tokenizer.encodePair('first sentence', 'second sentence');
+        final encoding = tokenizer.encodePair(
+          'first sentence',
+          'second sentence',
+        );
         final firstSepIdx = encoding.tokens.indexOf('[SEP]');
 
         for (var i = 0; i <= firstSepIdx; i++) {
-          expect(encoding.typeIds[i], equals(0),
-              reason: 'Token $i (${encoding.tokens[i]}) should have typeId 0');
+          expect(
+            encoding.typeIds[i],
+            equals(0),
+            reason: 'Token $i (${encoding.tokens[i]}) should have typeId 0',
+          );
         }
       });
 
@@ -1294,8 +1400,11 @@ void main() {
         final firstSepIdx = encoding.tokens.indexOf('[SEP]');
 
         for (var i = firstSepIdx + 1; i < encoding.length; i++) {
-          expect(encoding.typeIds[i], equals(1),
-              reason: 'Token $i (${encoding.tokens[i]}) should have typeId 1');
+          expect(
+            encoding.typeIds[i],
+            equals(1),
+            reason: 'Token $i (${encoding.tokens[i]}) should have typeId 1',
+          );
         }
       });
 
@@ -1311,7 +1420,11 @@ void main() {
       });
 
       test('pair without special tokens still has correct type IDs', () {
-        final encoding = tokenizer.encodePair('hello', 'world', addSpecialTokens: false);
+        final encoding = tokenizer.encodePair(
+          'hello',
+          'world',
+          addSpecialTokens: false,
+        );
 
         // First sequence should be 0, second should be 1
         // Without special tokens, the separation is based on which sequence the token came from
@@ -1340,12 +1453,16 @@ void main() {
         );
 
         // Original type IDs should be preserved
-        expect(padded.typeIds.sublist(0, encoding.length),
-            equals(encoding.typeIds));
+        expect(
+          padded.typeIds.sublist(0, encoding.length),
+          equals(encoding.typeIds),
+        );
 
         // Padding type IDs should be 0
-        expect(padded.typeIds.sublist(encoding.length),
-            everyElement(equals(0)));
+        expect(
+          padded.typeIds.sublist(encoding.length),
+          everyElement(equals(0)),
+        );
       });
     });
 
@@ -1383,10 +1500,7 @@ void main() {
       });
 
       test('batch pair encoding maintains type IDs', () {
-        final pairs = [
-          ('q1', 'a1'),
-          ('q2', 'a2'),
-        ];
+        final pairs = [('q1', 'a1'), ('q2', 'a2')];
         final batch = tokenizer.encodePairBatch(pairs);
 
         for (final encoding in batch) {
@@ -1404,8 +1518,11 @@ void main() {
         for (var i = 0; i < encoding.length; i++) {
           if (encoding.specialTokensMask[i] == 0) {
             // For content tokens, sequenceId should match typeId
-            expect(encoding.sequenceIds[i], equals(encoding.typeIds[i]),
-                reason: 'Token $i sequenceId should match typeId');
+            expect(
+              encoding.sequenceIds[i],
+              equals(encoding.typeIds[i]),
+              reason: 'Token $i sequenceId should match typeId',
+            );
           }
         }
       });

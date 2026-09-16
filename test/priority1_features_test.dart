@@ -3,6 +3,8 @@
 /// - Truncation strategies
 /// - vocabularyMap getter
 /// - numSpecialTokensToAdd() method
+library;
+
 import 'package:test/test.dart';
 import 'package:dart_bert_tokenizer/dart_bert_tokenizer.dart';
 
@@ -39,10 +41,10 @@ void main() {
     });
 
     test('encodeBatch with addSpecialTokens=false', () {
-      final encodings = tokenizer.encodeBatch(
-        ['hello', 'world'],
-        addSpecialTokens: false,
-      );
+      final encodings = tokenizer.encodeBatch([
+        'hello',
+        'world',
+      ], addSpecialTokens: false);
 
       for (final encoding in encodings) {
         expect(encoding.tokens, isNot(contains('[CLS]')));
@@ -84,7 +86,10 @@ void main() {
         config: const WordPieceConfig(addClsToken: false, addSepToken: false),
       );
 
-      expect(noSpecialTokenizer.numSpecialTokensToAdd(isPair: false), equals(0));
+      expect(
+        noSpecialTokenizer.numSpecialTokensToAdd(isPair: false),
+        equals(0),
+      );
       expect(noSpecialTokenizer.numSpecialTokensToAdd(isPair: true), equals(0));
     });
 
@@ -139,7 +144,7 @@ void main() {
     test('truncates longer sequence first', () {
       // Create long texts
       final longText = 'word ' * 100; // ~100 words
-      final shortText = 'short text';
+      const shortText = 'short text';
 
       final encoding = tokenizer.encodePair(
         longText,
@@ -155,8 +160,8 @@ void main() {
     });
 
     test('balances truncation between equal-length sequences', () {
-      final textA = 'one two three four five';
-      final textB = 'six seven eight nine ten';
+      const textA = 'one two three four five';
+      const textB = 'six seven eight nine ten';
 
       final encoding = tokenizer.encodePair(
         textA,
@@ -172,7 +177,7 @@ void main() {
   group('TruncationStrategy.onlyFirst', () {
     test('only truncates first sequence', () {
       final longText = 'word ' * 50;
-      final shortText = 'keep this intact';
+      const shortText = 'keep this intact';
 
       final encoding = tokenizer.encodePair(
         longText,
@@ -188,8 +193,8 @@ void main() {
     });
 
     test('preserves second sequence completely', () {
-      final textA = 'first sequence here';
-      final textB = 'second';
+      const textA = 'first sequence here';
+      const textB = 'second';
 
       final encodingB = tokenizer.encode('second', addSpecialTokens: false);
 
@@ -201,10 +206,9 @@ void main() {
       );
 
       // Count tokens from second sequence (typeId = 1, excluding [SEP])
-      final secondSeqTokens =
-          encoding.tokens.where((t) => t != '[SEP]').toList();
       final typeIdOneCount =
-          encoding.typeIds.where((t) => t == 1).length - 1; // Exclude final [SEP]
+          encoding.typeIds.where((t) => t == 1).length -
+          1; // Exclude final [SEP]
 
       expect(typeIdOneCount, equals(encodingB.length));
     });
@@ -212,7 +216,7 @@ void main() {
 
   group('TruncationStrategy.onlySecond', () {
     test('only truncates second sequence', () {
-      final shortText = 'keep this';
+      const shortText = 'keep this';
       final longText = 'word ' * 50;
 
       final encoding = tokenizer.encodePair(
@@ -228,8 +232,8 @@ void main() {
     });
 
     test('preserves first sequence completely', () {
-      final textA = 'first';
-      final textB = 'second sequence here very long';
+      const textA = 'first';
+      const textB = 'second sequence here very long';
 
       final encodingA = tokenizer.encode('first', addSpecialTokens: false);
 
@@ -242,7 +246,8 @@ void main() {
 
       // Count tokens from first sequence (typeId = 0, excluding [CLS] and first [SEP])
       final typeIdZeroCount =
-          encoding.typeIds.where((t) => t == 0).length - 2; // Exclude [CLS] and [SEP]
+          encoding.typeIds.where((t) => t == 0).length -
+          2; // Exclude [CLS] and [SEP]
 
       expect(typeIdZeroCount, equals(encodingA.length));
     });
@@ -250,8 +255,8 @@ void main() {
 
   group('TruncationStrategy.doNotTruncate', () {
     test('does not truncate even when exceeding maxLength', () {
-      final textA = 'first sequence';
-      final textB = 'second sequence';
+      const textA = 'first sequence';
+      const textB = 'second sequence';
 
       final encodingNoTrunc = tokenizer.encodePair(
         textA,
@@ -318,10 +323,7 @@ void main() {
     });
 
     test('applies addSpecialTokens to all pairs', () {
-      final pairs = [
-        ('a', 'b'),
-        ('c', 'd'),
-      ];
+      final pairs = [('a', 'b'), ('c', 'd')];
 
       final encodings = tokenizer.encodePairBatch(
         pairs,
@@ -337,7 +339,7 @@ void main() {
 
   group('Integration tests', () {
     test('full pipeline: encode without special, truncate, then decode', () {
-      final text = 'This is a test sentence for tokenization';
+      const text = 'This is a test sentence for tokenization';
 
       // Encode without special tokens
       final encoding = tokenizer.encode(text, addSpecialTokens: false);

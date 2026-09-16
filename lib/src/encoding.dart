@@ -39,7 +39,7 @@ enum TruncationStrategy {
 /// - [ids]: Token IDs for model input
 /// - [tokens]: Token strings for debugging
 /// - [attentionMask]: 1 for real tokens, 0 for padding
-/// - [typeIds]: Segment IDs (0 for first sequence, 1 for second)
+/// - [typeIds]: Template-defined token type IDs (independent of sequence IDs)
 /// - [specialTokensMask]: 1 for special tokens, 0 for regular tokens
 ///
 /// ## Token-Character Mapping
@@ -62,10 +62,10 @@ class Encoding {
   /// These are the integer indices into the vocabulary that the model uses.
   final Int32List ids;
 
-  /// Segment/type IDs distinguishing text pairs.
+  /// Template-defined token type IDs, in the range 0–255.
   ///
-  /// For single text: all 0s.
-  /// For text pairs: 0 for first sequence, 1 for second sequence.
+  /// Standard BERT pairs use 0/1, but other templates may use the same type ID
+  /// for both inputs. Use [sequenceIds] to identify the input sequence.
   final Uint8List typeIds;
 
   /// Attention mask indicating which tokens are real vs padding.
@@ -78,16 +78,17 @@ class Encoding {
   /// 1 for special tokens (`[CLS]`, `[SEP]`, `[PAD]`), 0 for regular tokens.
   final Uint8List specialTokensMask;
 
-  /// Character offsets for each token as `(start, end)` pairs.
+  /// Original Unicode code-point offsets as half-open `(start, end)` pairs.
   ///
-  /// Maps each token back to its position in the original text.
-  /// Special tokens have offset `(0, 0)`.
+  /// These are not Dart UTF-16 code-unit indices. Each pair input has its own
+  /// offset origin. Inserted template and padding tokens have offset `(0, 0)`.
   final List<(int, int)> offsets;
 
   /// Word indices for each token.
   ///
-  /// Multiple tokens from the same word share the same word ID.
-  /// Special tokens have `null` word ID.
+  /// Multiple tokens from the same word share the same word ID. Tokenizer
+  /// outputs restart word IDs for each pair input and retain them on truncation.
+  /// Inserted template and padding tokens have `null` word ID.
   final List<int?> wordIds;
 
   final List<int?>? _sequenceIds;
@@ -365,6 +366,7 @@ class Encoding {
     required int targetLength,
     required int padTokenId,
     String padToken = '[PAD]',
+    int padTypeId = 0,
     bool padOnRight = true,
   }) {
     if (length >= targetLength) {
@@ -383,7 +385,8 @@ class Encoding {
     }
     paddedIds.setRange(dstOffset, dstOffset + srcLen, ids);
 
-    final paddedTypeIds = Uint8List(targetLength);
+    final paddedTypeIds = Uint8List(targetLength)
+      ..fillRange(0, targetLength, padTypeId);
     paddedTypeIds.setRange(dstOffset, dstOffset + srcLen, typeIds);
 
     final paddedAttentionMask = Uint8List(targetLength);
@@ -428,6 +431,7 @@ class Encoding {
     required int multiple,
     required int padTokenId,
     String padToken = '[PAD]',
+    int padTypeId = 0,
     bool padOnRight = true,
   }) {
     if (multiple <= 0) return this;
@@ -440,11 +444,12 @@ class Encoding {
       targetLength: targetLength,
       padTokenId: padTokenId,
       padToken: padToken,
+      padTypeId: padTypeId,
       padOnRight: padOnRight,
     );
   }
 
-  /// Returns a new encoding truncated to the maximum length.
+  /// Slices this encoding to the maximum length, possibly removing special tokens.
   ///
   /// - [maxLength]: The maximum number of tokens.
   /// - [truncateFromEnd]: If true, removes tokens from the end; otherwise
@@ -520,6 +525,7 @@ class Encoding {
     required int maxLength,
     TruncationStrategy strategy = TruncationStrategy.longestFirst,
     int numSpecialTokens = 3,
+    bool truncateFromEnd = true,
   }) {
     final availableLength = maxLength - numSpecialTokens;
     if (availableLength <= 0) {
@@ -535,21 +541,38 @@ class Encoding {
 
     switch (strategy) {
       case TruncationStrategy.longestFirst:
-        return _truncateLongestFirst(encodingA, encodingB, tokensToRemove);
+        return _truncateLongestFirst(
+          encodingA,
+          encodingB,
+          tokensToRemove,
+          truncateFromEnd,
+        );
 
       case TruncationStrategy.onlyFirst:
         final newLengthA = encodingA.length - tokensToRemove;
         if (newLengthA <= 0) {
-          return (Encoding.empty(), encodingB);
+          throw ArgumentError('The first sequence cannot satisfy truncation');
         }
-        return (encodingA.withTruncation(maxLength: newLengthA), encodingB);
+        return (
+          encodingA.withTruncation(
+            maxLength: newLengthA,
+            truncateFromEnd: truncateFromEnd,
+          ),
+          encodingB,
+        );
 
       case TruncationStrategy.onlySecond:
         final newLengthB = encodingB.length - tokensToRemove;
         if (newLengthB <= 0) {
-          return (encodingA, Encoding.empty());
+          throw ArgumentError('The second sequence cannot satisfy truncation');
         }
-        return (encodingA, encodingB.withTruncation(maxLength: newLengthB));
+        return (
+          encodingA,
+          encodingB.withTruncation(
+            maxLength: newLengthB,
+            truncateFromEnd: truncateFromEnd,
+          ),
+        );
 
       case TruncationStrategy.doNotTruncate:
         return (encodingA, encodingB);
@@ -560,12 +583,14 @@ class Encoding {
     Encoding encodingA,
     Encoding encodingB,
     int tokensToRemove,
+    bool truncateFromEnd,
   ) {
     var lengthA = encodingA.length;
     var lengthB = encodingB.length;
 
     for (var i = 0; i < tokensToRemove; i++) {
-      if (lengthA > lengthB) {
+      if (lengthA > lengthB ||
+          (lengthA == lengthB && encodingA.length <= encodingB.length)) {
         lengthA--;
       } else {
         lengthB--;
@@ -573,10 +598,16 @@ class Encoding {
     }
 
     final truncatedA = lengthA < encodingA.length
-        ? encodingA.withTruncation(maxLength: lengthA)
+        ? encodingA.withTruncation(
+            maxLength: lengthA,
+            truncateFromEnd: truncateFromEnd,
+          )
         : encodingA;
     final truncatedB = lengthB < encodingB.length
-        ? encodingB.withTruncation(maxLength: lengthB)
+        ? encodingB.withTruncation(
+            maxLength: lengthB,
+            truncateFromEnd: truncateFromEnd,
+          )
         : encodingB;
 
     return (truncatedA, truncatedB);

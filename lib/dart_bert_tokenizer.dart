@@ -1,13 +1,13 @@
-/// A high-performance BERT WordPiece tokenizer implementation for Dart.
+/// A pure Dart BERT WordPiece tokenizer.
 ///
 /// This library provides a complete implementation of the WordPiece tokenization
-/// algorithm used in BERT and other transformer models. It is designed to be
-/// compatible with HuggingFace tokenizers while offering excellent performance
-/// for Dart applications.
+/// algorithm used in BERT and other transformer models. Supported Hugging Face
+/// WordPiece pipelines are verified with pinned model fixtures; see the README
+/// for supported components, model coverage and compatibility limits.
 ///
 /// ## Features
 ///
-/// - Full WordPiece tokenization compatible with HuggingFace tokenizers
+/// - WordPiece tokenization with supported Hugging Face JSON pipelines
 /// - Support for single text and text pair encoding
 /// - Batch processing with optional parallel execution using isolates
 /// - Configurable padding and truncation strategies
@@ -43,7 +43,7 @@
 ///   'What is Dart?',
 ///   'Dart is a programming language.',
 /// );
-/// print(encoding.typeIds);  // Segment IDs (0 for first, 1 for second)
+/// print(encoding.typeIds);  // Template-defined type IDs; sequenceIds identifies input A/B
 /// ```
 ///
 /// ## Batch Processing
@@ -57,7 +57,7 @@
 ///   'Third sentence.',
 /// ]);
 /// ```
-library dart_bert_tokenizer;
+library;
 
 export 'src/encoding.dart' show Encoding, EncodingBuilder, TruncationStrategy;
 export 'src/pre_tokenizer.dart' show BertPreTokenizer, PreToken;

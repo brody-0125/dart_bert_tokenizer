@@ -8,8 +8,40 @@
   - `WordPieceTokenizer.fromTokenizerJsonString()` - load from JSON string
 - Add `Vocabulary.fromMap()` factory for token-to-ID map construction
 - Automatically extract normalizer, post-processor, and added tokens from JSON
-- Support optional `configOverride` parameter for advanced configuration
-- 25 new tests including vocab.txt vs tokenizer.json equivalence verification
+- Support optional `configOverride`; it replaces exposed settings (including
+  omitted-field defaults) and uses the legacy CLS/SEP template.
+- Add pinned Hugging Face network fixtures for uncased, cased, multilingual BERT
+  and MiniLM, plus reproducible offline goldens from tokenizers 0.23.2.
+- Extend fixtures with KLUE Korean BERT/RoBERTa, Google/HFL Chinese BERT,
+  Arabic BERT, Turkish BERT and MuRIL; verify AraBERT/IndicBERT rejection
+  boundaries. Pin original JSON or vocabulary bytes and document conversion
+  settings, license provenance and Japanese morphology limitations.
+- Preserve original Unicode code-point offsets through normalization; fix
+  non-BMP lowercasing, canonical accent removal and CJK alignment.
+- Keep word IDs local to each input sequence and preserve them during truncation.
+- Truncate content before adding special tokens; apply padding after pair
+  construction and retain JSON settings in parallel batches.
+- Honor JSON decoder cleanup, null components, exact added tokens, supported
+  templates, and serialized padding/truncation settings. Reject unsupported
+  pipeline components and added-token flags explicitly.
+- Validate invalid lengths, worker counts, vocabulary IDs and impossible pair
+  truncation requests. Support custom unknown and padding metadata.
+- Keep legacy vocab.txt decoding; JSON WordPiece cleanup produces punctuation
+  without preceding spaces. Offsets now consistently refer to original Unicode
+  code points rather than normalized UTF-16 positions.
+- Document the HF 0.23.2 early-left-truncation word-ID discrepancy; retain correct
+  original word IDs and verify against HF's post-process reference path.
+- Add Linux/Windows, minimum SDK/stable, analysis and network fixture CI.
+  The release suite contains 1,143 offline tests and 707 network tests across
+  eleven successful model pipelines and two unsupported-pipeline boundaries.
+- Document vocabulary-derived fixture limits, template-defined type IDs and
+  upstream fixture licenses. Remove unqualified performance estimates.
+
+## 1.0.2
+
+- Add project configuration files (.gitignore).
+- Update .pubignore for cleaner package distribution.
+  (Restored from the published 1.0.2 archive.)
 
 ## 1.0.1
 
@@ -21,7 +53,8 @@
 
 - Initial release
 - Pure Dart implementation of BERT WordPiece tokenizer
-- 100% HuggingFace tokenizers compatibility
+- Initial HuggingFace compatibility claim (superseded by the explicit supported
+  pipeline scope and HF discrepancy documented in 1.1.0).
 - Memory-efficient typed arrays (Int32List, Uint8List)
 - Single text and sentence pair encoding
 - Batch encoding (sequential and parallel with Isolates)

@@ -47,26 +47,33 @@ void main() {
       expect(parallel.length, equals(sequential.length));
 
       for (var i = 0; i < texts.length; i++) {
-        expect(parallel[i].ids.toList(), equals(sequential[i].ids.toList()),
-            reason: 'IDs mismatch at index $i');
         expect(
-            parallel[i].tokens.toList(), equals(sequential[i].tokens.toList()),
-            reason: 'Tokens mismatch at index $i');
+          parallel[i].ids.toList(),
+          equals(sequential[i].ids.toList()),
+          reason: 'IDs mismatch at index $i',
+        );
+        expect(
+          parallel[i].tokens.toList(),
+          equals(sequential[i].tokens.toList()),
+          reason: 'Tokens mismatch at index $i',
+        );
       }
     });
 
-    test('encodeBatchParallel falls back to sequential for small batches',
-        () async {
-      final texts = ['hello', 'world']; // < 8 items
+    test(
+      'encodeBatchParallel falls back to sequential for small batches',
+      () async {
+        final texts = ['hello', 'world']; // < 8 items
 
-      final sequential = tokenizer.encodeBatch(texts);
-      final parallel = await tokenizer.encodeBatchParallel(texts);
+        final sequential = tokenizer.encodeBatch(texts);
+        final parallel = await tokenizer.encodeBatchParallel(texts);
 
-      expect(parallel.length, equals(sequential.length));
-      for (var i = 0; i < texts.length; i++) {
-        expect(parallel[i].ids.toList(), equals(sequential[i].ids.toList()));
-      }
-    });
+        expect(parallel.length, equals(sequential.length));
+        for (var i = 0; i < texts.length; i++) {
+          expect(parallel[i].ids.toList(), equals(sequential[i].ids.toList()));
+        }
+      },
+    );
 
     test('encodeBatchParallel respects numWorkers parameter', () async {
       final texts = List.generate(16, (i) => 'hello world $i');
@@ -87,26 +94,33 @@ void main() {
       }
     });
 
-    test('encodePairBatchParallel produces same results as encodePairBatch',
-        () async {
-      final pairs = List.generate(
-        16,
-        (i) => ('hello world $i', 'test sentence $i'),
-      );
+    test(
+      'encodePairBatchParallel produces same results as encodePairBatch',
+      () async {
+        final pairs = List.generate(
+          16,
+          (i) => ('hello world $i', 'test sentence $i'),
+        );
 
-      final sequential = tokenizer.encodePairBatch(pairs);
-      final parallel = await tokenizer.encodePairBatchParallel(pairs);
+        final sequential = tokenizer.encodePairBatch(pairs);
+        final parallel = await tokenizer.encodePairBatchParallel(pairs);
 
-      expect(parallel.length, equals(sequential.length));
+        expect(parallel.length, equals(sequential.length));
 
-      for (var i = 0; i < pairs.length; i++) {
-        expect(parallel[i].ids.toList(), equals(sequential[i].ids.toList()),
-            reason: 'IDs mismatch at index $i');
-        expect(parallel[i].typeIds.toList(),
+        for (var i = 0; i < pairs.length; i++) {
+          expect(
+            parallel[i].ids.toList(),
+            equals(sequential[i].ids.toList()),
+            reason: 'IDs mismatch at index $i',
+          );
+          expect(
+            parallel[i].typeIds.toList(),
             equals(sequential[i].typeIds.toList()),
-            reason: 'TypeIds mismatch at index $i');
-      }
-    });
+            reason: 'TypeIds mismatch at index $i',
+          );
+        }
+      },
+    );
 
     test('encodeBatchParallel with padding and truncation', () async {
       final configuredTokenizer = WordPieceTokenizer(vocab: tokenizer.vocab)

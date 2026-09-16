@@ -10,3 +10,9 @@ vocab.txt
 
 # Python scripts (for development only)
 scripts/
+
+# Development fixtures and CI
+test/
+benchmark/
+.github/
+.dart_tool/

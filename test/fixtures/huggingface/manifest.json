@@ -1,0 +1,117 @@
+[
+  {
+    "name": "bert-base-uncased",
+    "repository": "google-bert/bert-base-uncased",
+    "revision": "86b5e0934494bd15c9632b12f734a8a67f723594",
+    "sha256": "ce64fce797c24f68df90b40a3f74f579b336a493db14bd583fd520ea0d8c9a98",
+    "license": "apache-2.0"
+  },
+  {
+    "name": "bert-base-cased",
+    "repository": "google-bert/bert-base-cased",
+    "revision": "cd5ef92a9fb2f889e972770a36d4ed042daf221e",
+    "sha256": "5b3360be30cdf39081153cf9d30bfb0503c011462fc9f77f097127c83ef0f4d9",
+    "license": "apache-2.0"
+  },
+  {
+    "name": "bert-base-multilingual-cased",
+    "repository": "google-bert/bert-base-multilingual-cased",
+    "revision": "3f076fdb1ab68d5b2880cb87a0886f315b8146f8",
+    "sha256": "f4a4d5bf7301717e261fafbe26e1eb967f6ba4cb3ae0ab7a29f4642ec229f386",
+    "license": "apache-2.0"
+  },
+  {
+    "name": "all-MiniLM-L6-v2",
+    "repository": "sentence-transformers/all-MiniLM-L6-v2",
+    "revision": "1110a243fdf4706b3f48f1d95db1a4f5529b4d41",
+    "sha256": "be50c3628f2bf5bb5e3a7f17b1f74611b2561a3a27eeab05e5aa30f411572037",
+    "license": "apache-2.0"
+  },
+  {
+    "name": "klue--bert-base",
+    "repository": "klue/bert-base",
+    "revision": "77c8b3d707df785034b4e50f2da5d37be5f0f546",
+    "sha256": "c0000d13c6b4136b2290abdd30bcf51c1c4d87353aa3c5d1640d003484516afe",
+    "license": "cc-by-sa-4.0",
+    "language_cases": true,
+    "license_source": "https://github.com/KLUE-benchmark/KLUE/blob/main/License.md"
+  },
+  {
+    "name": "klue--roberta-base",
+    "repository": "klue/roberta-base",
+    "revision": "02f94ba5e3fcb7e2a58a390b8639b0fac974a8da",
+    "sha256": "66ac6204e18a45fa724fca7d44bc5f450881aa4c34f6352ddf27ada2294f07d3",
+    "license": "cc-by-sa-4.0",
+    "language_cases": true,
+    "license_source": "https://github.com/KLUE-benchmark/KLUE/blob/main/License.md"
+  },
+  {
+    "name": "google-bert--bert-base-chinese",
+    "repository": "google-bert/bert-base-chinese",
+    "revision": "8f23c25b06e129b6c986331a13d8d025a92cf0ea",
+    "sha256": "55c5edcfb8936895e019b2d8f97dcb547734f25b29f95009155f4c8c15649aae",
+    "license": "apache-2.0",
+    "language_cases": true
+  },
+  {
+    "name": "hfl--chinese-roberta-wwm-ext",
+    "repository": "hfl/chinese-roberta-wwm-ext",
+    "revision": "5c58d0b8ec1d9014354d691c538661bf00bfdb44",
+    "sha256": "53ff61207898738bbdc000f38abebef01041c8d23b6270c11855fc692d0a3ad6",
+    "license": "apache-2.0",
+    "language_cases": true
+  },
+  {
+    "name": "aubmindlab--bert-base-arabertv02",
+    "repository": "aubmindlab/bert-base-arabertv02",
+    "revision": "016fb9d6768f522a59c6e0d2d5d5d43a4e1bff60",
+    "sha256": "d9797bf02285035bba059782638b8c0aa130b7c2ca2d5dc2c30327586b3c773d",
+    "license": "Not specified in model metadata",
+    "expected_error": "AddedToken.single_word is not supported"
+  },
+  {
+    "name": "ai4bharat--IndicBERTv2-MLM-only",
+    "repository": "ai4bharat/IndicBERTv2-MLM-only",
+    "revision": "8598f13fe52443bc3fc054fcd665944560145b5c",
+    "sha256": "6af22a5c4bc890322c365fcb77dd77c06cbb9b088ffa50db1892d5220313c495",
+    "license": "mit",
+    "expected_error": "Unsupported pre_tokenizer"
+  },
+  {
+    "name": "asafaya--bert-base-arabic",
+    "repository": "asafaya/bert-base-arabic",
+    "revision": "39ecd286ebaadb68d0dea2381b8ed1ce01360f13",
+    "sha256": "793acd486c6b6621166cd1a061b5d70fd301f623b0e05fc834fe77ba444e02a0",
+    "license": "Not specified in model metadata",
+    "source_file": "vocab.txt",
+    "wordpiece_options": {
+      "lowercase": true
+    },
+    "language_cases": true
+  },
+  {
+    "name": "dbmdz--bert-base-turkish-cased",
+    "repository": "dbmdz/bert-base-turkish-cased",
+    "revision": "b6e1de16c983e0f2c70664591ea3f22810072608",
+    "sha256": "ca72d2012b1e46ed42f5df2dc9675f9da0b37a481601785cb4dff91f67fcca65",
+    "license": "mit",
+    "source_file": "vocab.txt",
+    "wordpiece_options": {
+      "lowercase": false
+    },
+    "language_cases": true
+  },
+  {
+    "name": "google--muril-base-cased",
+    "repository": "google/muril-base-cased",
+    "revision": "afd9f36c7923d54e97903922ff1b260d091d202f",
+    "sha256": "b96cc938b4009d063a605930cb82aef2c91ee52a94e94e6fcb78510d4ee5310b",
+    "license": "apache-2.0",
+    "source_file": "vocab.txt",
+    "wordpiece_options": {
+      "lowercase": false,
+      "strip_accents": false
+    },
+    "language_cases": true
+  }
+]
