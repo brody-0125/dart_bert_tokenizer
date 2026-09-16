@@ -1,6 +1,7 @@
 import 'added_token.dart';
 import 'pre_tokenizer.dart';
 import 'vocabulary.dart';
+import 'unicode_word_data.dart';
 
 /// Immutable registration snapshot shared by encoding and isolate workers.
 class AddedVocabulary {
@@ -91,14 +92,38 @@ class AddedVocabulary {
     );
   }
 
-  static final _wordStart = RegExp(
-    r'^[\p{Alphabetic}\p{M}\p{Nd}\p{Pc}\u200c\u200d]',
-    unicode: true,
-  );
-  static final _wordEnd = RegExp(
-    r'[\p{Alphabetic}\p{M}\p{Nd}\p{Pc}\u200c\u200d]$',
-    unicode: true,
-  );
+  static bool _wordAt(String text, int index) {
+    if (index < 0 || index >= text.length) return false;
+    var rune = text.codeUnitAt(index);
+    if (rune >= 0xd800 && rune <= 0xdbff && index + 1 < text.length) {
+      final low = text.codeUnitAt(index + 1);
+      if (low >= 0xdc00 && low <= 0xdfff) {
+        rune = 0x10000 + ((rune - 0xd800) << 10) + low - 0xdc00;
+      }
+    }
+    var left = 0;
+    var right = addedTokenWordRanges.length ~/ 2;
+    while (left < right) {
+      final middle = (left + right) ~/ 2;
+      if (rune < addedTokenWordRanges[middle * 2]) {
+        right = middle;
+      } else if (rune > addedTokenWordRanges[middle * 2 + 1]) {
+        left = middle + 1;
+      } else {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  static bool _wordBefore(String text, int index) {
+    if (index == 0) return false;
+    var previous = index - 1;
+    final unit = text.codeUnitAt(previous);
+    if (unit >= 0xdc00 && unit <= 0xdfff && previous > 0) previous--;
+    return _wordAt(text, previous);
+  }
+
   static final _spaceStart = RegExp(r'^\p{White_Space}*', unicode: true);
   static final _spaceEnd = RegExp(r'\p{White_Space}*$', unicode: true);
 
@@ -158,8 +183,7 @@ class AddedVocabulary {
       final id = ids[match.group(0)]!;
       final token = tokens[id]!;
       if (token.singleWord &&
-          (_wordEnd.hasMatch(text.substring(0, start)) ||
-              _wordStart.hasMatch(text.substring(end)))) {
+          (_wordBefore(text, start) || _wordAt(text, end))) {
         continue;
       }
       if (token.lstrip) {

@@ -5,6 +5,7 @@
 - Add immutable `AddedToken` definitions, `addTokens()` and `addSpecialTokens()`
   for both JSON and vocab.txt tokenizers. Preserve existing IDs and return new
   or changed registration counts; ignore identical definitions and empty input.
+- Pin HF word-character ranges across Dart VM Unicode versions (including 3.10.7).
 - Support Unicode single-word boundaries, left/right whitespace absorption,
   and raw-then-normalized matching with original code-point alignment.
 - Keep added tokens separate from base WordPiece tries; refresh matching/decode

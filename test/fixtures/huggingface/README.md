@@ -133,6 +133,7 @@ count-based rule. Existing IDs must never be overwritten.
 `unicode_word_boundaries.json` contains ranges from probing every Unicode scalar
 with HF's actual single_word matcher (null normalizer/pre-tokenizer). Tests check
 both sides of each range boundary through the public encoding API, including
-join controls, combining marks and supplementary-plane characters. Python oracle
-version is fixed; on the development Dart 3.13.3 VM, the Unicode property regex
-was additionally checked against every scalar with zero differences.
+join controls, combining marks and supplementary-plane characters. The same
+ranges generate `lib/src/unicode_word_data.dart` for runtime matching. This pins
+word boundaries across VM versions: Dart 3.13.3 Unicode properties matched HF
+over all scalars, but Dart 3.10.7 differed (first observed at U+0897).
