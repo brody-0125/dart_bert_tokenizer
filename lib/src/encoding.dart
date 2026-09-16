@@ -81,13 +81,17 @@ class Encoding {
   /// Original Unicode code-point offsets as half-open `(start, end)` pairs.
   ///
   /// These are not Dart UTF-16 code-unit indices. Each pair input has its own
-  /// offset origin. Inserted template and padding tokens have offset `(0, 0)`.
+  /// offset origin. Pre-tokenized inputs restart offsets within each input
+  /// item; use word IDs and sequence IDs to identify that item.
+  /// Inserted template and padding tokens have offset `(0, 0)`.
   final List<(int, int)> offsets;
 
   /// Word indices for each token.
   ///
   /// Multiple tokens from the same word share the same word ID. Tokenizer
   /// outputs restart word IDs for each pair input and retain them on truncation.
+  /// Pre-tokenized inputs use the original list index, preserving empty-item
+  /// gaps even when an item splits into several tokens.
   /// Inserted template and padding tokens have `null` word ID.
   final List<int?> wordIds;
 
@@ -164,11 +168,14 @@ class Encoding {
   /// - [charPos]: Character position in the original text.
   /// - [sequenceIndex]: Which sequence to search (0 or 1 for pairs).
   ///
+  /// For pre-tokenized input, offsets are word-local. Supply [wordIndex] to
+  /// select a word; without it, the first matching token is returned.
   /// Returns the token index, or `null` if no token contains this position.
-  int? charToToken(int charPos, {int sequenceIndex = 0}) {
+  int? charToToken(int charPos, {int sequenceIndex = 0, int? wordIndex}) {
     final seqIds = sequenceIds;
     for (var i = 0; i < length; i++) {
       if (seqIds[i] != sequenceIndex) continue;
+      if (wordIndex != null && wordIds[i] != wordIndex) continue;
       final (start, end) = offsets[i];
       if (charPos >= start && charPos < end) {
         return i;
@@ -178,11 +185,16 @@ class Encoding {
   }
 
   /// Finds the word index containing the given character position.
+  /// For word-local offsets, [wordIndex] restricts the search to that input item.
   ///
   /// - [charPos]: Character position in the original text.
   /// - [sequenceIndex]: Which sequence to search (0 or 1 for pairs).
-  int? charToWord(int charPos, {int sequenceIndex = 0}) {
-    final tokenIdx = charToToken(charPos, sequenceIndex: sequenceIndex);
+  int? charToWord(int charPos, {int sequenceIndex = 0, int? wordIndex}) {
+    final tokenIdx = charToToken(
+      charPos,
+      sequenceIndex: sequenceIndex,
+      wordIndex: wordIndex,
+    );
     if (tokenIdx == null) return null;
     return wordIds[tokenIdx];
   }

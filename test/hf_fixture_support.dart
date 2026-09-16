@@ -50,6 +50,34 @@ void expectHfEncoding(
     expected['decoded_with_special_tokens'],
     reason: 'decode with specials',
   );
+  for (final row in expected['alignment'] as List<dynamic>? ?? []) {
+    final seq = row[0] as int;
+    final word = row[1] as int;
+    (int, int)? span(dynamic value) =>
+        value == null ? null : (value[0] as int, value[1] as int);
+    expect(actual.wordToTokens(word, sequenceIndex: seq), span(row[2]));
+    expect(actual.wordToChars(word, sequenceIndex: seq), span(row[3]));
+    for (var pos = 0; pos < 12; pos++) {
+      int? match;
+      for (var i = 0; i < actual.length; i++) {
+        if (expected['sequence_ids'][i] == seq &&
+            expected['word_ids'][i] == word &&
+            expected['offsets'][i][0] <= pos &&
+            pos < expected['offsets'][i][1]) {
+          match = i;
+          break;
+        }
+      }
+      expect(
+        actual.charToToken(pos, sequenceIndex: seq, wordIndex: word),
+        match,
+      );
+      expect(
+        actual.charToWord(pos, sequenceIndex: seq, wordIndex: word),
+        match == null ? null : word,
+      );
+    }
+  }
 }
 
 Future<void> runHfCase(String raw, Map<String, dynamic> fixture) =>
@@ -88,7 +116,40 @@ Future<void> runHfTokenizerCase(
   }
   final List<Encoding> sequential;
   final List<Encoding> parallel;
-  if (fixture['pair_batch'] case final List<dynamic> batch) {
+  if (fixture['pretokenized'] == true) {
+    List<String> words(dynamic value) => (value as List).cast<String>();
+    if (fixture['pair_batch'] case final List<dynamic> batch) {
+      final pairs = batch.map((p) => (words(p[0]), words(p[1]))).toList();
+      sequential = tokenizer.encodePreTokenizedPairBatch(pairs);
+      parallel = await tokenizer.encodePreTokenizedPairBatchParallel(
+        pairs,
+        numWorkers: 2,
+      );
+    } else if (fixture['batch'] case final List<dynamic> batch) {
+      final inputs = batch.map(words).toList();
+      sequential = tokenizer.encodePreTokenizedBatch(inputs);
+      parallel = await tokenizer.encodePreTokenizedBatchParallel(
+        inputs,
+        numWorkers: 2,
+      );
+    } else {
+      final input = words(fixture['input']);
+      final special = fixture['add_special_tokens'] as bool?;
+      final encoding = fixture['pair'] == null
+          ? tokenizer.encodePreTokenized(input, addSpecialTokens: special)
+          : tokenizer.encodePreTokenizedPair(
+              input,
+              words(fixture['pair']),
+              addSpecialTokens: special,
+            );
+      expectHfEncoding(
+        tokenizer,
+        encoding,
+        fixture['expected'] as Map<String, dynamic>,
+      );
+      return;
+    }
+  } else if (fixture['pair_batch'] case final List<dynamic> batch) {
     final pairs = batch.map((p) => (p[0] as String, p[1] as String)).toList();
     sequential = tokenizer.encodePairBatch(pairs);
     parallel = await tokenizer.encodePairBatchParallel(pairs, numWorkers: 2);

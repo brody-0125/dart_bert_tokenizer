@@ -10,6 +10,7 @@ from pathlib import Path
 from urllib.request import urlopen
 
 import tokenizers
+from pretokenized_cases import cases as pretokenized_cases
 from tokenizers import Tokenizer, BertWordPieceTokenizer
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -101,7 +102,7 @@ def cases(raw, language_cases=False):
             t = Tokenizer.from_str(raw)
             result.append({'name': f'arabert-added-{i}', 'input': text,
                            'expected': expected(t, t.encode(text))})
-    return result
+    return result + pretokenized_cases(raw, expected)
 
 
 def main():

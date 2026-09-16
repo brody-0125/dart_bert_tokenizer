@@ -676,6 +676,23 @@ class WordPieceTokenizer {
 
   Encoding _content(String text) {
     final builder = EncodingBuilder();
+    _appendContent(builder, text);
+    return builder.build();
+  }
+
+  Encoding _preTokenizedContent(List<String> words) {
+    final builder = EncodingBuilder();
+    for (var i = 0; i < words.length; i++) {
+      _appendContent(builder, words[i], inputWordId: i);
+    }
+    return builder.build();
+  }
+
+  void _appendContent(
+    EncodingBuilder builder,
+    String text, {
+    int? inputWordId,
+  }) {
     var wordId = 0;
     for (final (piece, id) in _added.extract(text, _preTokenizer)) {
       if (id != null) {
@@ -684,7 +701,7 @@ class WordPieceTokenizer {
           id: id,
           typeId: 0,
           offset: (piece.start, piece.end),
-          wordId: wordId++,
+          wordId: inputWordId ?? wordId++,
         );
         continue;
       }
@@ -695,13 +712,12 @@ class WordPieceTokenizer {
             id: token.id,
             typeId: 0,
             offset: preToken.originalSpan(token.startOffset, token.endOffset),
-            wordId: wordId,
+            wordId: inputWordId ?? wordId,
           );
         }
         wordId++;
       }
     }
-    return builder.build();
   }
 
   Encoding _encode(
@@ -711,11 +727,25 @@ class WordPieceTokenizer {
     int? maxLength,
     TruncationStrategy? truncationStrategy,
   }) {
-    var first = _content(text);
-    var second = pair == null ? null : _content(pair);
+    return _encodeContents(
+      _content(text),
+      second: pair == null ? null : _content(pair),
+      addSpecialTokens: addSpecialTokens,
+      maxLength: maxLength,
+      truncationStrategy: truncationStrategy,
+    );
+  }
+
+  Encoding _encodeContents(
+    Encoding first, {
+    Encoding? second,
+    bool? addSpecialTokens,
+    int? maxLength,
+    TruncationStrategy? truncationStrategy,
+  }) {
     final addCls = addSpecialTokens ?? config.addClsToken;
     final addSep = addSpecialTokens ?? config.addSepToken;
-    var reserved = (addCls ? 1 : 0) + (addSep ? (pair == null ? 1 : 2) : 0);
+    var reserved = (addCls ? 1 : 0) + (addSep ? (second == null ? 1 : 2) : 0);
     final processor = _json?['post_processor'] as Map<String, dynamic>?;
     List<dynamic>? template;
     if (_json != null && !_overrideTemplate) {
@@ -724,14 +754,14 @@ class WordPieceTokenizer {
           {
             'Sequence': {'id': 'A', 'type_id': 0},
           },
-          if (pair != null)
+          if (second != null)
             {
               'Sequence': {'id': 'B', 'type_id': 1},
             },
         ];
       } else if (processor['type'] == 'TemplateProcessing') {
         template =
-            processor[pair == null ? 'single' : 'pair'] as List<dynamic>?;
+            processor[second == null ? 'single' : 'pair'] as List<dynamic>?;
         if (template == null) {
           throw const FormatException('Missing post-processor template');
         }
@@ -746,7 +776,7 @@ class WordPieceTokenizer {
           {
             'SpecialToken': {'id': processor['sep'][0], 'type_id': 0},
           },
-          if (pair != null) ...[
+          if (second != null) ...[
             {
               'Sequence': {'id': 'B', 'type_id': 1},
             },
@@ -908,6 +938,158 @@ class WordPieceTokenizer {
       texts
           .map((text) => encode(text, addSpecialTokens: addSpecialTokens))
           .toList(),
+    );
+  }
+
+  /// Encodes independently supplied words using the configured pipeline.
+  ///
+  /// Normalization, added tokens and pre-tokenization still apply to each item.
+  /// Word IDs are input indices (including gaps from empty items); offsets are
+  /// Unicode code-point positions within each item, not a joined sentence.
+  Encoding encodePreTokenized(List<String> words, {bool? addSpecialTokens}) =>
+      _encodeContents(
+        _preTokenizedContent(words),
+        addSpecialTokens: addSpecialTokens,
+      );
+
+  /// Encodes two word lists. Word IDs restart for each sequence.
+  /// See [encodePreTokenized] for word-local offset semantics.
+  Encoding encodePreTokenizedPair(
+    List<String> wordsA,
+    List<String> wordsB, {
+    bool? addSpecialTokens,
+    int? maxLength,
+    TruncationStrategy truncationStrategy = TruncationStrategy.longestFirst,
+  }) => _encodeContents(
+    _preTokenizedContent(wordsA),
+    second: _preTokenizedContent(wordsB),
+    addSpecialTokens: addSpecialTokens,
+    maxLength: maxLength,
+    truncationStrategy: _truncationConfig?.strategy ?? truncationStrategy,
+  );
+
+  /// Encodes word lists with batch-wide padding.
+  List<Encoding> encodePreTokenizedBatch(
+    List<List<String>> inputs, {
+    bool? addSpecialTokens,
+  }) => _applyBatchPostProcessing(
+    inputs
+        .map(
+          (words) =>
+              encodePreTokenized(words, addSpecialTokens: addSpecialTokens),
+        )
+        .toList(),
+  );
+
+  /// Encodes pairs of word lists with batch-wide padding.
+  List<Encoding> encodePreTokenizedPairBatch(
+    List<(List<String>, List<String>)> pairs, {
+    bool? addSpecialTokens,
+    int? maxLength,
+    TruncationStrategy truncationStrategy = TruncationStrategy.longestFirst,
+  }) => _applyBatchPostProcessing(
+    pairs
+        .map(
+          (pair) => encodePreTokenizedPair(
+            pair.$1,
+            pair.$2,
+            addSpecialTokens: addSpecialTokens,
+            maxLength: maxLength,
+            truncationStrategy: truncationStrategy,
+          ),
+        )
+        .toList(),
+  );
+
+  /// Encodes word lists in isolates, preserving order and batch-wide padding.
+  /// Snapshots tokenizer settings and nested inputs before starting workers.
+  /// Small batches use the synchronous path; [numWorkers] must be positive.
+  Future<List<Encoding>> encodePreTokenizedBatchParallel(
+    List<List<String>> texts, {
+    bool? addSpecialTokens,
+    int? numWorkers,
+  }) async {
+    if (numWorkers != null && numWorkers <= 0) {
+      throw ArgumentError.value(numWorkers, 'numWorkers');
+    }
+    if (texts.length < _kMinBatchSizeForParallel) {
+      return encodePreTokenizedBatch(texts, addSpecialTokens: addSpecialTokens);
+    }
+
+    texts = [for (final words in texts) List<String>.of(words)];
+    final snapshot = _snapshot();
+    final workerCount = numWorkers ?? _getOptimalWorkerCount(texts.length);
+    final chunkSize = (texts.length / workerCount).ceil();
+
+    final futures = <Future<List<Encoding>>>[];
+    for (var start = 0; start < texts.length; start += chunkSize) {
+      final chunk = texts.sublist(
+        start,
+        (start + chunkSize).clamp(0, texts.length),
+      );
+      futures.add(
+        Isolate.run(
+          () => snapshot.encodePreTokenizedBatch(
+            chunk,
+            addSpecialTokens: addSpecialTokens,
+          ),
+        ),
+      );
+    }
+    return snapshot._applyBatchPostProcessing(
+      (await Future.wait(futures)).expand((e) => e).toList(),
+    );
+  }
+
+  /// Encodes word lists in isolates, preserving order and batch-wide padding.
+  /// Snapshots tokenizer settings and nested inputs before starting workers.
+  /// Small batches use the synchronous path; [numWorkers] must be positive.
+  Future<List<Encoding>> encodePreTokenizedPairBatchParallel(
+    List<(List<String>, List<String>)> pairs, {
+    bool? addSpecialTokens,
+    int? maxLength,
+    TruncationStrategy truncationStrategy = TruncationStrategy.longestFirst,
+    int? numWorkers,
+  }) async {
+    if (numWorkers != null && numWorkers <= 0) {
+      throw ArgumentError.value(numWorkers, 'numWorkers');
+    }
+    if (pairs.length < _kMinBatchSizeForParallel) {
+      return encodePreTokenizedPairBatch(
+        pairs,
+        addSpecialTokens: addSpecialTokens,
+        maxLength: maxLength,
+        truncationStrategy: truncationStrategy,
+      );
+    }
+
+    pairs = [
+      for (final pair in pairs)
+        (List<String>.of(pair.$1), List<String>.of(pair.$2)),
+    ];
+    final snapshot = _snapshot();
+    final workerCount = numWorkers ?? _getOptimalWorkerCount(pairs.length);
+    final chunkSize = (pairs.length / workerCount).ceil();
+
+    final futures = <Future<List<Encoding>>>[];
+    for (var start = 0; start < pairs.length; start += chunkSize) {
+      final chunk = pairs.sublist(
+        start,
+        (start + chunkSize).clamp(0, pairs.length),
+      );
+      futures.add(
+        Isolate.run(
+          () => snapshot.encodePreTokenizedPairBatch(
+            chunk,
+            addSpecialTokens: addSpecialTokens,
+            maxLength: maxLength,
+            truncationStrategy: truncationStrategy,
+          ),
+        ),
+      );
+    }
+    return snapshot._applyBatchPostProcessing(
+      (await Future.wait(futures)).expand((e) => e).toList(),
     );
   }
 

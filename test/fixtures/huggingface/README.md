@@ -141,3 +141,25 @@ over all scalars, but Dart 3.10.7 differed (first observed at U+0897).
 A separate regression covers `<X>` with rstrip=true followed by a whitespace-only
 AddedToken with lstrip=true: HF 0.23.2 panics with `AddedVocabulary bad split`
 for `<X>   hello`. Dart skips the already-consumed empty/reversed match.
+
+## Pre-tokenized input (1.3.0)
+
+`generate_hf_fixtures.py` includes `pretokenized_cases.py`: 46 word-list cases
+per supported model (552 in total). `pretokenized: true` selects list inputs;
+single/pair/batch shapes otherwise retain the existing fixture keys. Full and
+reduced vocabularies must produce identical output, including alignment.
+Run `python scripts/generate_pretokenized_fixtures.py` afterwards for 40
+synthetic cases: all 32 AddedToken flag combinations, null components,
+BertProcessing, shared pair type IDs and independent input-item matching.
+
+Offsets are local to each original item. Empty items preserve later word-ID
+indices. Alignment rows store `[sequence, word, token_span, character_span]`.
+Only existing sequences are queried against HF: HF 0.23.2 falls back to the
+whole encoding for a nonexistent sequence; Dart keeps its existing null result.
+The Dart wordIndex character filter is checked against the matching HF output
+offsets and input word IDs. Eight normalized-special cases retain raw
+`hf_expected` alongside the established 1.2.0 special-ID filtering policy.
+
+`test/pretokenized_test.dart` also covers word-local reverse lookups, impossible
+lengths, invalid worker counts, nested input mutations and configuration changes
+during in-flight single/pair batches, including empty and fallback batches.
