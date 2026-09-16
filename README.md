@@ -19,7 +19,7 @@ A lightweight, pure Dart implementation of BERT WordPiece tokenizer.
 
 ```yaml
 dependencies:
-  dart_bert_tokenizer: ^1.2.0
+  dart_bert_tokenizer: ^1.3.0
 ```
 
 ## Quick Start
@@ -46,7 +46,7 @@ void main() {
 
 ### Loading from tokenizer.json
 
-Load supported Hugging Face WordPiece `tokenizer.json` files. Normalization, post-processing, decoder, padding and truncation settings are extracted; unsupported configurations raise `FormatException`. See [compatibility and limits](#hugging-face-compatibility-in-120).
+Load supported Hugging Face WordPiece `tokenizer.json` files. Normalization, post-processing, decoder, padding and truncation settings are extracted; unsupported configurations raise `FormatException`. See [compatibility and limits](#hugging-face-compatibility-in-130).
 
 ```dart
 // From file (async)
@@ -85,6 +85,41 @@ print(encoding.sequenceIds);   // Sequence indices (0, 1, or null)
 // Without special tokens
 final raw = tokenizer.encode('Hello', addSpecialTokens: false);
 ```
+
+### Pre-tokenized Words (1.3.0)
+
+```dart
+final encoding = tokenizer.encodePreTokenized(['Hello,', 'world!']);
+// tokens: [CLS], hello, ',', world, '!', [SEP]
+// wordIds: null, 0, 0, 1, 1, null
+// offsets: (0,0), (0,5), (5,6), (0,5), (5,6), (0,0)
+final token = encoding.charToToken(0, wordIndex: 1); // 3
+final span = encoding.wordToTokens(1); // (3, 5)
+```
+
+Each item still passes through the configured normalization, AddedToken matching,
+pre-tokenizer and WordPiece stages. All resulting subwords retain that item's
+original list index, including gaps from empty items. Offsets are Unicode
+code-point positions **within each item**, not positions in a joined sentence.
+AddedToken matches never cross item boundaries. Truncation preserves original
+word IDs and offsets; `wordToChars` reports only the surviving token span.
+
+Use `wordIndex` with `charToToken`/`charToWord` to disambiguate repeated offsets.
+Omitting it preserves the existing first-match behavior. Pair lookups also take
+`sequenceIndex`; `sequenceIds` identify inputs even when their type IDs are equal.
+
+`encodePreTokenizedPair`, `encodePreTokenizedBatch`,
+`encodePreTokenizedPairBatch`, `encodePreTokenizedBatchParallel` and
+`encodePreTokenizedPairBatchParallel` support the same settings as their text
+counterparts. Parallel calls snapshot nested input lists and tokenizer settings.
+`encodeBatch(List<String>)` continues to mean a batch of raw strings.
+
+For NER/POS, map `wordIds` to input labels. One common policy labels the first
+subword and assigns -100 to later subwords and inserted special/padding tokens.
+See the runnable [NER alignment example](example/pretokenized_example.dart).
+External morphological analysis, full-sentence offset reconstruction, and label
+policy are caller responsibilities. Pre-tokenized input does not make an
+unsupported tokenizer.json pipeline supported.
 
 ### Sentence Pair Encoding
 
@@ -397,7 +432,7 @@ vocabularies reproduce the full-model expected values. Generated goldens are
 checked in, so ordinary Dart tests do not require Python. The legacy benchmark
 is a separate diagnostic; the fixture suite is the release compatibility gate.
 
-## Hugging Face compatibility in 1.2.0
+## Hugging Face compatibility in 1.3.0
 
 The suite pins twelve successful model pipelines and one unsupported-pipeline
 boundary by repository revision and source-file SHA-256:
@@ -421,7 +456,7 @@ every model of that language.
 Python `tokenizers==0.23.2` generates the checked-in expected values. Tests compare
 IDs, tokens, type IDs, attention/special masks, offsets, word/sequence IDs and
 both decoder modes, including sequential and parallel batches. The current suite
-has 1,301 offline tests and 788 opt-in network tests. CI checks Linux, Windows,
+has 1,900 offline tests and 1,340 opt-in network tests. CI checks Linux, Windows,
 Dart 3.10.7 and stable, plus analysis, formatting and publish dry-run.
 See [fixture provenance and regeneration](test/fixtures/huggingface/README.md).
 

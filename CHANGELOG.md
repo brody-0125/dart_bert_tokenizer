@@ -1,5 +1,20 @@
 # Changelog
 
+## 1.3.0
+
+- Add pre-tokenized word-list encoding for single inputs, pairs, batches and
+  parallel batches. Reuse the configured normalization, AddedToken extraction,
+  pre-tokenizer, WordPiece, truncation, template and padding pipeline.
+- Preserve input list indices as word IDs, including empty-item gaps. Offsets
+  remain Unicode code-point positions within each item. AddedToken matching
+  never crosses item boundaries.
+- Add optional `wordIndex` filters to `charToToken` and `charToWord`. Existing
+  calls retain first-match behavior; pair lookups also use `sequenceIndex`.
+- Snapshot nested word lists and tokenizer settings for parallel encoding.
+- Add a runnable NER alignment example, 552 pinned model pre-tokenized cases,
+  and 40 synthetic HF pipeline/AddedToken cases. Preserve 1.2.0 HF edge policies.
+- Validate 1,900 offline tests and 1,340 network tests. No runtime dependencies.
+
 ## 1.2.0
 
 - Add immutable `AddedToken` definitions, `addTokens()` and `addSpecialTokens()`
