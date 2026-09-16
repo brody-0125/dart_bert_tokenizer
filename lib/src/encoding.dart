@@ -39,7 +39,7 @@ enum TruncationStrategy {
 /// - [ids]: Token IDs for model input
 /// - [tokens]: Token strings for debugging
 /// - [attentionMask]: 1 for real tokens, 0 for padding
-/// - [typeIds]: Segment IDs (0 for first sequence, 1 for second)
+/// - [typeIds]: Template-defined token type IDs (independent of sequence IDs)
 /// - [specialTokensMask]: 1 for special tokens, 0 for regular tokens
 ///
 /// ## Token-Character Mapping
@@ -62,10 +62,10 @@ class Encoding {
   /// These are the integer indices into the vocabulary that the model uses.
   final Int32List ids;
 
-  /// Segment/type IDs distinguishing text pairs.
+  /// Template-defined token type IDs, in the range 0–255.
   ///
-  /// For single text: all 0s.
-  /// For text pairs: 0 for first sequence, 1 for second sequence.
+  /// Standard BERT pairs use 0/1, but other templates may use the same type ID
+  /// for both inputs. Use [sequenceIds] to identify the input sequence.
   final Uint8List typeIds;
 
   /// Attention mask indicating which tokens are real vs padding.
@@ -78,16 +78,17 @@ class Encoding {
   /// 1 for special tokens (`[CLS]`, `[SEP]`, `[PAD]`), 0 for regular tokens.
   final Uint8List specialTokensMask;
 
-  /// Character offsets for each token as `(start, end)` pairs.
+  /// Original Unicode code-point offsets as half-open `(start, end)` pairs.
   ///
-  /// Maps each token back to its position in the original text.
-  /// Special tokens have offset `(0, 0)`.
+  /// These are not Dart UTF-16 code-unit indices. Each pair input has its own
+  /// offset origin. Inserted template and padding tokens have offset `(0, 0)`.
   final List<(int, int)> offsets;
 
   /// Word indices for each token.
   ///
-  /// Multiple tokens from the same word share the same word ID.
-  /// Special tokens have `null` word ID.
+  /// Multiple tokens from the same word share the same word ID. Tokenizer
+  /// outputs restart word IDs for each pair input and retain them on truncation.
+  /// Inserted template and padding tokens have `null` word ID.
   final List<int?> wordIds;
 
   final List<int?>? _sequenceIds;
@@ -448,7 +449,7 @@ class Encoding {
     );
   }
 
-  /// Returns a new encoding truncated to the maximum length.
+  /// Slices this encoding to the maximum length, possibly removing special tokens.
   ///
   /// - [maxLength]: The maximum number of tokens.
   /// - [truncateFromEnd]: If true, removes tokens from the end; otherwise

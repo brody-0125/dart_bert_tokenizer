@@ -479,8 +479,9 @@ class WordPieceTokenizer {
   /// extracted from the JSON.
   ///
   /// - [path]: Path to the `tokenizer.json` file.
-  /// - [configOverride]: Optional configuration that overrides values
-  ///   extracted from the JSON.
+  /// - [configOverride]: Replaces the exposed WordPiece settings as a whole,
+  ///   including defaults for omitted fields, and selects the legacy CLS/SEP
+  ///   template. This is not a partial merge.
   ///
   /// Example:
   /// ```dart

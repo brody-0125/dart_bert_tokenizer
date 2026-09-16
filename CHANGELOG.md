@@ -8,7 +8,8 @@
   - `WordPieceTokenizer.fromTokenizerJsonString()` - load from JSON string
 - Add `Vocabulary.fromMap()` factory for token-to-ID map construction
 - Automatically extract normalizer, post-processor, and added tokens from JSON
-- Support optional `configOverride` parameter for advanced configuration
+- Support optional `configOverride`; it replaces exposed settings (including
+  omitted-field defaults) and uses the legacy CLS/SEP template.
 - Add pinned Hugging Face network fixtures for uncased, cased, multilingual BERT
   and MiniLM, plus reproducible offline goldens from tokenizers 0.23.2.
 - Extend fixtures with KLUE Korean BERT/RoBERTa, Google/HFL Chinese BERT,
@@ -31,6 +32,10 @@
 - Document the HF 0.23.2 early-left-truncation word-ID discrepancy; retain correct
   original word IDs and verify against HF's post-process reference path.
 - Add Linux/Windows, minimum SDK/stable, analysis and network fixture CI.
+  The release suite contains 1,143 offline tests and 707 network tests across
+  eleven successful model pipelines and two unsupported-pipeline boundaries.
+- Document vocabulary-derived fixture limits, template-defined type IDs and
+  upstream fixture licenses. Remove unqualified performance estimates.
 
 ## 1.0.2
 
@@ -48,7 +53,8 @@
 
 - Initial release
 - Pure Dart implementation of BERT WordPiece tokenizer
-- 100% HuggingFace tokenizers compatibility
+- Initial HuggingFace compatibility claim (superseded by the explicit supported
+  pipeline scope and HF discrepancy documented in 1.1.0).
 - Memory-efficient typed arrays (Int32List, Uint8List)
 - Single text and sentence pair encoding
 - Batch encoding (sequential and parallel with Isolates)

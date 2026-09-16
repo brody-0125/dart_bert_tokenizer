@@ -106,3 +106,8 @@ Padding explicitly uses the model's [PAD] ID (KLUE RoBERTa uses 1). Pair
 truncation lengths are chosen from actual token counts so only_first/only_second
 remain valid for language-specific vocabularies. Language cases include Arabic
 diacritics, Turkish I/İ/ı/i, Indic scripts, combining accents and control chars.
+
+The release suite currently has 1,143 offline tests and 707 opt-in network tests.
+Both paths register model cases through `test/hf_fixture_support.dart`, including
+the same error-message checks for unsupported pipelines and full-field
+comparisons for sequential and parallel batches.
