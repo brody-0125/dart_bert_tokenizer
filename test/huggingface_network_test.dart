@@ -3,7 +3,6 @@ import 'dart:io';
 
 import 'package:crypto/crypto.dart';
 import 'package:test/test.dart';
-import 'package:dart_bert_tokenizer/dart_bert_tokenizer.dart';
 
 import 'hf_fixture_support.dart';
 
@@ -15,14 +14,6 @@ void main() {
   final enabled = Platform.environment['RUN_HF_NETWORK_TESTS'] == '1';
   for (final entry in manifest) {
     final model = entry as Map<String, dynamic>;
-    final golden = model.containsKey('expected_error')
-        ? {'cases': <dynamic>[]}
-        : jsonDecode(
-                File(
-                  '$directory/${model['name']}.golden.json',
-                ).readAsStringSync(),
-              )
-              as Map<String, dynamic>;
     group(
       '${model['name']}@${model['revision']}',
       () {
@@ -65,24 +56,7 @@ void main() {
             client.close(force: true);
           }
         });
-        if (model['expected_error'] case final String error) {
-          test('rejects unsupported pipeline', () {
-            expect(
-              () => WordPieceTokenizer.fromTokenizerJsonString(raw),
-              throwsA(
-                isA<FormatException>().having(
-                  (e) => e.message,
-                  'message',
-                  contains(error),
-                ),
-              ),
-            );
-          });
-        }
-        for (final item in golden['cases'] as List<dynamic>) {
-          final fixture = item as Map<String, dynamic>;
-          test(fixture['name'] as String, () => runHfCase(raw, fixture));
-        }
+        registerHfModelTests(model, () => raw);
       },
       skip: enabled
           ? false
