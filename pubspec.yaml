@@ -1,6 +1,6 @@
 name: dart_bert_tokenizer
-description: A pure Dart BERT WordPiece tokenizer with Hugging Face tokenizer.json loading, Unicode offsets, padding, truncation, and verified model fixtures.
-version: 1.1.0
+description: A pure Dart BERT WordPiece tokenizer with Hugging Face tokenizer.json loading, dynamic AddedToken support, Unicode offsets, and verified model fixtures.
+version: 1.2.0
 repository: https://github.com/brody-0125/dart_bert_tokenizer
 topics:
   - nlp

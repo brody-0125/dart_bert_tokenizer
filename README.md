@@ -13,13 +13,13 @@ A lightweight, pure Dart implementation of BERT WordPiece tokenizer.
 - **Full API** - Encoding, decoding, padding, truncation, offset mapping
 - **Batch Processing** - Sequential and parallel (Isolate-based) batch encoding
 - **HuggingFace tokenizer.json** - Load directly from HuggingFace tokenizer files
-- **Well Tested** - Offline HF goldens and pinned network fixtures for eleven supported model pipelines and two unsupported-pipeline boundaries
+- **Well Tested** - Offline HF goldens and pinned network fixtures for twelve supported model pipelines and one unsupported-pipeline boundary
 
 ## Installation
 
 ```yaml
 dependencies:
-  dart_bert_tokenizer: ^1.1.0
+  dart_bert_tokenizer: ^1.2.0
 ```
 
 ## Quick Start
@@ -46,7 +46,7 @@ void main() {
 
 ### Loading from tokenizer.json
 
-Load supported Hugging Face WordPiece `tokenizer.json` files. Normalization, post-processing, decoder, padding and truncation settings are extracted; unsupported configurations raise `FormatException`. See [compatibility and limits](#hugging-face-compatibility-in-110).
+Load supported Hugging Face WordPiece `tokenizer.json` files. Normalization, post-processing, decoder, padding and truncation settings are extracted; unsupported configurations raise `FormatException`. See [compatibility and limits](#hugging-face-compatibility-in-120).
 
 ```dart
 // From file (async)
@@ -113,6 +113,57 @@ final pairs = [('Q1', 'A1'), ('Q2', 'A2')];
 final pairEncodings = tokenizer.encodePairBatch(pairs);
 final parallelPairs = await tokenizer.encodePairBatchParallel(pairs);
 ```
+
+### Added tokens (1.2.0)
+
+```dart
+final changed = tokenizer.addTokens([
+  const AddedToken('custom', singleWord: true),
+  const AddedToken('<entity>', lstrip: true, rstrip: true),
+]);
+tokenizer.addSpecialTokens(['[ENTITY]']);
+// For special tokens with explicit matching options:
+tokenizer.addTokens([
+  const AddedToken('[LINK]', special: true, normalized: true),
+]);
+final result = tokenizer.encode('custom  <entity>  [ENTITY]');
+final id = tokenizer.vocab.tokenToId('[ENTITY]');
+```
+
+`singleWord` checks Unicode word characters on both sides. `lstrip`/`rstrip`
+include neighboring Unicode whitespace in the matched token and its original
+code-point offsets. Normal tokens default to `normalized: true`; special tokens
+default to false. Raw tokens are extracted first, then normalized tokens from
+the remaining text. Unmatched text proceeds through BERT splitting and WordPiece.
+
+Registration returns the number of new or changed definitions, not just new IDs.
+Existing token IDs are reused, identical definitions and empty strings are
+ignored. Updates are atomic; new registrations do not change another tokenizer
+sharing the original vocabulary. Parallel calls capture registration and padding/
+truncation settings when invoked. Registering tokens does **not** resize the
+model's embedding matrix: the model must support the resulting IDs.
+
+Token lookup preserves the original spelling; decode can use its normalized
+spelling. Special IDs are skipped by default, even if normalized, and remain
+special after re-registration as ordinary tokens. Additional tokens are kept
+out of the base WordPiece trie so failed boundary matches cannot bypass the
+boundary rule through subword segmentation. These APIs also work with vocab.txt.
+
+HF 0.23.2 edge-case policies:
+
+- If different IDs normalize to the same pattern, the lowest ID wins. HF's
+  choice can vary with hash-map order.
+- Special-token filtering uses IDs, including normalized special tokens.
+  Changing `normalized` refreshes decode spelling; HF can retain a stale cache.
+- Fully consumed whitespace-only matches are skipped rather than producing
+  the invalid slice that can crash HF 0.23.2 after combined stripping.
+- Sparse vocabularies allocate above the highest occupied ID, preventing
+  collisions; new IDs must fit Int32. This replaces 1.1.0's HF-style count-based
+  allocation for sparse JSON vocabularies.
+
+These differences are explicit fixture contracts, not blanket HF equivalence.
+AraBERT fixtures validate its tokenizer JSON; its separately recommended
+`ArabertPreprocessor` is not implemented here.
 
 ### Padding
 
@@ -268,6 +319,8 @@ final tokenizer = WordPieceTokenizer(
 | `fromTokenizerJson(path)` | Load from tokenizer.json (async) |
 | `fromTokenizerJsonSync(path)` | Load from tokenizer.json (sync) |
 | `fromTokenizerJsonString(json)` | Load from JSON string |
+| `addTokens(tokens)` | Register or update AddedToken definitions |
+| `addSpecialTokens(tokens)` | Register raw special token strings |
 | `encode(text)` | Encode single text |
 | `encodePair(textA, textB)` | Encode text pair |
 | `encodeBatch(texts)` | Encode multiple texts |
@@ -335,6 +388,8 @@ dart run benchmark/hf_compatibility_benchmark.dart
 ```sh
 python -m pip install -r scripts/requirements-fixtures.txt
 python scripts/generate_hf_fixtures.py
+python scripts/generate_added_token_fixtures.py
+python scripts/generate_unicode_word_boundaries.py
 ```
 
 The pinned generator checks original file hashes and verifies that reduced
@@ -342,10 +397,10 @@ vocabularies reproduce the full-model expected values. Generated goldens are
 checked in, so ordinary Dart tests do not require Python. The legacy benchmark
 is a separate diagnostic; the fixture suite is the release compatibility gate.
 
-## Hugging Face compatibility in 1.1.0
+## Hugging Face compatibility in 1.2.0
 
-The suite pins eleven successful model pipelines and two unsupported-pipeline
-boundaries by repository revision and source-file SHA-256:
+The suite pins twelve successful model pipelines and one unsupported-pipeline
+boundary by repository revision and source-file SHA-256:
 
 | Model(s) | What is verified |
 |---|---|
@@ -354,7 +409,8 @@ boundaries by repository revision and source-file SHA-256:
 | `klue/bert-base`, `klue/roberta-base` | Official JSON; Korean normalization and pair type/sequence IDs |
 | `google-bert/bert-base-chinese`, `hfl/chinese-roberta-wwm-ext` | Official JSON; Chinese text and differing normalization settings |
 | `asafaya/bert-base-arabic`, `dbmdz/bert-base-turkish-cased`, `google/muril-base-cased` | Official vocabularies with explicitly recorded HF WordPiece builder settings |
-| `aubmindlab/bert-base-arabertv02`, `ai4bharat/IndicBERTv2-MLM-only` | Explicit rejection of unsupported AddedToken/Whitespace components |
+| `aubmindlab/bert-base-arabertv02` | Official JSON, including normalized special tokens with Unicode word boundaries |
+| `ai4bharat/IndicBERTv2-MLM-only` | Explicit rejection of the unsupported Whitespace pre-tokenizer |
 
 Vocabulary-derived fixtures validate the recorded conversion pipeline; they do
 not establish full Transformers `AutoTokenizer` equivalence. Tohoku Japanese v3
@@ -365,7 +421,7 @@ every model of that language.
 Python `tokenizers==0.23.2` generates the checked-in expected values. Tests compare
 IDs, tokens, type IDs, attention/special masks, offsets, word/sequence IDs and
 both decoder modes, including sequential and parallel batches. The current suite
-has 1,143 offline tests and 707 opt-in network tests. CI checks Linux, Windows,
+has 1,301 offline tests and 788 opt-in network tests. CI checks Linux, Windows,
 Dart 3.10.7 and stable, plus analysis, formatting and publish dry-run.
 See [fixture provenance and regeneration](test/fixtures/huggingface/README.md).
 
@@ -373,9 +429,9 @@ Supported JSON components are WordPiece, BertNormalizer, BertPreTokenizer,
 BertProcessing, WordPiece decoder, and TemplateProcessing with one occurrence
 of each input sequence and single vocabulary-token special entries. Null
 normalizer, pre-tokenizer, post-processor and decoder preserve their respective
-absence. Exact added-token matching (`normalized`, `single_word`, `lstrip` and
-`rstrip` all false) is supported. Other component types, unsupported added-token
-flags and nonzero truncation stride fail explicitly with `FormatException`.
+absence. Added tokens support `normalized`, `single_word`, `lstrip`, `rstrip`
+and `special`. Unsupported component types, invalid option types and nonzero
+truncation stride fail explicitly with `FormatException`.
 Type IDs come from the template, independently of sequence IDs: KLUE RoBERTa
 uses type ID zero for both inputs. Type IDs must fit the public `Uint8List` representation (0–255).
 
